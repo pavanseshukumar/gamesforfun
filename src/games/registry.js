@@ -114,6 +114,18 @@ export const GAMES = [
     lowerIsBetter: false,
   },
   {
+    id: "maze",
+    route: "/games/maze",
+    title: "Maze Dash",
+    tagline: "Swipe through mazes, grab the key",
+    emoji: "🌀",
+    mascot: "pip",
+    colors: ["#9FF0D6", "#1FA89A"],
+    accent: "#169C8F",
+    unit: "stars",
+    lowerIsBetter: false,
+  },
+  {
     // The daily puzzle has its own banner on Home, so it stays out of the
     // carousel and quick play. Its mascot changes every day.
     id: "daily",
