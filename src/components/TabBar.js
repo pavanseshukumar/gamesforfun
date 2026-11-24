@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ARCADE } from "../games/registry";
 import { haptic } from "../lib/haptics";
+import { sfx } from "../lib/sound";
 import { BOUNCY, SPRING } from "../lib/motion";
 import { cardShadow, INK } from "../theme";
 
@@ -98,6 +99,7 @@ function QuickPlay() {
       onPressOut={() => scale.set(withSpring(1, SPRING))}
       onPress={() => {
         haptic.medium();
+        sfx("whoosh");
         spin.set(withTiming(spin.get() + 360, { duration: 450 }));
         const game = ARCADE[Math.floor(Math.random() * ARCADE.length)];
         setTimeout(() => router.push(game.route), 260);
@@ -123,13 +125,16 @@ function QuickPlay() {
 }
 
 /** Floating pill tab bar: two tab groups around a black quick-play button. */
-export default function TabBar({ state, navigation }) {
+export default function TabBar({ state, emitter, navigateToTab }) {
   const insets = useSafeAreaInsets();
+  // Expo Router 58 hands custom tab bars an `emitter` and `navigateToTab`
+  // (not a `navigation` object), mirroring its built-in BottomTabBar.
   const go = (route, index) => {
-    const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
+    const event = emitter.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
     if (state.index !== index && !event.defaultPrevented) {
       haptic.select();
-      navigation.navigate(route.name);
+      sfx("select");
+      navigateToTab(route.key);
     }
   };
   const tab = (i) => {

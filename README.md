@@ -19,6 +19,14 @@ quick-play button in the middle.
 - **Quick play** (centre button): jumps into a random arcade game
 - **Today's puzzle** banner on Home, with a tick once solved and a 7-day calendar
 
+## Sound
+
+27 original sound effects (pops that climb in pitch with your combo, card flips, tile slides,
+boings, chimes, fanfares) are synthesized from scratch by `scripts/generate-sounds.py` into
+`assets/sounds/`, so they're royalty-free and tiny (~500 KB total). Tweak a recipe and run
+`python3 scripts/generate-sounds.py` (needs numpy) to rebuild them. Sounds mix with your music,
+respect the silent switch, and can be turned off in Settings.
+
 Every finished round earns **XP** → levels → ranks (Rookie → Bronze → Silver → Gold Explorer →
 Diamond Legend), and playing on consecutive days builds a **streak**.
 
@@ -75,7 +83,7 @@ The home screen picks it up automatically. See `AGENTS.md` for styling and anima
 
 ## Roadmap ideas
 
-- Sound effects and music (expo-audio), with a toggle in Settings
+- Background music with its own volume control
 - More games: word pop, stack tower, simon-says blobs
 - Online leaderboards (Supabase or Firebase)
 - App icon, splash screen and store builds with EAS

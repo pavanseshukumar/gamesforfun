@@ -21,6 +21,7 @@ import Mascot from "../../components/Mascot";
 import { addRandomTile, canMove, maxTile, move, newBoard, SIZE } from "../../games/fusion/logic";
 import { getGame } from "../../games/registry";
 import { haptic } from "../../lib/haptics";
+import { sfx } from "../../lib/sound";
 import { BOUNCY } from "../../lib/motion";
 import { useGameStore } from "../../store/useGameStore";
 
@@ -159,10 +160,12 @@ export default function Fusion() {
       setScore(nextScore);
       if (result.gained >= 128) haptic.medium();
       else if (result.gained) haptic.tap();
+      sfx(result.gained >= 128 ? "star" : result.gained ? "merge" : "whoosh");
 
       if (!reachedGoal.current && maxTile(next) >= GOAL) {
         reachedGoal.current = true;
         haptic.success();
+        sfx("levelup");
         setToast(`${GOAL} fused! Keep going 🚀`);
         setTimeout(() => setToast(null), 2200);
       }

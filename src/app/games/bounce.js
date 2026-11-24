@@ -22,6 +22,7 @@ import Mascot from "../../components/Mascot";
 import ScorePopup from "../../components/ScorePopup";
 import { getGame } from "../../games/registry";
 import { haptic } from "../../lib/haptics";
+import { sfx } from "../../lib/sound";
 import { BOUNCY } from "../../lib/motion";
 import { useGameStore } from "../../store/useGameStore";
 import { display } from "../../theme";
@@ -299,14 +300,18 @@ export default function BounceBuddy() {
         dusk.set(withTiming(Math.min(1, Math.max(0, (level - 15) / 15)), { duration: 900 }));
         night.set(withTiming(Math.min(1, Math.max(0, (level - 35) / 15)), { duration: 900 }));
 
+        sfx("land");
         if (perfect) {
           haptic.success();
+          sfx("perfect");
           popup(r.streak > 1 ? `PERFECT ×${r.streak}` : "PERFECT!", "#FF3D8B");
         } else if (landedType === "star") {
           haptic.success();
+          sfx("star");
           popup("+5 ⭐", "#FFC300");
         } else if (landedType === "spring") {
           haptic.medium();
+          sfx("jump");
           popup("BOING +3", "#4CC46B");
         } else {
           haptic.tap();
@@ -342,11 +347,13 @@ export default function BounceBuddy() {
               return s;
             });
             haptic.error();
+            sfx("wrong");
           }, 1400);
         }
       } else if (type === "miss") {
         r.perfects = 0;
         haptic.error();
+        sfx("wrong");
       } else if (type === "over") {
         loop.setActive(false);
         setPhase("over");
@@ -370,6 +377,7 @@ export default function BounceBuddy() {
       return v;
     });
     haptic.select();
+    sfx("jump");
   };
 
   const start = () => {

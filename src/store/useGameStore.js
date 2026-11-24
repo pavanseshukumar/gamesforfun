@@ -33,6 +33,7 @@ export const useGameStore = create(
       name: "Player",
       avatar: "zip",
       haptics: true,
+      sound: true,
       controls: { colorCatch: "tilt" }, // "tilt" | "drag"
 
       /**
@@ -85,6 +86,7 @@ export const useGameStore = create(
       setName: (name) => set({ name }),
       setAvatar: (avatar) => set({ avatar }),
       setHaptics: (haptics) => set({ haptics }),
+      setSound: (sound) => set({ sound }),
       resetStats: () => set({ ...FRESH_STATS }),
     }),
     {

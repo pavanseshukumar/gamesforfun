@@ -30,6 +30,7 @@ import {
 } from "../../games/daily/logic";
 import { getGame } from "../../games/registry";
 import { haptic } from "../../lib/haptics";
+import { sfx } from "../../lib/sound";
 import { dayKey } from "../../lib/progress";
 import { useGameStore } from "../../store/useGameStore";
 import { cardShadow, display, INK } from "../../theme";
@@ -181,6 +182,7 @@ export default function DailyPuzzle() {
       return;
     }
     haptic.tap();
+    sfx("slide");
     const nextMoves = moves + 1;
     setBoard(next);
     setMoves(nextMoves);
@@ -188,6 +190,7 @@ export default function DailyPuzzle() {
     if (isSolved(next)) {
       setPhase("solved");
       haptic.success();
+      sfx("solved");
       let outcome = { isNewBest: false, xpGained: 0, levelUp: null };
       if (!practice) {
         outcome = recordGame(GAME.id, nextMoves, { lowerIsBetter: true, xp: dailyXp(nextMoves) });
@@ -363,6 +366,7 @@ export default function DailyPuzzle() {
 
       {result && (
         <GameOverModal
+          mood="success"
           title={practice ? "Practice solved!" : "Puzzle solved!"}
           game={mascotGame}
           score={moves}

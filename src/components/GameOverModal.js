@@ -1,8 +1,10 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
+import { useEffect } from "react";
 import { Text, View } from "react-native";
 import Animated, { FadeIn, FadeInUp, FadeOut, ZoomIn } from "react-native-reanimated";
 
+import { sfx, sfxLater } from "../lib/sound";
 import { display } from "../theme";
 import { GhostButton, PrimaryButton } from "./Buttons";
 import Confetti from "./Confetti";
@@ -20,8 +22,16 @@ export default function GameOverModal({
   result,
   onPlayAgain,
   extra,
+  mood = "fail", // "success" for rounds you complete (puzzles), "fail" for game overs
 }) {
   const { isNewBest, xpGained, levelUp } = result;
+
+  // One jingle per round: fanfare for a record, sparkle for a finish, a gentle
+  // descending tune for a game over, plus a chime on level-up.
+  useEffect(() => {
+    sfx(isNewBest ? "win" : mood === "success" ? "star" : "gameover");
+    if (levelUp) sfxLater("levelup", 1100);
+  }, [isNewBest, levelUp, mood]);
   return (
     <Animated.View
       entering={FadeIn.duration(250)}

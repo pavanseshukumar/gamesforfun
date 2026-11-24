@@ -2,6 +2,7 @@ import { Pressable } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 
 import { haptic } from "../lib/haptics";
+import { sfx } from "../lib/sound";
 import { SPRING } from "../lib/motion";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -30,7 +31,10 @@ export default function PressableScale({
         scale.set(withSpring(1, SPRING));
       }}
       onPress={(e) => {
-        if (hapticFeedback) haptic.tap();
+        if (hapticFeedback) {
+          haptic.tap();
+          sfx("tap");
+        }
         onPress?.(e);
       }}
       style={[style, animatedStyle]}

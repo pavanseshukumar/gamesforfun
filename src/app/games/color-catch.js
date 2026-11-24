@@ -22,6 +22,7 @@ import Mascot from "../../components/Mascot";
 import ScorePopup from "../../components/ScorePopup";
 import { getGame } from "../../games/registry";
 import { haptic } from "../../lib/haptics";
+import { popFor, sfx } from "../../lib/sound";
 import { BOUNCY } from "../../lib/motion";
 import useTilt from "../../lib/useTilt";
 import { useGameStore } from "../../store/useGameStore";
@@ -326,11 +327,13 @@ export default function ColorCatch() {
       if (type === "warn") {
         setWarning(a);
         haptic.select();
+        sfx("warn");
       } else if (type === "switch") {
         setTarget(a);
         setWarning(null);
         r.switches++;
         haptic.medium();
+        sfx("switch");
       } else if (type === "catch") {
         const kind = Math.floor(a / 100);
         const good = Math.floor(a / 10) % 10 === 1;
@@ -341,6 +344,7 @@ export default function ColorCatch() {
           setShield(true);
           r.score += 3;
           haptic.success();
+          sfx("powerup");
           addPopup(b, "+3 🛡", "#FFB800");
         } else if (kind === CLOCK) {
           sim.modify((s) => {
@@ -352,18 +356,21 @@ export default function ColorCatch() {
           setTimeout(() => setSlow(false), 3000);
           r.score += 1;
           haptic.success();
+          sfx("powerup");
           addPopup(b, "SLOW-MO", "#3F8CFF");
         } else if (good) {
           r.streak++;
           const mult = 1 + Math.floor(r.streak / 8);
           r.score += mult;
           haptic.tap();
+          sfx(mult === 1 ? "catch" : popFor(mult));
           addPopup(b, `+${mult}`, color);
         } else if (r.shield) {
           r.shield = false;
           setShield(false);
           r.streak = 0;
           haptic.medium();
+          sfx("shield");
           addPopup(b, "BLOCKED", "#FFB800");
         } else {
           r.streak = 0;
@@ -374,6 +381,7 @@ export default function ColorCatch() {
           }
           setLives(r.lives);
           haptic.error();
+          sfx("wrong");
           flash.set(
             withSequence(withTiming(1, { duration: 60 }), withTiming(0, { duration: 380 })),
           );

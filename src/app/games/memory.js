@@ -20,6 +20,7 @@ import Mascot from "../../components/Mascot";
 import PressableScale from "../../components/PressableScale";
 import { getGame } from "../../games/registry";
 import { haptic } from "../../lib/haptics";
+import { sfx } from "../../lib/sound";
 import { BOUNCY } from "../../lib/motion";
 import { useGameStore } from "../../store/useGameStore";
 
@@ -206,6 +207,7 @@ export default function Memory() {
     if (locked.current || card.flipped || card.matched || over) return;
     setStarted(true);
     haptic.tap();
+    sfx("flip");
 
     const nextDeck = deck.map((c, i) => (i === index ? { ...c, flipped: true } : c));
     const nextOpen = [...open, index];
@@ -223,6 +225,7 @@ export default function Memory() {
 
     if (nextDeck[a].emoji === nextDeck[b].emoji) {
       haptic.success();
+      setTimeout(() => sfx("match"), 120);
       const matchedDeck = nextDeck.map((c, i) =>
         i === a || i === b ? { ...c, matched: true, flipped: false } : c,
       );
@@ -238,10 +241,12 @@ export default function Memory() {
       locked.current = true;
       setTimeout(() => {
         haptic.error();
+        sfx("wrong");
         setShake({ ids: [a, b], n: Date.now() });
       }, 450);
       setTimeout(() => {
         setDeck((d) => d.map((c, i) => (i === a || i === b ? { ...c, flipped: false } : c)));
+        sfx("flip");
         locked.current = false;
       }, 900);
     }
@@ -320,6 +325,7 @@ export default function Memory() {
 
       {over && (
         <GameOverModal
+          mood="success"
           title="All pairs found!"
           game={GAME}
           score={moves}

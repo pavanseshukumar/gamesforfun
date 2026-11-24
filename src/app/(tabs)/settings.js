@@ -6,6 +6,7 @@ import GradientScreen from "../../components/GradientScreen";
 import Mascot, { MASCOTS } from "../../components/Mascot";
 import PressableScale from "../../components/PressableScale";
 import { haptic } from "../../lib/haptics";
+import { sfx } from "../../lib/sound";
 import useFocusKey from "../../lib/useFocusKey";
 import { useGameStore } from "../../store/useGameStore";
 import { cardShadow, display, INK } from "../../theme";
@@ -42,6 +43,8 @@ export default function Settings() {
   const setName = useGameStore((s) => s.setName);
   const setAvatar = useGameStore((s) => s.setAvatar);
   const setHaptics = useGameStore((s) => s.setHaptics);
+  const sound = useGameStore((s) => s.sound ?? true);
+  const setSound = useGameStore((s) => s.setSound);
   const resetStats = useGameStore((s) => s.resetStats);
   const catchMode = useGameStore((s) => s.controls?.colorCatch ?? "tilt");
   const setControl = useGameStore((s) => s.setControl);
@@ -117,6 +120,29 @@ export default function Settings() {
         </Section>
 
         <Section title="Feel" delay={240}>
+          <View className="mb-4 flex-row items-center">
+            <View className="h-11 w-11 items-center justify-center rounded-full bg-[#F3F1FA]">
+              <Ionicons
+                name={sound ? "volume-high-outline" : "volume-mute-outline"}
+                size={20}
+                color={INK}
+              />
+            </View>
+            <View className="ml-3 flex-1">
+              <Text className="font-body-bold text-base text-ink">Sound effects</Text>
+              <Text className="font-body text-xs text-ink-mute">Pops, chimes and fanfares</Text>
+            </View>
+            <Switch
+              value={sound}
+              onValueChange={(v) => {
+                setSound(v);
+                if (v) setTimeout(() => sfx("match"), 50);
+              }}
+              trackColor={{ true: INK, false: "#D9D6E5" }}
+              thumbColor="#fff"
+              activeThumbColor="#fff"
+            />
+          </View>
           <View className="flex-row items-center">
             <View className="h-11 w-11 items-center justify-center rounded-full bg-[#F3F1FA]">
               <Ionicons name="phone-portrait-outline" size={20} color={INK} />

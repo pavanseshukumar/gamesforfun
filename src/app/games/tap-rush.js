@@ -23,6 +23,7 @@ import Mascot from "../../components/Mascot";
 import ScorePopup from "../../components/ScorePopup";
 import { getGame } from "../../games/registry";
 import { haptic } from "../../lib/haptics";
+import { popFor, sfx } from "../../lib/sound";
 import { useGameStore } from "../../store/useGameStore";
 import { display } from "../../theme";
 
@@ -276,6 +277,7 @@ export default function TapRush() {
   const startPlaying = useCallback(() => {
     startedAt.current = Date.now();
     setPhase("playing");
+    sfx("go");
     bar.set(1);
     bar.set(withTiming(0, { duration: DURATION, easing: Easing.linear }));
     later(finish, DURATION);
@@ -306,6 +308,7 @@ export default function TapRush() {
       later(() => {
         setCount(n);
         haptic.select();
+        sfx("tick");
       }, i * 600),
     );
     later(startPlaying, 1800);
@@ -324,9 +327,14 @@ export default function TapRush() {
     setScore(s.score);
     setCombo(s.combo);
     setTargets((list) => list.filter((t) => t.id !== target.id));
-    if (target.golden) haptic.success();
-    else if (s.combo % 5 === 0) haptic.medium();
-    else haptic.tap();
+    if (target.golden) {
+      haptic.success();
+      sfx("star");
+    } else {
+      if (s.combo % 5 === 0) haptic.medium();
+      else haptic.tap();
+      sfx(popFor(mult)); // pops climb in pitch as the multiplier grows
+    }
 
     const popup = {
       id: target.id,
@@ -342,7 +350,10 @@ export default function TapRush() {
   const missTap = () => {
     if (phase !== "playing") return;
     stats.current.misses++;
-    if (stats.current.combo > 0) haptic.error();
+    if (stats.current.combo > 0) {
+      haptic.error();
+      sfx("wrong");
+    }
     breakCombo();
   };
 
