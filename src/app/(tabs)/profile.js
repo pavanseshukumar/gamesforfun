@@ -7,7 +7,7 @@ import GradientScreen from "../../components/GradientScreen";
 import HexBadge from "../../components/HexBadge";
 import Mascot from "../../components/Mascot";
 import XpBar from "../../components/XpBar";
-import { GAMES } from "../../games/registry";
+import { GAMES, mascotFor } from "../../games/registry";
 import useAchievements from "../../games/useAchievements";
 import { levelInfo, rankFor } from "../../lib/progress";
 import useFocusKey from "../../lib/useFocusKey";
@@ -157,7 +157,7 @@ export default function Profile() {
                   style={{ backgroundColor: g.colors[0] }}
                 >
                   <View style={{ marginTop: 10 }}>
-                    <Mascot variant={g.mascot} size={50} animated={false} />
+                    <Mascot variant={mascotFor(g)} size={50} animated={false} />
                   </View>
                 </View>
                 <View className="ml-3 flex-1">

@@ -15,6 +15,7 @@ export default function useAchievements() {
       bestStreak: s.bestStreak,
       xp: s.xp,
       seenAwards: s.seenAwards,
+      daily: s.daily,
     })),
   );
 

@@ -20,6 +20,7 @@ import GameOverModal from "../../components/GameOverModal";
 import { PrimaryButton } from "../../components/Buttons";
 import GradientScreen from "../../components/GradientScreen";
 import Mascot from "../../components/Mascot";
+import ScorePopup from "../../components/ScorePopup";
 import { getGame } from "../../games/registry";
 import { haptic } from "../../lib/haptics";
 import { useGameStore } from "../../store/useGameStore";
@@ -125,46 +126,6 @@ function Orb({ target, onHit }) {
         </LinearGradient>
       </View>
     </Animated.View>
-  );
-}
-
-function Popup({ x, y, text, color }) {
-  const t = useSharedValue(0);
-  useEffect(() => {
-    t.set(withTiming(1, { duration: 650, easing: Easing.out(Easing.cubic) }));
-  }, [t]);
-  const textStyle = useAnimatedStyle(() => ({
-    opacity: 1 - t.value,
-    transform: [{ translateY: -60 * t.value }, { scale: 0.8 + 0.5 * Math.min(1, t.value * 3) }],
-  }));
-  const burstStyle = useAnimatedStyle(() => ({
-    opacity: 0.8 * (1 - t.value),
-    transform: [{ scale: 0.4 + t.value * 1.6 }],
-  }));
-  return (
-    <View pointerEvents="none" style={{ position: "absolute", left: x - 50, top: y - 50 }}>
-      <Animated.View
-        style={[
-          {
-            position: "absolute",
-            width: 100,
-            height: 100,
-            borderRadius: 50,
-            borderWidth: 4,
-            borderColor: color,
-          },
-          burstStyle,
-        ]}
-      />
-      <Animated.View
-        style={[
-          { width: 100, height: 100, alignItems: "center", justifyContent: "center" },
-          textStyle,
-        ]}
-      >
-        <Text style={display(30)}>{text}</Text>
-      </Animated.View>
-    </View>
   );
 }
 
@@ -440,7 +401,7 @@ export default function TapRush() {
             <Orb key={t.id} target={t} onHit={hit} />
           ))}
           {popups.map((p) => (
-            <Popup key={p.id} {...p} />
+            <ScorePopup key={p.id} {...p} />
           ))}
 
           {phase === "ready" && (

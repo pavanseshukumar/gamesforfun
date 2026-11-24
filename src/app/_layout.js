@@ -40,6 +40,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
           {/* Swiping back would fight the in-game swipe gestures. */}
           <Stack.Screen name="games/fusion" options={{ gestureEnabled: false }} />
+          <Stack.Screen name="games/color-catch" options={{ gestureEnabled: false }} />
         </Stack>
       </SafeAreaProvider>
     </GestureHandlerRootView>

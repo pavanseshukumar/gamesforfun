@@ -58,6 +58,15 @@ Docs: https://docs.expo.dev/eas/index.md
 - **Gestures:** react-native-gesture-handler v3. Prefer the hook API (`usePanGesture`, …).
   For instant taps (reaction games), use the responder props (`onStartShouldSetResponder` +
   `onResponderGrant`) rather than `Pressable.onPressIn`, which can drop very short taps on web.
+- **Real-time games** (Bounce Buddy, Color Catch): keep the simulation in one shared value and
+  step it in `useFrameCallback` with `sim.modify((s) => { "worklet"; ...; return s; })`. Render a
+  fixed pool of sprites whose `useAnimatedStyle` reads from the sim, so React never re-renders per
+  frame. Send discrete events (catch, land, game over) to JS with `scheduleOnRN` from
+  `react-native-worklets`, through a stable `emit` callback that forwards to a handler ref.
+- **Tilt:** use `src/lib/useTilt.js`, which normalises the accelerometer sign across iOS, Android
+  and web; always offer a drag fallback.
+- **Seeded randomness:** `src/lib/random.js` (`createRng`, `hashString`) for anything that must be
+  the same for every player, such as the daily puzzle.
 - **Haptics:** always go through `src/lib/haptics.js` (respects the settings toggle, no-op on web).
 - **Adding a game:** create `src/app/games/<id>.js`, add an entry to `src/games/registry.js`, use
   `GradientScreen`, `GameHeader` and `GameOverModal`, and pass the result of `recordGame(id, score, { xp, records })` to the modal.

@@ -12,7 +12,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { GAMES } from "../games/registry";
+import { ARCADE } from "../games/registry";
 import { haptic } from "../lib/haptics";
 import { BOUNCY, SPRING } from "../lib/motion";
 import { cardShadow, INK } from "../theme";
@@ -99,7 +99,7 @@ function QuickPlay() {
       onPress={() => {
         haptic.medium();
         spin.set(withTiming(spin.get() + 360, { duration: 450 }));
-        const game = GAMES[Math.floor(Math.random() * GAMES.length)];
+        const game = ARCADE[Math.floor(Math.random() * ARCADE.length)];
         setTimeout(() => router.push(game.route), 260);
       }}
     >

@@ -81,9 +81,11 @@ export default function GameOverModal({
 
             <Animated.View entering={FadeInUp.delay(350).springify()}>
               <View className="mt-4 flex-row gap-2">
-                <View className="rounded-full bg-[#FFF3C4] px-4 py-1.5">
-                  <Text className="font-body-black text-sm text-ink">⭐ +{xpGained} XP</Text>
-                </View>
+                {xpGained > 0 && (
+                  <View className="rounded-full bg-[#FFF3C4] px-4 py-1.5">
+                    <Text className="font-body-black text-sm text-ink">⭐ +{xpGained} XP</Text>
+                  </View>
+                )}
                 {levelUp && (
                   <View className="rounded-full bg-[#DDF8C8] px-4 py-1.5">
                     <Text className="font-body-black text-sm text-ink">⬆ Level {levelUp}!</Text>

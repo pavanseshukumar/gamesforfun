@@ -3,11 +3,12 @@ import { ScrollView, Text, useWindowDimensions, View } from "react-native";
 import Animated, { FadeIn, FadeInDown, FadeInUp, ZoomIn } from "react-native-reanimated";
 
 import { IconButton } from "../../components/Buttons";
+import DailyBanner from "../../components/DailyBanner";
 import GameCard from "../../components/GameCard";
 import GradientScreen from "../../components/GradientScreen";
 import Mascot from "../../components/Mascot";
 import XpBar from "../../components/XpBar";
-import { GAMES } from "../../games/registry";
+import { ARCADE } from "../../games/registry";
 import useAchievements from "../../games/useAchievements";
 import { levelInfo, rankFor } from "../../lib/progress";
 import useFocusKey from "../../lib/useFocusKey";
@@ -115,11 +116,19 @@ export default function Home() {
           </View>
         </Animated.View>
 
+        {/* Today's puzzle */}
+        <Animated.View
+          entering={FadeInUp.delay(280).springify()}
+          style={{ paddingHorizontal: 20, marginTop: 22 }}
+        >
+          <DailyBanner />
+        </Animated.View>
+
         {/* Game carousel */}
         <View className="mt-8 flex-row items-end justify-between px-5">
           <Text style={display(30)}>Games</Text>
           <Text className="mb-1.5 font-body-bold text-sm text-ink-mute">
-            {GAMES.length} to play
+            {ARCADE.length} to play
           </Text>
         </View>
         <ScrollView
@@ -134,7 +143,7 @@ export default function Home() {
             gap: 16,
           }}
         >
-          {GAMES.map((game, i) => (
+          {ARCADE.map((game, i) => (
             <GameCard key={game.id} game={game} index={i} best={best[game.id]} width={cardWidth} />
           ))}
         </ScrollView>

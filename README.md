@@ -16,7 +16,8 @@ quick-play button in the middle.
 - **Profile**: your name huge, your buddy, level, games played, streak, XP, rank and badge showcase
 - **Trophies**: hexagon badges with live progress; the home bell counts newly unlocked ones
 - **Settings**: edit your name, pick your buddy, haptics, reset progress
-- **Quick play** (centre button): jumps into a random game
+- **Quick play** (centre button): jumps into a random arcade game
+- **Today's puzzle** banner on Home, with a tick once solved and a 7-day calendar
 
 Every finished round earns **XP** → levels → ranks (Rookie → Bronze → Silver → Gold Explorer →
 Diamond Legend), and playing on consecutive days builds a **streak**.
@@ -28,6 +29,9 @@ Diamond Legend), and playing on consecutive days builds a **streak**.
 | ⚡ **Tap Rush** | 30 seconds. Tap orbs before their ring closes. Every 5 hits in a row raises the multiplier; ⭐ golden orbs are worth 5×. | 3-2-1 countdown, spring-in orbs, shrinking timer rings, "+N" burst popups, combo badge, shake on a miss |
 | 🧠 **Memory Flip** | Flip cards to match all 8 pairs in as few moves as you can. | Staggered deal-in, 3D card flips, match bounce, shake on a mismatch, progress pips |
 | 🔮 **Fusion** | Swipe to slide tiles; matching numbers fuse and double. Keep going until no moves are left. | Sliding tiles, spawn pop, merge pulse, glow on big tiles |
+| 🦘 **Bounce Buddy** | Tap to hop Pip onto the platform sliding above. Land dead-centre for a PERFECT; stars +5, springs +3, clouds melt in 1.4s. | Squash-and-stretch hops, camera climb, parallax clouds, sky turns sunset → night |
+| 🎨 **Color Catch** | Tilt (or drag) to move Sunny's basket and catch only the target colour, which changes every 8s. ⭐ shield, ⏳ slow-mo, 3 hearts. | Wobbling drops, basket recolours, catch squash, red flash + shake on mistakes |
+| 🧩 **Daily Puzzle** | One 4×4 sliding picture puzzle per day, the same for everyone (seeded by date). First solve counts; replays are practice. | Spring-sliding tiles, picture reveal with the mascot coming alive, confetti |
 
 All games share the same pieces: a themed gradient backdrop, a header whose score pops on every
 change, haptics, and a game-over sheet where the game's mascot cheers, shows the XP you earned, and
@@ -38,7 +42,7 @@ throws confetti for a new best. Everything is saved on the device.
 ```bash
 npm install
 npm start          # then scan the QR code with Expo Go on your phone
-npm run web        # or try it in a browser (arrow keys / WASD work in Fusion)
+npm run web        # or try it in a browser (arrow keys work in Fusion and Color Catch)
 ```
 
 Other scripts: `npm run lint`, `npm run format`, `npm run export:web`.
@@ -72,6 +76,6 @@ The home screen picks it up automatically. See `AGENTS.md` for styling and anima
 ## Roadmap ideas
 
 - Sound effects and music (expo-audio), with a toggle in Settings
-- More games: word scramble, snake/dodge, a daily puzzle with streaks
+- More games: word pop, stack tower, simon-says blobs
 - Online leaderboards (Supabase or Firebase)
 - App icon, splash screen and store builds with EAS

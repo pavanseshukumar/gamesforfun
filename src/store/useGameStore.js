@@ -19,6 +19,7 @@ const FRESH_STATS = {
   bestStreak: 0,
   lastPlayDay: null,
   seenAwards: [],
+  daily: {}, // { [YYYY-MM-DD]: moves } — first solve of each daily puzzle
 };
 
 /**
@@ -32,6 +33,7 @@ export const useGameStore = create(
       name: "Player",
       avatar: "zip",
       haptics: true,
+      controls: { colorCatch: "tilt" }, // "tilt" | "drag"
 
       /**
        * Records a finished round.
@@ -71,6 +73,14 @@ export const useGameStore = create(
         return { isNewBest, xpGained: xp, levelUp: after > before ? after : null };
       },
 
+      /** Stores the first solve of a daily puzzle; later solves that day don't count. */
+      recordDaily: (day, moves) => {
+        if (get().daily[day] != null) return false;
+        set((s) => ({ daily: { ...s.daily, [day]: moves } }));
+        return true;
+      },
+
+      setControl: (game, mode) => set((s) => ({ controls: { ...s.controls, [game]: mode } })),
       markAwardsSeen: (ids) => set({ seenAwards: ids }),
       setName: (name) => set({ name }),
       setAvatar: (avatar) => set({ avatar }),

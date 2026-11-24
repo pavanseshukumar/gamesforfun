@@ -43,6 +43,8 @@ export default function Settings() {
   const setAvatar = useGameStore((s) => s.setAvatar);
   const setHaptics = useGameStore((s) => s.setHaptics);
   const resetStats = useGameStore((s) => s.resetStats);
+  const catchMode = useGameStore((s) => s.controls?.colorCatch ?? "tilt");
+  const setControl = useGameStore((s) => s.setControl);
 
   return (
     <GradientScreen theme="settings">
@@ -138,7 +140,41 @@ export default function Settings() {
           </View>
         </Section>
 
-        <Section title="Danger zone" delay={320}>
+        <Section title="Color Catch controls" delay={300}>
+          <View className="flex-row gap-2 rounded-full bg-[#F3F1FA] p-1">
+            {[
+              ["tilt", "Tilt phone", "phone-landscape-outline"],
+              ["drag", "Drag finger", "hand-left-outline"],
+            ].map(([key, label, icon]) => {
+              const on = catchMode === key;
+              return (
+                <PressableScale
+                  key={key}
+                  style={{ flex: 1 }}
+                  onPress={() => setControl("colorCatch", key)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: on }}
+                >
+                  <View
+                    className={`flex-row items-center justify-center rounded-full py-3 ${on ? "bg-ink" : ""}`}
+                  >
+                    <Ionicons name={icon} size={16} color={on ? "#fff" : INK} />
+                    <Text
+                      className={`ml-2 font-body-bold text-sm ${on ? "text-white" : "text-ink"}`}
+                    >
+                      {label}
+                    </Text>
+                  </View>
+                </PressableScale>
+              );
+            })}
+          </View>
+          <Text className="ml-2 mt-2 font-body text-xs text-ink-mute">
+            Tilt falls back to drag on devices without a motion sensor.
+          </Text>
+        </Section>
+
+        <Section title="Danger zone" delay={360}>
           <PressableScale
             scaleTo={0.97}
             onPress={() =>
@@ -166,7 +202,7 @@ export default function Settings() {
         </Section>
 
         <Text className="mt-8 text-center font-body text-xs text-ink-mute">
-          Games for Fun · v2.0
+          Games for Fun · v2.1
         </Text>
       </ScrollView>
     </GradientScreen>

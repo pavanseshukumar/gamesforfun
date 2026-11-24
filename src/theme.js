@@ -12,6 +12,9 @@ export const BACKDROPS = {
   "tap-rush": ["#FFC94A", "#FFE5A0", "#FFF8E5"],
   memory: ["#8FBDFF", "#C7DEFF", "#F0F6FF"],
   fusion: ["#6DECB9", "#C2F8DD", "#EFFFF7"],
+  bounce: ["#FF9BCB", "#FFD0E6", "#FFF2F8"],
+  "color-catch": ["#FFB49A", "#FFDCCB", "#FFF5EF"],
+  daily: ["#8C7BFF", "#C3B8FF", "#F1EEFF"],
 };
 
 /** Shared soft shadow for white cards. */

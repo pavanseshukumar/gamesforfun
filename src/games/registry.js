@@ -1,3 +1,5 @@
+import { mascotOfDay } from "./daily/logic";
+
 /**
  * Every game in the hub. Add a new game by creating a route in
  * src/app/games/<id>.js and adding an entry here.
@@ -39,6 +41,51 @@ export const GAMES = [
     unit: "pts",
     lowerIsBetter: false,
   },
+  {
+    id: "bounce",
+    route: "/games/bounce",
+    title: "Bounce Buddy",
+    tagline: "Time your hops, climb the sky",
+    emoji: "🦘",
+    mascot: "pip",
+    colors: ["#FF9BCB", "#FF3D8B"],
+    accent: "#FF3D8B",
+    unit: "pts",
+    lowerIsBetter: false,
+  },
+  {
+    id: "color-catch",
+    route: "/games/color-catch",
+    title: "Color Catch",
+    tagline: "Tilt to catch the right colour",
+    emoji: "🎨",
+    mascot: "sunny",
+    colors: ["#FFD966", "#FF8A3D"],
+    accent: "#FF8A3D",
+    unit: "pts",
+    lowerIsBetter: false,
+  },
+  {
+    // The daily puzzle has its own banner on Home, so it stays out of the
+    // carousel and quick play. Its mascot changes every day.
+    id: "daily",
+    route: "/games/daily",
+    title: "Daily Puzzle",
+    tagline: "One new picture puzzle a day",
+    emoji: "🧩",
+    mascot: "bloop",
+    daily: true,
+    colors: ["#B3A6FF", "#6B5CFF"],
+    accent: "#6B5CFF",
+    unit: "moves",
+    lowerIsBetter: true,
+  },
 ];
 
+/** Games that appear in the carousel and quick play. */
+export const ARCADE = GAMES.filter((g) => !g.daily);
+
 export const getGame = (id) => GAMES.find((g) => g.id === id);
+
+/** Mascot shown for a game; the daily puzzle's changes every day. */
+export const mascotFor = (game) => (game.daily ? mascotOfDay() : game.mascot);
