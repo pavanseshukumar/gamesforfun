@@ -14,6 +14,7 @@
  * hook and the tests all read from this one place.
  */
 import { BOUNCE_LEVELS } from "./bounce/levels";
+import { COLOR_CATCH_LEVELS } from "./colorCatch/levels";
 import { STACK_LEVELS } from "./stack/levels";
 import { TAP_RUSH_LEVELS } from "./tapRush/levels";
 
@@ -21,6 +22,7 @@ export const CHALLENGES = {
   "tap-rush": TAP_RUSH_LEVELS,
   stack: STACK_LEVELS,
   bounce: BOUNCE_LEVELS,
+  "color-catch": COLOR_CATCH_LEVELS,
 };
 
 export const challengesFor = (gameId) => CHALLENGES[gameId] ?? null;

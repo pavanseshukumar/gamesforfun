@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Platform, Text, View } from "react-native";
 import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
 import Animated, {
@@ -15,12 +16,15 @@ import Animated, {
 import { scheduleOnRN } from "react-native-worklets";
 
 import { PrimaryButton } from "../../components/Buttons";
+import { ChallengeGoal, ChallengeResult, LevelsButton } from "../../components/Challenge";
 import GameHeader from "../../components/GameHeader";
 import GameOverModal from "../../components/GameOverModal";
 import GradientScreen from "../../components/GradientScreen";
 import Mascot from "../../components/Mascot";
 import ScorePopup from "../../components/ScorePopup";
+import { COLOR_CATCH_DEFAULTS } from "../../games/colorCatch/levels";
 import { getGame } from "../../games/registry";
+import useChallenge from "../../games/useChallenge";
 import { haptic } from "../../lib/haptics";
 import { popFor, sfx } from "../../lib/sound";
 import { BOUNCY } from "../../lib/motion";
@@ -35,8 +39,7 @@ const POOL = 12; // max drops on screen at once
 const R = 17; // drop radius
 const BASKET_W = 104;
 const PLAYER_H = 118; // mascot + basket height
-const SWITCH_EVERY = 8; // seconds between target colour changes
-const LIVES = 3;
+const METRIC_UNITS = { score: "pts", catches: "catches", switches: "switches" };
 
 // Drop kinds
 const DROP = 0;
@@ -46,7 +49,14 @@ const CLOCK = 2; // slows time for a moment
 const freshDrops = () =>
   Array.from({ length: POOL }, () => ({ a: 0, x: 0, y: 0, v: 0, c: 0, k: DROP }));
 
-const freshSim = (w, h) => ({
+// Level rules live in the sim so the UI-thread worklet can read them.
+const freshSim = (w, h, cfg = COLOR_CATCH_DEFAULTS) => ({
+  switchEvery: cfg.switchEvery,
+  speedScale: cfg.speedScale,
+  spawnScale: cfg.spawnScale,
+  targetShare: cfg.targetShare,
+  powerups: cfg.powerups,
+  nColors: cfg.colors,
   running: false,
   w,
   h,
@@ -170,9 +180,21 @@ function Player({ sim, pulse, shield }) {
   );
 }
 
-export default function ColorCatch() {
+// Remount per level so every level starts from a clean slate.
+export default function ColorCatchScreen() {
+  const { level } = useLocalSearchParams();
+  return <ColorCatch key={level ?? "endless"} />;
+}
+
+function ColorCatch() {
   const best = useGameStore((s) => s.best[GAME.id]);
   const recordGame = useGameStore((s) => s.recordGame);
+  const challenge = useChallenge(GAME.id);
+  const cfg = useMemo(
+    () => ({ ...COLOR_CATCH_DEFAULTS, ...(challenge.level?.config ?? {}) }),
+    [challenge.level],
+  );
+  const LIVES = cfg.lives;
   const mode = useGameStore((s) => s.controls?.colorCatch ?? "tilt");
 
   const [phase, setPhase] = useState("ready"); // ready | playing | over
@@ -202,9 +224,12 @@ export default function ColorCatch() {
     lives: LIVES,
     shield: false,
     switches: 0,
+    catches: 0,
     clean: 0,
     lostLife: false,
   });
+  const roundTimer = useRef(null);
+  const [secondsLeft, setSecondsLeft] = useState(null);
 
   useEffect(() => {
     tiltOn.set(useTiltNow);
@@ -235,13 +260,13 @@ export default function ColorCatch() {
 
       // Target colour rotation, with a warning shortly before each switch.
       s.targetT += dt;
-      if (!s.warned && s.targetT > SWITCH_EVERY - 1.6) {
+      if (!s.warned && s.targetT > s.switchEvery - 1.6) {
         s.warned = true;
         scheduleOnRN(emit, "warn", s.next);
       }
-      if (s.targetT >= SWITCH_EVERY) {
+      if (s.targetT >= s.switchEvery) {
         s.target = s.next;
-        let n = Math.floor(Math.random() * 3);
+        let n = Math.floor(Math.random() * (s.nColors - 1));
         if (n >= s.target) n += 1;
         s.next = n;
         s.targetT = 0;
@@ -251,23 +276,23 @@ export default function ColorCatch() {
 
       // Spawning gets faster over time.
       s.spawnAcc += dt;
-      const interval = Math.max(0.36, 0.95 - s.t * 0.008);
+      const interval = Math.max(0.36, 0.95 - s.t * 0.008) * s.spawnScale;
       if (s.spawnAcc >= interval) {
         s.spawnAcc = 0;
         for (let i = 0; i < POOL; i++) {
           const d = s.drops[i];
           if (d.a) continue;
           const roll = Math.random();
-          d.k = roll < 0.05 ? STAR : roll < 0.09 ? CLOCK : DROP;
+          d.k = s.powerups && roll < 0.05 ? STAR : s.powerups && roll < 0.09 ? CLOCK : DROP;
           let c = s.target;
-          if (Math.random() > 0.45) {
-            c = Math.floor(Math.random() * 3);
+          if (Math.random() > s.targetShare) {
+            c = Math.floor(Math.random() * (s.nColors - 1));
             if (c >= s.target) c += 1;
           }
           d.c = c;
           d.x = R + 6 + Math.random() * (s.w - 2 * R - 12);
           d.y = -R;
-          d.v = Math.min(440, 160 + s.t * 3.4) * (0.85 + Math.random() * 0.3);
+          d.v = Math.min(440, 160 + s.t * 3.4) * s.speedScale * (0.85 + Math.random() * 0.3);
           d.a = 1;
           break;
         }
@@ -313,13 +338,32 @@ export default function ColorCatch() {
     });
     setPhase("over");
     haptic.heavy();
+    clearTimeout(roundTimer.current);
     const r = run.current;
+    const records = { ccSwitches: r.switches, ccClean: r.clean };
+    if (challenge.level) {
+      const res = challenge.complete(
+        { score: r.score, catches: r.catches, switches: r.switches },
+        records,
+      );
+      setResult({ ...res, challenge: true });
+      return;
+    }
     const outcome = recordGame(GAME.id, r.score, {
       xp: 10 + Math.floor(r.score / 2),
-      records: { ccSwitches: r.switches, ccClean: r.clean },
+      records,
     });
     setResult({ ...outcome, switches: r.switches });
-  }, [loop, sim, recordGame]);
+  }, [challenge, loop, sim, recordGame]);
+  useEffect(() => () => clearTimeout(roundTimer.current), []);
+
+  // Visible countdown for timed levels.
+  const timed = cfg.duration > 0 && phase === "playing";
+  useEffect(() => {
+    if (!timed) return undefined;
+    const id = setInterval(() => setSecondsLeft((t) => Math.max(0, (t ?? 0) - 1)), 1000);
+    return () => clearInterval(id);
+  }, [timed]);
 
   useEffect(() => {
     handlers.current = (type, a, b) => {
@@ -359,6 +403,7 @@ export default function ColorCatch() {
           sfx("powerup");
           addPopup(b, "SLOW-MO", "#3F8CFF");
         } else if (good) {
+          r.catches++;
           r.streak++;
           const mult = 1 + Math.floor(r.streak / 8);
           r.score += mult;
@@ -407,6 +452,7 @@ export default function ColorCatch() {
       lives: LIVES,
       shield: false,
       switches: 0,
+      catches: 0,
       clean: 0,
       lostLife: false,
     };
@@ -419,14 +465,19 @@ export default function ColorCatch() {
     setResult(null);
     setTarget(0);
     const { w, h } = sim.get();
-    const fresh = freshSim(w, h);
-    fresh.target = Math.floor(Math.random() * 4);
-    fresh.next = (fresh.target + 1 + Math.floor(Math.random() * 3)) % 4;
+    const fresh = freshSim(w, h, cfg);
+    const n = cfg.colors;
+    fresh.target = Math.floor(Math.random() * n);
+    fresh.next = (fresh.target + 1 + Math.floor(Math.random() * (n - 1))) % n;
     fresh.running = true;
     setTarget(fresh.target);
     sim.set(fresh);
     setPhase("playing");
     loop.setActive(true);
+    // Timed levels end when the clock runs out (hearts still apply).
+    clearTimeout(roundTimer.current);
+    setSecondsLeft(cfg.duration > 0 ? cfg.duration : null);
+    if (cfg.duration > 0) roundTimer.current = setTimeout(() => endGame(), cfg.duration * 1000);
   };
 
   // Arrow keys on web.
@@ -464,7 +515,11 @@ export default function ColorCatch() {
 
   return (
     <GradientScreen theme={GAME.id} edges={["top", "bottom"]}>
-      <GameHeader title={GAME.title} score={score} best={best} />
+      <GameHeader
+        title={challenge.level ? `Level ${challenge.n}` : GAME.title}
+        score={score}
+        best={challenge.level ? undefined : best}
+      />
 
       {/* Target banner */}
       <View className="mt-4 flex-row items-center justify-between px-5">
@@ -491,6 +546,9 @@ export default function ColorCatch() {
           )}
         </View>
         <View className="flex-row gap-1">
+          {secondsLeft != null && phase === "playing" && (
+            <Text className="mr-2 font-body-black text-sm text-ink">⏱ {secondsLeft}s</Text>
+          )}
           {Array.from({ length: LIVES }, (_, i) => (
             <Text key={i} style={{ fontSize: 20, opacity: i < lives ? 1 : 0.25 }}>
               ❤️
@@ -566,10 +624,14 @@ export default function ColorCatch() {
                   <Mascot variant={GAME.mascot} size={130} mood="cheer" />
                 </Animated.View>
                 <Text style={[display(44), { marginTop: 6 }]}>Color Catch</Text>
-                <Text className="mt-2 text-center font-body-semi text-sm leading-5 text-ink-soft">
-                  Catch only the colour shown up top.{"\n"}Wrong colour costs a ❤️ · it changes
-                  every {SWITCH_EVERY}s.{"\n"}⭐ = shield · ⏳ = slow-mo
-                </Text>
+                {challenge.level ? (
+                  <ChallengeGoal level={challenge.level} n={challenge.n} />
+                ) : (
+                  <Text className="mt-2 text-center font-body-semi text-sm leading-5 text-ink-soft">
+                    Catch only the colour shown up top.{"\n"}Wrong colour costs a ❤️ · it changes
+                    every {cfg.switchEvery}s.{"\n"}⭐ = shield · ⏳ = slow-mo
+                  </Text>
+                )}
                 <View className="mt-3 rounded-full bg-white px-4 py-2">
                   <Text className="font-body-bold text-xs text-ink">📱 {controlHint}</Text>
                 </View>
@@ -579,13 +641,29 @@ export default function ColorCatch() {
                   onPress={start}
                   style={{ marginTop: 18 }}
                 />
+                {!challenge.level && (
+                  <LevelsButton
+                    gameId={GAME.id}
+                    count={challenge.count}
+                    onPress={challenge.openLevels}
+                    style={{ marginTop: 10 }}
+                  />
+                )}
               </Animated.View>
             )}
           </View>
         </Animated.View>
       </GestureDetector>
 
-      {phase === "over" && result && (
+      {phase === "over" && result?.challenge && (
+        <ChallengeResult
+          game={GAME}
+          challenge={challenge}
+          result={result}
+          unit={METRIC_UNITS[challenge.level.metric]}
+        />
+      )}
+      {phase === "over" && result && !result.challenge && (
         <GameOverModal
           title="Out of hearts!"
           game={GAME}
