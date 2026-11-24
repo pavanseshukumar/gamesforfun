@@ -1,15 +1,7 @@
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { ScrollView, Text, useWindowDimensions, View } from "react-native";
-import Animated, {
-  FadeIn,
-  FadeInDown,
-  FadeInUp,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  ZoomIn,
-} from "react-native-reanimated";
+import Animated, { FadeInDown, FadeInUp, ZoomIn } from "react-native-reanimated";
 
 import { GhostButton, IconButton, PrimaryButton } from "../../components/Buttons";
 import Confetti from "../../components/Confetti";
@@ -17,17 +9,9 @@ import GameHeader from "../../components/GameHeader";
 import GameOverModal from "../../components/GameOverModal";
 import GradientScreen from "../../components/GradientScreen";
 import { MASCOTS } from "../../components/Mascot";
-import PressableScale from "../../components/PressableScale";
 import PuzzleArt from "../../components/PuzzleArt";
-import {
-  BLANK,
-  dailyXp,
-  isSolved,
-  mascotOfDay,
-  SIZE,
-  slide,
-  todaysBoard,
-} from "../../games/daily/logic";
+import SlidingBoard from "../../components/SlidingBoard";
+import { dailyXp, isSolved, mascotOfDay, slide, todaysBoard } from "../../games/daily/logic";
 import { getGame } from "../../games/registry";
 import { haptic } from "../../lib/haptics";
 import { sfx } from "../../lib/sound";
@@ -36,8 +20,6 @@ import { useGameStore } from "../../store/useGameStore";
 import { cardShadow, display, INK } from "../../theme";
 
 const GAME = getGame("daily");
-const GAP = 6;
-const TILE_SPRING = { damping: 18, stiffness: 260, mass: 0.6 };
 
 function useCountdownToMidnight() {
   const calc = () => {
@@ -96,47 +78,9 @@ function WeekStrip({ daily, today }) {
   );
 }
 
-function Tile({ id, index, tile, variant, boardInner, showNumber, onPress }) {
-  const cell = tile + GAP;
-  const x = useSharedValue((index % SIZE) * cell);
-  const y = useSharedValue(Math.floor(index / SIZE) * cell);
-
-  useEffect(() => {
-    x.set(withSpring((index % SIZE) * cell, TILE_SPRING));
-    y.set(withSpring(Math.floor(index / SIZE) * cell, TILE_SPRING));
-  }, [index, cell, x, y]);
-
-  const style = useAnimatedStyle(() => ({
-    transform: [{ translateX: x.value }, { translateY: y.value }],
-  }));
-
-  // Where this piece of the picture lives in the solved image.
-  const homeC = id % SIZE;
-  const homeR = Math.floor(id / SIZE);
-
-  return (
-    <Animated.View style={[{ position: "absolute", width: tile, height: tile }, style]}>
-      <PressableScale onPress={onPress} scaleTo={0.93} hapticFeedback={false}>
-        <View style={{ width: tile, height: tile, borderRadius: 14, overflow: "hidden" }}>
-          <View style={{ position: "absolute", left: -homeC * cell, top: -homeR * cell }}>
-            <PuzzleArt variant={variant} size={boardInner} />
-          </View>
-          {showNumber && (
-            <View className="absolute left-1.5 top-1.5 h-6 min-w-6 items-center justify-center rounded-full bg-white/90 px-1">
-              <Text className="font-body-black text-[11px] text-ink">{id + 1}</Text>
-            </View>
-          )}
-        </View>
-      </PressableScale>
-    </Animated.View>
-  );
-}
-
 export default function DailyPuzzle() {
   const { width } = useWindowDimensions();
   const boardSize = Math.min(width - 40, 400);
-  const boardInner = boardSize - 2 * 8; // board has 8px padding
-  const tile = (boardInner - GAP * (SIZE - 1)) / SIZE;
 
   const today = dayKey();
   const variant = useMemo(() => mascotOfDay(today), [today]);
@@ -315,52 +259,14 @@ export default function DailyPuzzle() {
       </View>
 
       <View className="flex-1 items-center justify-center">
-        <Animated.View entering={ZoomIn.springify().damping(14)}>
-          <View
-            style={[
-              {
-                width: boardSize,
-                height: boardSize,
-                padding: 8,
-                borderRadius: 26,
-                backgroundColor: "rgba(255,255,255,0.6)",
-                borderWidth: 2,
-                borderColor: "#FFFFFF",
-              },
-            ]}
-          >
-            <View style={{ flex: 1 }}>
-              {board.map((id, index) =>
-                id === BLANK ? null : (
-                  <Tile
-                    key={id}
-                    id={id}
-                    index={index}
-                    tile={tile}
-                    variant={variant}
-                    boardInner={boardInner}
-                    showNumber={showNumbers && phase === "playing"}
-                    onPress={() => tap(index)}
-                  />
-                ),
-              )}
-              {phase === "solved" && (
-                <Animated.View
-                  entering={FadeIn.duration(500)}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    borderRadius: 16,
-                    overflow: "hidden",
-                  }}
-                >
-                  <PuzzleArt variant={variant} size={boardInner} animated mood="cheer" />
-                </Animated.View>
-              )}
-            </View>
-          </View>
-        </Animated.View>
+        <SlidingBoard
+          board={board}
+          variant={variant}
+          boardSize={boardSize}
+          showNumbers={showNumbers}
+          solved={phase === "solved"}
+          onTap={tap}
+        />
         {phase === "solved" && <Confetti />}
       </View>
 

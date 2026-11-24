@@ -18,6 +18,7 @@ export const BACKDROPS = {
   "word-pop": ["#7FE3FF", "#C4F3FF", "#EFFCFF"],
   stack: ["#C9B6FF", "#FFD6E8", "#FFF4EC"],
   "blob-launch": ["#8FD3FF", "#CDEBFF", "#F2FAFF"],
+  slider: ["#FFD39A", "#FFE9CC", "#FFF8EE"],
 };
 
 /** Shared soft shadow for white cards. */

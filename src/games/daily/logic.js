@@ -7,53 +7,20 @@
  * the solved picture, so every board is solvable.
  */
 import { dayKey } from "../../lib/progress";
-import { createRng, hashString } from "../../lib/random";
+import { hashString } from "../../lib/random";
+import * as sliding from "../sliding";
 
 export const SIZE = 4;
-export const BLANK = SIZE * SIZE - 1;
+export const BLANK = sliding.blankOf(SIZE);
 const SHUFFLE_MOVES = 140;
 const CAST = ["zip", "bloop", "gloop", "pip", "sunny"];
 
-export const solvedBoard = () => Array.from({ length: SIZE * SIZE }, (_, i) => i);
-
-export const isSolved = (board) => board.every((tile, i) => tile === i);
-
-/** Indexes of cells orthogonally next to `index`. */
-export function neighbors(index) {
-  const r = Math.floor(index / SIZE);
-  const c = index % SIZE;
-  const out = [];
-  if (r > 0) out.push(index - SIZE);
-  if (r < SIZE - 1) out.push(index + SIZE);
-  if (c > 0) out.push(index - 1);
-  if (c < SIZE - 1) out.push(index + 1);
-  return out;
-}
-
-/** Slides the tile at `index` into the gap if they touch. Returns a new board or null. */
-export function slide(board, index) {
-  const gap = board.indexOf(BLANK);
-  if (!neighbors(gap).includes(index)) return null;
-  const next = [...board];
-  [next[gap], next[index]] = [next[index], next[gap]];
-  return next;
-}
-
-export function shuffledBoard(seed, moves = SHUFFLE_MOVES) {
-  const rand = createRng(seed);
-  let board = solvedBoard();
-  let gap = BLANK;
-  let prev = -1;
-  for (let i = 0; i < moves || isSolved(board); i++) {
-    // Never undo the previous move, so the shuffle really travels.
-    const options = neighbors(gap).filter((n) => n !== prev);
-    const pick = options[Math.floor(rand() * options.length)];
-    board = slide(board, pick);
-    prev = gap;
-    gap = pick;
-  }
-  return board;
-}
+export const solvedBoard = () => sliding.solvedBoard(SIZE);
+export const isSolved = sliding.isSolved;
+export const neighbors = (index) => sliding.neighbors(index, SIZE);
+export const slide = sliding.slide;
+export const shuffledBoard = (seed, moves = SHUFFLE_MOVES) =>
+  sliding.scramble(seed, SIZE, moves).board;
 
 export const seedForDay = (day = dayKey()) => hashString(`gamesforfun:${day}`);
 

@@ -102,6 +102,18 @@ export const GAMES = [
     lowerIsBetter: false,
   },
   {
+    id: "slider",
+    route: "/games/slider",
+    title: "Picture Slider",
+    tagline: "Slide tiles, rebuild the picture",
+    emoji: "🖼️",
+    mascot: "sunny",
+    colors: ["#FFD27A", "#FF8A5B"],
+    accent: "#FF7A45",
+    unit: "stars",
+    lowerIsBetter: false,
+  },
+  {
     // The daily puzzle has its own banner on Home, so it stays out of the
     // carousel and quick play. Its mascot changes every day.
     id: "daily",

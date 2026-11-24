@@ -42,6 +42,7 @@ Diamond Legend), and playing on consecutive days builds a **streak**.
 | 🔤 **Word Pop** | Tap rising letter bubbles to spell words (3–8 letters) in 90 seconds. Tapped bubbles freeze; rare letters and long words score more; golden bubbles double a word. | Floating, swaying bubbles, live ✓ when your letters form a word, pop-and-score on submit |
 | 🧱 **Stack Tower** | Tap to drop each sliding block onto the tower; overhangs get sliced off so the blocks shrink. Perfect drops snap in, and 3 in a row grow the block back. | Tumbling sliced pieces, Gloop riding the top, camera climb, sky turns sunset → space |
 | 🎯 **Blob Launch** | Drag back to aim, let go to fling Zip at wobbly towers of wood, stone and ice. Pop every Grump within 3 shots; fewer shots earn more stars across 10 handmade levels. | Real physics (matter-js), stretchy sling bands, predicted-path dots, toppling structures, level-select with stars |
+| 🖼️ **Picture Slider** | Slide tiles to rebuild mascot pictures across 12 levels that grow from 3×3 to 5×5. Each board is a fixed scramble; finish at par for 3 stars. | Springy tiles, goal thumbnail, picture comes alive when solved, level select with stars |
 | 🧩 **Daily Puzzle** | One 4×4 sliding picture puzzle per day, the same for everyone (seeded by date). First solve counts; replays are practice. | Spring-sliding tiles, picture reveal with the mascot coming alive, confetti |
 
 All games share the same pieces: a themed gradient backdrop, a header whose score pops on every

@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -8,7 +7,6 @@ import Animated, {
   FadeInDown,
   useAnimatedStyle,
   useSharedValue,
-  ZoomIn,
 } from "react-native-reanimated";
 import Svg, { Path } from "react-native-svg";
 
@@ -17,8 +15,8 @@ import GameHeader from "../../components/GameHeader";
 import GameOverModal from "../../components/GameOverModal";
 import GradientScreen from "../../components/GradientScreen";
 import Grump from "../../components/Grump";
+import LevelGrid, { Stars, totalStars } from "../../components/LevelGrid";
 import Mascot from "../../components/Mascot";
-import PressableScale from "../../components/PressableScale";
 import ScorePopup from "../../components/ScorePopup";
 import { LEVELS } from "../../games/blob/levels";
 import {
@@ -174,22 +172,10 @@ function Dot({ dots, i, scale }) {
   );
 }
 
-function Stars({ count, size = 18 }) {
-  return (
-    <View className="flex-row">
-      {[0, 1, 2].map((i) => (
-        <Text key={i} style={{ fontSize: size, opacity: i < count ? 1 : 0.25 }}>
-          ⭐
-        </Text>
-      ))}
-    </View>
-  );
-}
-
 // ---- level select -------------------------------------------------------------------
 
 function LevelSelect({ progress, onPick }) {
-  const total = Object.values(progress).reduce((a, l) => a + l.stars, 0);
+  const total = totalStars(progress);
   return (
     <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
       <Animated.View entering={FadeInDown.springify()}>
@@ -210,47 +196,7 @@ function LevelSelect({ progress, onPick }) {
         </View>
       </Animated.View>
 
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
-        {LEVELS.map((lvl, i) => {
-          const n = i + 1;
-          const stars = progress[n]?.stars ?? 0;
-          const locked = n > 1 && !(progress[n - 1]?.stars > 0);
-          return (
-            <Animated.View
-              key={n}
-              entering={ZoomIn.delay(60 * i)
-                .springify()
-                .damping(13)}
-              style={{ width: "30.5%" }}
-            >
-              <PressableScale
-                onPress={() => !locked && onPick(i)}
-                disabled={locked}
-                accessibilityLabel={`Level ${n}`}
-              >
-                <View
-                  style={[cardShadow, { opacity: locked ? 0.55 : 1 }]}
-                  className="items-center rounded-3xl bg-white px-2 pb-3 pt-2"
-                >
-                  {locked ? (
-                    <View className="h-[46px] items-center justify-center">
-                      <Ionicons name="lock-closed" size={24} color="#9A98A8" />
-                    </View>
-                  ) : (
-                    <Text style={display(40)}>{n}</Text>
-                  )}
-                  <Text numberOfLines={1} className="font-body-bold text-[11px] text-ink-mute">
-                    {lvl.name}
-                  </Text>
-                  <View className="mt-1">
-                    <Stars count={stars} size={13} />
-                  </View>
-                </View>
-              </PressableScale>
-            </Animated.View>
-          );
-        })}
-      </View>
+      <LevelGrid levels={LEVELS} progress={progress} onPick={onPick} />
     </ScrollView>
   );
 }
