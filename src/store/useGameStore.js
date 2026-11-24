@@ -20,6 +20,7 @@ const FRESH_STATS = {
   lastPlayDay: null,
   seenAwards: [],
   daily: {}, // { [YYYY-MM-DD]: moves } — first solve of each daily puzzle
+  levels: {}, // { [gameId]: { [levelNumber]: { stars, score } } } — best per level
 };
 
 /**
@@ -79,6 +80,19 @@ export const useGameStore = create(
         if (get().daily[day] != null) return false;
         set((s) => ({ daily: { ...s.daily, [day]: moves } }));
         return true;
+      },
+
+      /** Keeps the best stars/score per level. Returns the previous best stars. */
+      recordLevel: (gameId, n, stars, score) => {
+        const prev = get().levels?.[gameId]?.[n];
+        const next = {
+          stars: Math.max(stars, prev?.stars ?? 0),
+          score: Math.max(score, prev?.score ?? 0),
+        };
+        set((s) => ({
+          levels: { ...s.levels, [gameId]: { ...(s.levels?.[gameId] ?? {}), [n]: next } },
+        }));
+        return { prevStars: prev?.stars ?? 0 };
       },
 
       setControl: (game, mode) => set((s) => ({ controls: { ...s.controls, [game]: mode } })),

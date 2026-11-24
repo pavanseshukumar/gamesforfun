@@ -90,6 +90,18 @@ export const GAMES = [
     lowerIsBetter: false,
   },
   {
+    id: "blob-launch",
+    route: "/games/blob-launch",
+    title: "Blob Launch",
+    tagline: "Fling Zip, topple the Grumps",
+    emoji: "🎯",
+    mascot: "zip",
+    colors: ["#8FD3FF", "#FF8FB1"],
+    accent: "#FF5C8A",
+    unit: "stars",
+    lowerIsBetter: false,
+  },
+  {
     // The daily puzzle has its own banner on Home, so it stays out of the
     // carousel and quick play. Its mascot changes every day.
     id: "daily",

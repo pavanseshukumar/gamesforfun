@@ -16,6 +16,7 @@ export default function useAchievements() {
       xp: s.xp,
       seenAwards: s.seenAwards,
       daily: s.daily,
+      levels: s.levels,
     })),
   );
 

@@ -22,6 +22,10 @@ export default function GameOverModal({
   result,
   onPlayAgain,
   extra,
+  primaryLabel = "Play again",
+  primaryIcon = "refresh",
+  secondaryLabel = "Back to games",
+  onSecondary,
   mood = "fail", // "success" for rounds you complete (puzzles), "fail" for game overs
 }) {
   const { isNewBest, xpGained, levelUp } = result;
@@ -105,14 +109,14 @@ export default function GameOverModal({
             </Animated.View>
 
             <PrimaryButton
-              title="Play again"
-              icon="refresh"
+              title={primaryLabel}
+              icon={primaryIcon}
               onPress={onPlayAgain}
               style={{ alignSelf: "stretch", marginTop: 22 }}
             />
             <GhostButton
-              title="Back to games"
-              onPress={() => router.back()}
+              title={secondaryLabel}
+              onPress={onSecondary ?? (() => router.back())}
               style={{ alignSelf: "stretch", marginTop: 10 }}
             />
           </View>

@@ -64,6 +64,14 @@ Docs: https://docs.expo.dev/eas/index.md
   fixed pool of sprites whose `useAnimatedStyle` reads from the sim, so React never re-renders per
   frame. Send discrete events (catch, land, game over) to JS with `scheduleOnRN` from
   `react-native-worklets`, through a stable `emit` callback that forwards to a handler ref.
+- **Physics games** (Blob Launch): simulation lives in a React-free module (`src/games/blob/world.js`,
+  matter-js) so the app and the tests share it. The screen steps it at a fixed 60 Hz in a
+  `requestAnimationFrame` loop and writes poses into one shared value for the sprites. Every level
+  must stand still at rest and be clearable within 3 shots; `__tests__/blob.test.js` checks this with
+  a headless solver, so re-run `npm test` after editing physics constants or levels. Create bodies
+  dynamic and *then* `Body.setStatic(true)`: a body created static has infinite mass once released.
+- **Store selectors:** never return a fresh `{}`/`[]` fallback from a `useGameStore` selector (it
+  re-renders forever, React error #185); use a module-level constant instead.
 - **Tilt:** use `src/lib/useTilt.js`, which normalises the accelerometer sign across iOS, Android
   and web; always offer a drag fallback.
 - **Seeded randomness:** `src/lib/random.js` (`createRng`, `hashString`) for anything that must be
