@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Platform, Text, View } from "react-native";
 import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
 import Animated, {
@@ -19,21 +20,23 @@ import Animated, {
 import { scheduleOnRN } from "react-native-worklets";
 
 import { PrimaryButton } from "../../components/Buttons";
+import { ChallengeGoal, ChallengeResult, LevelsButton } from "../../components/Challenge";
 import GameHeader from "../../components/GameHeader";
 import GameOverModal from "../../components/GameOverModal";
 import GradientScreen from "../../components/GradientScreen";
 import Mascot from "../../components/Mascot";
 import PressableScale from "../../components/PressableScale";
+import { MATH_DEFAULTS } from "../../games/math/levels";
 import { cardTime, makeQuestion, multiplierFor, tierFor, TIERS } from "../../games/math/logic";
 import { getGame } from "../../games/registry";
+import useChallenge from "../../games/useChallenge";
 import { haptic } from "../../lib/haptics";
 import { popFor, sfx } from "../../lib/sound";
 import { useGameStore } from "../../store/useGameStore";
 import { cardShadow, display, INK } from "../../theme";
 
 const GAME = getGame("quick-math");
-const ROUND_MS = 60_000;
-const PENALTY_MS = 3000;
+const METRIC_UNITS = { score: "pts", correct: "correct", streak: "in a row" };
 const THROW = 520;
 const GREEN = "#1FBF7A";
 const RED = "#E5484D";
@@ -43,9 +46,22 @@ let questionId = 0;
 // "144 ÷ 12 = 12" at full size would overflow the card.
 const equationSize = (text) => Math.min(64, Math.floor(560 / text.length));
 
-export default function QuickMath() {
+// Remount per level so every level starts from a clean slate.
+export default function QuickMathScreen() {
+  const { level } = useLocalSearchParams();
+  return <QuickMath key={level ?? "endless"} />;
+}
+
+function QuickMath() {
   const best = useGameStore((s) => s.best[GAME.id]);
   const recordGame = useGameStore((s) => s.recordGame);
+  const challenge = useChallenge(GAME.id);
+  const cfg = useMemo(
+    () => ({ ...MATH_DEFAULTS, ...(challenge.level?.config ?? {}) }),
+    [challenge.level],
+  );
+  const ROUND_MS = cfg.duration * 1000;
+  const custom = useMemo(() => (cfg.ops ? { ops: cfg.ops, max: cfg.max } : null), [cfg]);
 
   const [phase, setPhase] = useState("ready"); // ready | playing | over
   const [question, setQuestion] = useState(null);
@@ -76,29 +92,38 @@ export default function QuickMath() {
 
   const nextCard = useCallback(() => {
     const r = run.current;
-    const q = { ...makeQuestion(r.tier), id: ++questionId };
+    const q = { ...makeQuestion(r.tier, Math.random, custom), id: ++questionId };
     currentId.current = q.id;
     setQuestion(q);
     x.set(0);
     r.busy = false;
-    const secs = cardTime(r.correct);
+    const secs = cardTime(r.correct) * cfg.cardScale;
     timer.set(1);
     timer.set(withTiming(0, { duration: secs * 1000, easing: Easing.linear }));
     clearTimeout(cardTimer.current);
     cardTimer.current = setTimeout(() => answerRef.current?.(null, q), secs * 1000);
-  }, [timer, x]);
+  }, [cfg.cardScale, custom, timer, x]);
 
   const finish = useCallback(() => {
     clearTimeout(cardTimer.current);
     setPhase("over");
     haptic.heavy();
     const r = run.current;
+    const records = { qmBestStreak: r.bestStreak, qmTier: r.tier };
+    if (challenge.level) {
+      const res = challenge.complete(
+        { score: r.score, correct: r.correct, streak: r.bestStreak },
+        records,
+      );
+      setResult({ ...res, challenge: true });
+      return;
+    }
     const outcome = recordGame(GAME.id, r.score, {
       xp: 10 + Math.floor(r.score / 2),
-      records: { qmBestStreak: r.bestStreak, qmTier: r.tier },
+      records,
     });
     setResult({ ...outcome, correct: r.correct, bestStreak: r.bestStreak });
-  }, [recordGame]);
+  }, [challenge, recordGame]);
 
   /** side: "right" (true), "left" (false) or null (ran out of time). */
   const answer = useCallback(
@@ -120,7 +145,8 @@ export default function QuickMath() {
         glow.set(withSequence(withTiming(1, { duration: 60 }), withTiming(0, { duration: 300 })));
         haptic.tap();
         sfx(popFor(mult));
-        const tier = tierFor(r.correct);
+        // Practice levels (custom ops) stay on their chosen skill.
+        const tier = custom ? r.tier : Math.max(cfg.startTier, tierFor(r.correct));
         if (tier > r.tier) {
           r.tier = tier;
           setTier(tier);
@@ -130,7 +156,8 @@ export default function QuickMath() {
         }
       } else {
         r.streak = 0;
-        r.endAt -= PENALTY_MS;
+        r.endAt -= cfg.penalty * 1000;
+        if (cfg.suddenDeath) r.endAt = 0; // one miss ends the round
         setHint(`${q.a} ${q.op} ${q.b} = ${q.truth}`);
         glow.set(withSequence(withTiming(-1, { duration: 60 }), withTiming(0, { duration: 380 })));
         shake.set(
@@ -147,7 +174,7 @@ export default function QuickMath() {
       if (Date.now() >= r.endAt) finish();
       else nextCard();
     },
-    [finish, glow, nextCard, shake],
+    [cfg.penalty, cfg.startTier, cfg.suddenDeath, custom, finish, glow, nextCard, shake],
   );
   useEffect(() => {
     answerRef.current = answer;
@@ -178,7 +205,7 @@ export default function QuickMath() {
       correct: 0,
       streak: 0,
       bestStreak: 0,
-      tier: 0,
+      tier: cfg.startTier,
       endAt: Date.now() + ROUND_MS,
       busy: false,
     };
@@ -186,7 +213,7 @@ export default function QuickMath() {
     setStreak(0);
     setHint(null);
     setResult(null);
-    setTier(0);
+    setTier(cfg.startTier);
     setTimeLeft(ROUND_MS);
     setPhase("playing");
     sfx("go");
@@ -259,7 +286,11 @@ export default function QuickMath() {
 
   return (
     <GradientScreen theme={GAME.id} edges={["top", "bottom"]}>
-      <GameHeader title={GAME.title} score={score} best={best} />
+      <GameHeader
+        title={challenge.level ? `Level ${challenge.n}` : GAME.title}
+        score={score}
+        best={challenge.level ? undefined : best}
+      />
 
       <View className="mt-4 flex-row items-center justify-between px-5">
         <Text className={`font-body-black text-sm ${secs <= 10 ? "text-[#E5484D]" : "text-ink"}`}>
@@ -388,16 +419,28 @@ export default function QuickMath() {
               <Mascot variant={GAME.mascot} size={130} mood="cool" />
             </Animated.View>
             <Text style={[display(44), { marginTop: 6 }]}>Quick Math</Text>
-            <Text className="mt-2 text-center font-body-semi text-sm leading-5 text-ink-soft">
-              Swipe right if the sum is true, left if it&apos;s false.{"\n"}Streaks multiply your
-              points · mistakes cost 3 seconds.{"\n"}60 seconds — how far can you climb?
-            </Text>
+            {challenge.level ? (
+              <ChallengeGoal level={challenge.level} n={challenge.n} />
+            ) : (
+              <Text className="mt-2 text-center font-body-semi text-sm leading-5 text-ink-soft">
+                Swipe right if the sum is true, left if it&apos;s false.{"\n"}Streaks multiply your
+                points · mistakes cost 3 seconds.{"\n"}60 seconds — how far can you climb?
+              </Text>
+            )}
             <PrimaryButton
               title="Start"
               icon="calculator"
               onPress={start}
               style={{ marginTop: 18 }}
             />
+            {!challenge.level && (
+              <LevelsButton
+                gameId={GAME.id}
+                count={challenge.count}
+                onPress={challenge.openLevels}
+                style={{ marginTop: 10 }}
+              />
+            )}
           </Animated.View>
         )}
       </Animated.View>
@@ -443,7 +486,15 @@ export default function QuickMath() {
         </View>
       )}
 
-      {phase === "over" && result && (
+      {phase === "over" && result?.challenge && (
+        <ChallengeResult
+          game={GAME}
+          challenge={challenge}
+          result={result}
+          unit={METRIC_UNITS[challenge.level.metric]}
+        />
+      )}
+      {phase === "over" && result && !result.challenge && (
         <GameOverModal
           title="Time's up!"
           game={GAME}

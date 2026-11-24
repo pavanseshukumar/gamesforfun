@@ -55,10 +55,13 @@ export function sneakyWrong(a, op, b, truth, rand = Math.random) {
 
 /**
  * Makes a question for a tier. Returns { a, op, b, shown, truth, isTrue, text }.
- * About half the time the shown answer is true.
+ * About half the time the shown answer is true. `custom` ({ ops, max })
+ * overrides the tier, e.g. times-tables-only practice levels.
  */
-export function makeQuestion(tier, rand = Math.random) {
-  const { ops, max } = TIERS[Math.min(tier, TIERS.length - 1)];
+export function makeQuestion(tier, rand = Math.random, custom = null) {
+  const { ops, max } = custom?.ops
+    ? { max: 10, ...custom }
+    : TIERS[Math.min(tier, TIERS.length - 1)];
   const op = ops[Math.floor(rand() * ops.length)];
   let a;
   let b;

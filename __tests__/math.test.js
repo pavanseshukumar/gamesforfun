@@ -26,6 +26,16 @@ describe("Quick Math questions", () => {
     }
   });
 
+  test("custom operation sets drill one skill", () => {
+    const rand = createRng(11);
+    for (let i = 0; i < 500; i++) {
+      const q = makeQuestion(0, rand, { ops: ["÷"], max: 10 });
+      expect(q.op).toBe("÷");
+      expect(Number.isInteger(q.truth)).toBe(true);
+      expect(q.b).toBeLessThanOrEqual(10);
+    }
+  });
+
   test("about half the cards are true", () => {
     const rand = createRng(7);
     let trues = 0;
