@@ -1,95 +1,76 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { useEffect } from "react";
 import { Text, View } from "react-native";
-import Animated, {
-  Easing,
-  FadeInDown,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { FadeInRight } from "react-native-reanimated";
 
+import { cardShadow, display } from "../theme";
+import Mascot from "./Mascot";
 import PressableScale from "./PressableScale";
 
-function FloatingEmoji({ emoji, delay }) {
-  const t = useSharedValue(0);
-  useEffect(() => {
-    const id = setTimeout(() => {
-      t.set(
-        withRepeat(withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.sin) }), -1, true),
-      );
-    }, delay);
-    return () => clearTimeout(id);
-  }, [t, delay]);
-
-  const style = useAnimatedStyle(() => ({
-    transform: [{ translateY: -6 * t.value }, { rotate: `${(t.value - 0.5) * 10}deg` }],
-  }));
-
-  return (
-    <Animated.View style={style}>
-      <Text style={{ fontSize: 44 }}>{emoji}</Text>
-    </Animated.View>
-  );
-}
-
-export default function GameCard({ game, index, best, plays }) {
+/** Tall carousel card for the home screen: numbered art tile + info. */
+export default function GameCard({ game, index, best, width }) {
   return (
     <Animated.View
-      entering={FadeInDown.delay(150 + index * 110)
+      entering={FadeInRight.delay(200 + index * 120)
         .springify()
-        .damping(15)}
+        .damping(16)}
     >
       <PressableScale onPress={() => router.push(game.route)} scaleTo={0.96}>
-        <LinearGradient
-          colors={game.colors}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{ borderRadius: 28, padding: 20, overflow: "hidden" }}
+        <View
+          style={[{ width, borderRadius: 30, backgroundColor: "#FFFFFF", padding: 10 }, cardShadow]}
         >
-          {/* Soft highlight in the corner gives the card some depth. */}
-          <View
+          <LinearGradient
+            colors={game.colors}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
             style={{
-              position: "absolute",
-              right: -40,
-              top: -40,
-              width: 160,
-              height: 160,
-              borderRadius: 80,
-              backgroundColor: "rgba(255,255,255,0.14)",
+              height: 168,
+              borderRadius: 22,
+              overflow: "hidden",
+              alignItems: "center",
+              justifyContent: "flex-end",
             }}
-          />
-          <View className="flex-row items-center">
-            <View className="mr-4 h-20 w-20 items-center justify-center rounded-3xl bg-white/20">
-              <FloatingEmoji emoji={game.emoji} delay={index * 300} />
+          >
+            <View
+              style={{
+                position: "absolute",
+                right: -30,
+                top: -30,
+                width: 120,
+                height: 120,
+                borderRadius: 60,
+                backgroundColor: "rgba(255,255,255,0.22)",
+              }}
+            />
+            <Text
+              style={[
+                display(86),
+                { position: "absolute", left: 12, top: -6, color: "#FFFFFF", opacity: 0.95 },
+              ]}
+            >
+              {index + 1}
+            </Text>
+            <View style={{ marginBottom: -6, marginLeft: 36 }}>
+              <Mascot variant={game.mascot} size={124} delay={index * 350} />
             </View>
-            <View className="flex-1">
-              <Text className="text-2xl font-black text-white">{game.title}</Text>
-              <Text className="mt-1 text-sm leading-5 text-white/85">{game.tagline}</Text>
-            </View>
-          </View>
+          </LinearGradient>
 
-          <View className="mt-4 flex-row items-center justify-between">
-            <View className="flex-row gap-2">
-              <View className="rounded-full bg-black/20 px-3 py-1">
-                <Text className="text-xs font-bold text-white">
-                  🏆 {best != null ? `${best} ${game.unit}` : "No best yet"}
+          <View className="px-2 pb-1 pt-3">
+            <Text className="font-body-black text-xl text-ink">{game.title}</Text>
+            <Text className="mt-0.5 font-body text-[13px] text-ink-mute">{game.tagline}</Text>
+            <View className="mt-3 flex-row items-center justify-between">
+              <View className="flex-row items-center rounded-full bg-[#F3F3F6] px-3 py-1.5">
+                <Text className="font-body-bold text-xs text-ink">
+                  🏆 {best != null ? `${best} ${game.unit}` : "No record"}
                 </Text>
               </View>
-              {plays > 0 && (
-                <View className="rounded-full bg-black/20 px-3 py-1">
-                  <Text className="text-xs font-bold text-white">{plays} played</Text>
-                </View>
-              )}
-            </View>
-            <View className="h-9 w-9 items-center justify-center rounded-full bg-white">
-              <Ionicons name="play" size={16} color={game.accent} style={{ marginLeft: 2 }} />
+              <View className="h-10 w-10 items-center justify-center rounded-full bg-ink">
+                <Ionicons name="play" size={16} color="#fff" style={{ marginLeft: 2 }} />
+              </View>
             </View>
           </View>
-        </LinearGradient>
+        </View>
       </PressableScale>
     </Animated.View>
   );

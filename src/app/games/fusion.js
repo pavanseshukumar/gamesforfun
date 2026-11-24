@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, Text, useWindowDimensions, View } from "react-native";
 import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
@@ -16,8 +15,9 @@ import Animated, {
 
 import GameHeader from "../../components/GameHeader";
 import GameOverModal from "../../components/GameOverModal";
-import PressableScale from "../../components/PressableScale";
-import Screen from "../../components/Screen";
+import { IconButton } from "../../components/Buttons";
+import GradientScreen from "../../components/GradientScreen";
+import Mascot from "../../components/Mascot";
 import { addRandomTile, canMove, maxTile, move, newBoard, SIZE } from "../../games/fusion/logic";
 import { getGame } from "../../games/registry";
 import { haptic } from "../../lib/haptics";
@@ -29,20 +29,21 @@ const GAP = 10;
 const SLIDE_MS = 110;
 const GOAL = 2048;
 
+// [background, text] per value: soft pastels first, then saturated candy.
 const TILE_COLORS = {
-  2: ["#1F3B4D", "#BFEFFF"],
-  4: ["#1E4E5C", "#C8FFF4"],
-  8: ["#14B8A6", "#FFFFFF"],
-  16: ["#0EA5E9", "#FFFFFF"],
-  32: ["#3B82F6", "#FFFFFF"],
-  64: ["#6366F1", "#FFFFFF"],
-  128: ["#8B5CF6", "#FFFFFF"],
-  256: ["#A855F7", "#FFFFFF"],
-  512: ["#D946EF", "#FFFFFF"],
-  1024: ["#EC4899", "#FFFFFF"],
-  2048: ["#FFC94D", "#2A1A00"],
+  2: ["#FFFFFF", "#141414"],
+  4: ["#FFF3B8", "#141414"],
+  8: ["#FFD43B", "#141414"],
+  16: ["#FF9F1C", "#FFFFFF"],
+  32: ["#FF6B3D", "#FFFFFF"],
+  64: ["#FF3D8B", "#FFFFFF"],
+  128: ["#B15CFF", "#FFFFFF"],
+  256: ["#6B5CFF", "#FFFFFF"],
+  512: ["#3F8CFF", "#FFFFFF"],
+  1024: ["#13B5D6", "#FFFFFF"],
+  2048: ["#1FBF7A", "#FFFFFF"],
 };
-const colorsFor = (v) => TILE_COLORS[v] ?? ["#FF6B5B", "#FFFFFF"];
+const colorsFor = (v) => TILE_COLORS[v] ?? ["#141414", "#FFD43B"];
 
 function Tile({ tile, cell }) {
   const x = useSharedValue(tile.c * (cell + GAP));
@@ -90,21 +91,30 @@ function Tile({ tile, cell }) {
           position: "absolute",
           width: cell,
           height: cell,
-          borderRadius: 16,
+          borderRadius: 18,
           backgroundColor: bg,
           alignItems: "center",
           justifyContent: "center",
           zIndex: tile.dead ? 1 : 2,
-          shadowColor: bg,
-          shadowOpacity: tile.value >= 8 ? 0.6 : 0,
-          shadowRadius: 12,
-          shadowOffset: { width: 0, height: 0 },
-          elevation: tile.value >= 8 ? 6 : 0,
+          shadowColor: tile.value >= 16 ? bg : "#1A1A40",
+          shadowOpacity: tile.value >= 16 ? 0.5 : 0.1,
+          shadowRadius: 10,
+          shadowOffset: { width: 0, height: 5 },
+          elevation: 4,
         },
         style,
       ]}
     >
-      <Text style={{ color: fg, fontSize, fontWeight: "900" }}>{tile.value}</Text>
+      <Text
+        style={{
+          color: fg,
+          fontSize: fontSize * 1.05,
+          fontFamily: "Anton_400Regular",
+          includeFontPadding: false,
+        }}
+      >
+        {tile.value}
+      </Text>
     </Animated.View>
   );
 }
@@ -160,8 +170,12 @@ export default function Fusion() {
       if (stuck) {
         setTimeout(() => {
           haptic.error();
-          const isNewBest = recordGame(GAME.id, nextScore);
-          setOver({ isNewBest });
+          setOver(
+            recordGame(GAME.id, nextScore, {
+              xp: 10 + Math.floor(nextScore / 25),
+              records: { fusionTile: maxTile(next) },
+            }),
+          );
         }, 500);
       }
     },
@@ -215,19 +229,12 @@ export default function Fusion() {
   };
 
   return (
-    <Screen tint="#22C9A8" secondTint="#3B82F6">
+    <GradientScreen theme={GAME.id} edges={["top", "bottom"]}>
       <GameHeader
         title={GAME.title}
-        accent={GAME.accent}
         score={score}
         best={best}
-        right={
-          <PressableScale onPress={restart} accessibilityLabel="Restart">
-            <View className="h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
-              <Ionicons name="refresh" size={20} color="#fff" />
-            </View>
-          </PressableScale>
-        }
+        right={<IconButton icon="refresh" label="Restart" onPress={restart} />}
       />
 
       <GestureDetector gesture={swipe}>
@@ -238,10 +245,10 @@ export default function Fusion() {
                 width: boardSize,
                 height: boardSize,
                 padding: GAP,
-                borderRadius: 24,
-                backgroundColor: "rgba(255,255,255,0.06)",
-                borderWidth: 1,
-                borderColor: "rgba(255,255,255,0.08)",
+                borderRadius: 30,
+                backgroundColor: "rgba(255,255,255,0.45)",
+                borderWidth: 2,
+                borderColor: "rgba(255,255,255,0.95)",
               }}
             >
               {/* Empty cell backdrop */}
@@ -254,8 +261,8 @@ export default function Fusion() {
                     top: GAP + Math.floor(i / SIZE) * (cell + GAP),
                     width: cell,
                     height: cell,
-                    borderRadius: 16,
-                    backgroundColor: "rgba(255,255,255,0.05)",
+                    borderRadius: 18,
+                    backgroundColor: "rgba(255,255,255,0.55)",
                   }}
                 />
               ))}
@@ -267,9 +274,12 @@ export default function Fusion() {
             </View>
           </Animated.View>
 
-          <Text className="mt-6 text-center text-sm text-mist">
-            Swipe to slide · Fuse twins to double them
-          </Text>
+          <View className="mt-5 flex-row items-center">
+            <Mascot variant={GAME.mascot} size={54} mood="happy" />
+            <View className="ml-2 rounded-2xl bg-white px-4 py-2.5">
+              <Text className="font-body-bold text-sm text-ink">Swipe to slide · fuse twins!</Text>
+            </View>
+          </View>
         </View>
       </GestureDetector>
 
@@ -279,8 +289,8 @@ export default function Fusion() {
           exiting={FadeOut}
           style={{ position: "absolute", top: 120, alignSelf: "center", zIndex: 40 }}
         >
-          <View className="rounded-full bg-gold px-5 py-2">
-            <Text className="font-black text-ink">{toast}</Text>
+          <View className="rounded-full bg-ink px-5 py-2.5">
+            <Text className="font-body-black text-white">{toast}</Text>
           </View>
         </Animated.View>
       )}
@@ -288,16 +298,18 @@ export default function Fusion() {
       {over && (
         <GameOverModal
           title="No moves left"
-          emoji={GAME.emoji}
+          game={GAME}
           score={score}
-          unit={GAME.unit}
           best={best}
-          isNewBest={over.isNewBest}
-          colors={GAME.colors}
+          result={over}
           onPlayAgain={restart}
-          extra={<Text className="mt-2 text-sm text-mist-300">Biggest tile: {maxTile(tiles)}</Text>}
+          extra={
+            <Text className="mt-2 font-body-semi text-sm text-ink-mute">
+              Biggest tile: {maxTile(tiles)}
+            </Text>
+          }
         />
       )}
-    </Screen>
+    </GradientScreen>
   );
 }

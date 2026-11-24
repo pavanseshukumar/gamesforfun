@@ -41,7 +41,13 @@ Docs: https://docs.expo.dev/eas/index.md
 
 ## Project conventions (Games for Fun)
 
-- **Styling:** NativeWind v4 (Tailwind v3). Theme colors live in `tailwind.config.js`.
+- **Design language:** bright gradient screens (`GradientScreen` + `BACKDROPS` in `src/theme.js`),
+  ink-black text, white rounded cards with `cardShadow`, black pill primary buttons
+  (`components/Buttons.js`), Anton display headlines via `display(size)`, Outfit body text via
+  `font-body`, `font-body-semi`, `font-body-bold` and `font-body-black`. Never rely on `fontWeight`
+  with these custom fonts. The mascots in `components/Mascot.js` are original SVG characters;
+  reuse them rather than adding emoji art.
+- **Styling:** NativeWind v4 (Tailwind v3). Theme colors and font families live in `tailwind.config.js`.
   `className` works on core RN components (`View`, `Text`, `Pressable`, …) but **not** on
   Reanimated `Animated.*` components: give those inline `style`, and put Tailwind classes on a
   plain child or wrapper.
@@ -54,4 +60,4 @@ Docs: https://docs.expo.dev/eas/index.md
   `onResponderGrant`) rather than `Pressable.onPressIn`, which can drop very short taps on web.
 - **Haptics:** always go through `src/lib/haptics.js` (respects the settings toggle, no-op on web).
 - **Adding a game:** create `src/app/games/<id>.js`, add an entry to `src/games/registry.js`, use
-  `Screen`, `GameHeader` and `GameOverModal`, and call `useGameStore().recordGame()` at the end.
+  `GradientScreen`, `GameHeader` and `GameOverModal`, and pass the result of `recordGame(id, score, { xp, records })` to the modal.

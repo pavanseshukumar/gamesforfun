@@ -5,12 +5,22 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        ink: { DEFAULT: "#0B0A1A", 900: "#0B0A1A", 800: "#131229", 700: "#1C1A3A", 600: "#2A2752" },
-        mist: { DEFAULT: "#A9A6D6", 300: "#C9C7EE", 500: "#7C79B0" },
-        rush: "#FF6B5B",
-        flip: "#A26BFA",
-        fusion: "#22C9A8",
-        gold: "#FFC94D",
+        ink: { DEFAULT: "#141414", soft: "#3D3D3D", mute: "#6B6B6B" },
+        paper: "#FFFFFF",
+        sun: "#FFD43B",
+        lime: "#B6F36A",
+        sky: "#7DB9FF",
+        zip: "#FF9F1C",
+        bloop: "#4D8CFF",
+        gloop: "#2BD67B",
+        pip: "#FF6FB1",
+      },
+      fontFamily: {
+        display: ["Anton_400Regular"],
+        body: ["Outfit_500Medium"],
+        "body-semi": ["Outfit_600SemiBold"],
+        "body-bold": ["Outfit_700Bold"],
+        "body-black": ["Outfit_800ExtraBold"],
       },
     },
   },

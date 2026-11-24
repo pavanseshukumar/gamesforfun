@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useRef, useState } from "react";
 import { Text, useWindowDimensions, View } from "react-native";
@@ -15,8 +14,10 @@ import Animated, {
 
 import GameHeader from "../../components/GameHeader";
 import GameOverModal from "../../components/GameOverModal";
+import { IconButton } from "../../components/Buttons";
+import GradientScreen from "../../components/GradientScreen";
+import Mascot from "../../components/Mascot";
 import PressableScale from "../../components/PressableScale";
-import Screen from "../../components/Screen";
 import { getGame } from "../../games/registry";
 import { haptic } from "../../lib/haptics";
 import { BOUNCY } from "../../lib/motion";
@@ -101,11 +102,13 @@ function Card({ card, index, size, onPress, shake }) {
     position: "absolute",
     width: size,
     height: size * 1.25,
-    borderRadius: 18,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
     backfaceVisibility: "hidden",
     overflow: "hidden",
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
   };
 
   return (
@@ -137,9 +140,22 @@ function Card({ card, index, size, onPress, shake }) {
                 justifyContent: "center",
               }}
             >
-              <View className="h-1/2 w-1/2 items-center justify-center rounded-2xl border-2 border-white/30">
-                <Text className="text-xl font-black text-white/80">?</Text>
-              </View>
+              <View
+                style={{
+                  position: "absolute",
+                  right: -size * 0.2,
+                  top: -size * 0.2,
+                  width: size * 0.7,
+                  height: size * 0.7,
+                  borderRadius: size,
+                  backgroundColor: "rgba(255,255,255,0.18)",
+                }}
+              />
+              <Text
+                style={{ fontFamily: "Anton_400Regular", fontSize: size * 0.42, color: "#FFFFFF" }}
+              >
+                ?
+              </Text>
             </LinearGradient>
           </Animated.View>
           <Animated.View
@@ -147,9 +163,8 @@ function Card({ card, index, size, onPress, shake }) {
               face,
               frontStyle,
               {
-                backgroundColor: card.matched ? "#2B2158" : "#F5F3FF",
-                borderWidth: 2,
-                borderColor: card.matched ? "#A26BFA" : "transparent",
+                backgroundColor: card.matched ? "#E3FBD0" : "#FFFFFF",
+                borderColor: card.matched ? "#2BD67B" : "#FFFFFF",
               },
             ]}
           >
@@ -214,8 +229,9 @@ export default function Memory() {
       setTimeout(() => setDeck(matchedDeck), 250);
       if (matchedDeck.every((c) => c.matched)) {
         setTimeout(() => {
-          const isNewBest = recordGame(GAME.id, nextMoves, { lowerIsBetter: true });
-          setOver({ isNewBest });
+          // Fewer moves earn more XP: a perfect 8-move clear is worth 58.
+          const xp = 10 + Math.max(0, 48 - (nextMoves - 8) * 3);
+          setOver(recordGame(GAME.id, nextMoves, { lowerIsBetter: true, xp }));
         }, 900);
       }
     } else {
@@ -245,31 +261,24 @@ export default function Memory() {
   const ss = String(seconds % 60).padStart(2, "0");
 
   return (
-    <Screen tint="#A26BFA" secondTint="#F25FB4">
+    <GradientScreen theme={GAME.id} edges={["top", "bottom"]}>
       <GameHeader
-        title={GAME.title}
-        accent={GAME.accent}
+        title="Memory"
         score={moves}
         scoreLabel="Moves"
         best={best}
-        right={
-          <PressableScale onPress={restart} accessibilityLabel="New deck">
-            <View className="h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
-              <Ionicons name="shuffle" size={20} color="#fff" />
-            </View>
-          </PressableScale>
-        }
+        right={<IconButton icon="shuffle" label="New deck" onPress={restart} />}
       />
 
-      <View className="mt-4 flex-row items-center justify-between px-4">
-        <Text className="font-bold text-mist">
+      <View className="mt-4 flex-row items-center justify-between px-5">
+        <Text className="font-body-black text-sm text-ink">
           ⏱ {mm}:{ss}
         </Text>
         <View className="flex-row gap-1">
           {Array.from({ length: PAIRS }, (_, i) => (
             <View
               key={i}
-              className={`h-2 w-4 rounded-full ${i < matchedCount ? "bg-flip" : "bg-white/15"}`}
+              className={`h-2.5 w-5 rounded-full ${i < matchedCount ? "bg-ink" : "bg-white/70"}`}
             />
           ))}
         </View>
@@ -278,7 +287,7 @@ export default function Memory() {
       <View className="flex-1 items-center justify-center">
         <View
           key={deck[0].key}
-          style={{ width: boardWidth, flexDirection: "row", flexWrap: "wrap", gap: GAP }}
+          style={[{ width: boardWidth, flexDirection: "row", flexWrap: "wrap", gap: GAP }]}
         >
           {deck.map((card, i) => (
             <Card
@@ -291,25 +300,39 @@ export default function Memory() {
             />
           ))}
         </View>
+        <View className="mt-5 flex-row items-center">
+          <Mascot
+            variant={GAME.mascot}
+            size={54}
+            mood={matchedCount >= PAIRS / 2 ? "cheer" : "happy"}
+          />
+          <View className="ml-2 rounded-2xl bg-white px-4 py-2.5">
+            <Text className="font-body-bold text-sm text-ink">
+              {matchedCount === 0
+                ? "Find the matching pairs!"
+                : matchedCount === PAIRS
+                  ? "All done! 🎉"
+                  : `${PAIRS - matchedCount} pairs to go!`}
+            </Text>
+          </View>
+        </View>
       </View>
 
       {over && (
         <GameOverModal
           title="All pairs found!"
-          emoji={GAME.emoji}
+          game={GAME}
           score={moves}
-          unit={GAME.unit}
           best={best}
-          isNewBest={over.isNewBest}
-          colors={GAME.colors}
+          result={over}
           onPlayAgain={restart}
           extra={
-            <Text className="mt-2 text-sm text-mist-300">
+            <Text className="mt-2 font-body-semi text-sm text-ink-mute">
               Time: {mm}:{ss}
             </Text>
           }
         />
       )}
-    </Screen>
+    </GradientScreen>
   );
 }

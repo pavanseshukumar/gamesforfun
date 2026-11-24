@@ -17,22 +17,25 @@ import Animated, {
 
 import GameHeader from "../../components/GameHeader";
 import GameOverModal from "../../components/GameOverModal";
-import PressableScale from "../../components/PressableScale";
-import Screen from "../../components/Screen";
+import { PrimaryButton } from "../../components/Buttons";
+import GradientScreen from "../../components/GradientScreen";
+import Mascot from "../../components/Mascot";
 import { getGame } from "../../games/registry";
 import { haptic } from "../../lib/haptics";
 import { useGameStore } from "../../store/useGameStore";
+import { display } from "../../theme";
 
 const GAME = getGame("tap-rush");
 const DURATION = 30_000;
 const MAX_ON_SCREEN = 4;
 const ORB_COLORS = [
-  ["#FF6B5B", "#FF9F43"],
-  ["#FF5FA2", "#FF8E8E"],
-  ["#FFB347", "#FF6B5B"],
-  ["#F97316", "#FACC15"],
+  ["#FF8A5B", "#FF4D4D"],
+  ["#FF8CC6", "#FF3D8B"],
+  ["#7FB2FF", "#3F6DFF"],
+  ["#8BE04E", "#1FBF7A"],
+  ["#C9A8FF", "#8A5CFF"],
 ];
-const GOLD = ["#FFE27A", "#FFB800"];
+const GOLD = ["#FFF07A", "#FFB800"];
 
 let targetId = 0;
 
@@ -70,8 +73,8 @@ function Orb({ target, onHit }) {
             width: size,
             height: size,
             borderRadius: size / 2,
-            borderWidth: 3,
-            borderColor: golden ? "#FFE27A" : "#FFFFFF",
+            borderWidth: 3.5,
+            borderColor: golden ? "#FFB800" : colors[1],
           },
           ringStyle,
         ]}
@@ -98,13 +101,26 @@ function Orb({ target, onHit }) {
             borderRadius: size,
             alignItems: "center",
             justifyContent: "center",
-            shadowColor: golden ? "#FFB800" : colors[0],
-            shadowOpacity: 0.8,
-            shadowRadius: 14,
-            shadowOffset: { width: 0, height: 0 },
-            elevation: 8,
+            shadowColor: golden ? "#FFB800" : colors[1],
+            shadowOpacity: 0.45,
+            shadowRadius: 10,
+            shadowOffset: { width: 0, height: 6 },
+            elevation: 6,
           }}
         >
+          {/* glossy highlight */}
+          <View
+            style={{
+              position: "absolute",
+              top: size * 0.08,
+              left: size * 0.12,
+              width: size * 0.22,
+              height: size * 0.12,
+              borderRadius: size,
+              backgroundColor: "rgba(255,255,255,0.6)",
+              transform: [{ rotate: "-30deg" }],
+            }}
+          />
           {golden && <Text style={{ fontSize: size * 0.28 }}>⭐</Text>}
         </LinearGradient>
       </View>
@@ -146,7 +162,7 @@ function Popup({ x, y, text, color }) {
           textStyle,
         ]}
       >
-        <Text style={{ color: "#fff", fontSize: 26, fontWeight: "900" }}>{text}</Text>
+        <Text style={display(30)}>{text}</Text>
       </Animated.View>
     </View>
   );
@@ -159,7 +175,7 @@ function Countdown({ value }) {
         key={value}
         entering={ZoomIn.springify().damping(9)}
         exiting={FadeOut.duration(120)}
-        style={{ color: "#fff", fontSize: 120, fontWeight: "900" }}
+        style={display(150)}
       >
         {value}
       </Animated.Text>
@@ -167,32 +183,28 @@ function Countdown({ value }) {
   );
 }
 
-function StartButton({ onPress }) {
+function StartPanel({ onPress }) {
   const pulse = useSharedValue(1);
   useEffect(() => {
-    pulse.set(withRepeat(withTiming(1.08, { duration: 700 }), -1, true));
+    pulse.set(withRepeat(withTiming(1.06, { duration: 650 }), -1, true));
   }, [pulse]);
   const style = useAnimatedStyle(() => ({ transform: [{ scale: pulse.value }] }));
   return (
-    <Animated.View entering={ZoomIn.springify()}>
-      <Animated.View style={style}>
-        <PressableScale onPress={onPress}>
-          <LinearGradient
-            colors={GAME.colors}
-            style={{
-              width: 170,
-              height: 170,
-              borderRadius: 85,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text style={{ fontSize: 44 }}>⚡</Text>
-            <Text className="mt-1 text-lg font-black text-white">Tap to start</Text>
-          </LinearGradient>
-        </PressableScale>
+    <View style={{ alignItems: "center" }}>
+      <Animated.View entering={ZoomIn.springify().damping(11)}>
+        <Mascot variant={GAME.mascot} size={150} mood="cheer" />
       </Animated.View>
-    </Animated.View>
+      <Text style={[display(44), { marginTop: 6 }]}>Ready?</Text>
+      <Text className="mt-2 text-center font-body-semi text-sm leading-5 text-ink-soft">
+        Tap orbs before their ring closes.{"\n"}5 hits in a row raise your multiplier.{"\n"}⭐
+        Golden orbs are worth 5×.
+      </Text>
+      <Animated.View entering={FadeIn.delay(200)}>
+        <Animated.View style={[{ marginTop: 22 }, style]}>
+          <PrimaryButton title="Tap to start" icon="flash" onPress={onPress} />
+        </Animated.View>
+      </Animated.View>
+    </View>
   );
 }
 
@@ -293,8 +305,11 @@ export default function TapRush() {
     setPhase("over");
     haptic.heavy();
     const s = stats.current;
-    const isNewBest = recordGame(GAME.id, s.score);
-    setResult({ isNewBest, hits: s.hits, bestCombo: s.bestCombo });
+    const outcome = recordGame(GAME.id, s.score, {
+      xp: 10 + Math.floor(s.score / 2),
+      records: { rushCombo: s.bestCombo },
+    });
+    setResult({ ...outcome, hits: s.hits, bestCombo: s.bestCombo });
   }, [clearTimers, recordGame]);
 
   const startPlaying = useCallback(() => {
@@ -357,7 +372,7 @@ export default function TapRush() {
       x: target.x,
       y: target.y,
       text: `+${points}`,
-      color: target.golden ? "#FFE27A" : target.colors[0],
+      color: target.golden ? "#FFB800" : target.colors[1],
     };
     setPopups((p) => [...p, popup]);
     later(() => setPopups((p) => p.filter((q) => q.id !== popup.id)), 700);
@@ -375,23 +390,25 @@ export default function TapRush() {
   const mult = 1 + Math.floor(combo / 5);
 
   return (
-    <Screen tint="#FF6B5B" secondTint="#FF9F43">
-      <GameHeader title={GAME.title} accent={GAME.accent} score={score} best={best} />
+    <GradientScreen theme={GAME.id} edges={["top", "bottom"]}>
+      <GameHeader title={GAME.title} score={score} best={best} />
 
-      <View className="mt-4 px-4">
+      <View className="mt-4 px-5">
         <View className="mb-2 flex-row items-center justify-between">
-          <Text className="font-bold text-mist">⏱ {(timeLeft / 1000).toFixed(1)}s</Text>
+          <Text className="font-body-black text-sm text-ink">
+            ⏱ {(timeLeft / 1000).toFixed(1)}s
+          </Text>
           {combo >= 3 && (
             <Animated.View key={mult} entering={ZoomIn.springify().damping(10)}>
-              <View className="rounded-full bg-gold px-3 py-1">
-                <Text className="text-xs font-black text-ink">
+              <View className="rounded-full bg-ink px-3 py-1">
+                <Text className="font-body-black text-xs text-white">
                   🔥 {combo} combo{mult > 1 ? ` · x${mult}` : ""}
                 </Text>
               </View>
             </Animated.View>
           )}
         </View>
-        <View className="h-2.5 overflow-hidden rounded-full bg-white/10">
+        <View className="h-3 overflow-hidden rounded-full bg-white/70">
           <Animated.View style={[{ height: "100%" }, barStyle]}>
             <LinearGradient
               colors={GAME.colors}
@@ -403,7 +420,7 @@ export default function TapRush() {
         </View>
       </View>
 
-      <Animated.View style={[{ flex: 1, margin: 16 }, fieldStyle]}>
+      <Animated.View style={[{ flex: 1, margin: 20, marginBottom: 12 }, fieldStyle]}>
         <View
           onStartShouldSetResponder={() => phase === "playing"}
           onResponderGrant={missTap}
@@ -412,10 +429,10 @@ export default function TapRush() {
           }
           style={{
             flex: 1,
-            borderRadius: 28,
-            backgroundColor: "rgba(255,255,255,0.04)",
-            borderWidth: 1,
-            borderColor: "rgba(255,255,255,0.08)",
+            borderRadius: 32,
+            backgroundColor: "rgba(255,255,255,0.45)",
+            borderWidth: 2,
+            borderColor: "rgba(255,255,255,0.9)",
             overflow: "hidden",
           }}
         >
@@ -438,14 +455,10 @@ export default function TapRush() {
                 bottom: 0,
                 alignItems: "center",
                 justifyContent: "center",
-                padding: 32,
+                padding: 24,
               }}
             >
-              <StartButton onPress={start} />
-              <Text className="mt-8 text-center text-sm leading-5 text-mist">
-                Tap orbs before their ring closes.{"\n"}Every 5 hits in a row raises your
-                multiplier.{"\n"}⭐ Golden orbs are worth 5×.
-              </Text>
+              <StartPanel onPress={start} />
             </Animated.View>
           )}
           {phase === "countdown" && <Countdown value={count} />}
@@ -455,20 +468,18 @@ export default function TapRush() {
       {phase === "over" && result && (
         <GameOverModal
           title="Time's up!"
-          emoji={GAME.emoji}
+          game={GAME}
           score={score}
-          unit={GAME.unit}
           best={best}
-          isNewBest={result.isNewBest}
-          colors={GAME.colors}
+          result={result}
           onPlayAgain={start}
           extra={
-            <Text className="mt-2 text-sm text-mist-300">
+            <Text className="mt-2 font-body-semi text-sm text-ink-mute">
               {result.hits} hits · best combo {result.bestCombo}
             </Text>
           }
         />
       )}
-    </Screen>
+    </GradientScreen>
   );
 }
