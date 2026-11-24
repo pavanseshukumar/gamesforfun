@@ -152,4 +152,75 @@ const l10 = (() => {
   ]);
 })();
 
-export const LEVELS = [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10];
+const l11 = (() => {
+  const h = hut(330, 80, 60);
+  return level("Stone Wall", [
+    h,
+    {
+      blocks: [pillar(250, 90, "stone"), pillar(264, 90, "stone")],
+      grumps: [grumpOn(330, h.top), grumpOn(330, G)],
+    },
+  ]);
+})();
+
+const l12 = (() => {
+  const deck = G - 80;
+  return level("Ice Bridge", [
+    {
+      blocks: [
+        pillar(260, 80),
+        pillar(360, 80),
+        { x: 310, y: deck - PLANK_H / 2, w: 124, h: PLANK_H, type: "ice" },
+      ],
+      grumps: [grumpOn(290, deck - PLANK_H), grumpOn(332, deck - PLANK_H), grumpOn(310, G)],
+    },
+  ]);
+})();
+
+const l13 = (() => {
+  const ledgeTop = 450;
+  const h = hut(340, 70, 44, "wood", ledgeTop);
+  return level("Floating Fort", [
+    h,
+    {
+      ledges: [{ x: 340, y: ledgeTop + 8, w: 120, h: 16 }],
+      grumps: [grumpOn(340, h.top), grumpOn(340, ledgeTop), grumpOn(240, G)],
+    },
+  ]);
+})();
+
+const l14 = (() => {
+  const s = 32;
+  const colA = [0, 1, 2].map((k) => box(260, s, k === 1 ? "ice" : "wood", G - k * s));
+  const colB = [0, 1, 2, 3].map((k) => box(350, s, k % 2 ? "ice" : "wood", G - k * s));
+  return level("Box Stacks", [
+    { blocks: [...colA, ...colB] },
+    { grumps: [grumpOn(260, G - 3 * s), grumpOn(350, G - 4 * s), grumpOn(305, G)] },
+  ]);
+})();
+
+const l15 = (() => {
+  const base = hut(280, 130, 56, "stone");
+  const left = hut(248, 56, 50, "wood", base.top);
+  const right = hut(312, 56, 50, "ice", base.top);
+  const perch = 380;
+  // A far, high perch the citadel shot can't reach: plan for two shots.
+  return level("Grump Citadel", [
+    base,
+    left,
+    right,
+    {
+      ledges: [{ x: 372, y: perch + 8, w: 56, h: 16 }],
+      blocks: [pillar(352, 36, "stone", perch)],
+      grumps: [
+        grumpOn(280, G),
+        grumpOn(248, left.top),
+        grumpOn(312, right.top),
+        grumpOn(248, base.top),
+        grumpOn(378, perch),
+      ],
+    },
+  ]);
+})();
+
+export const LEVELS = [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15];
