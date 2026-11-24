@@ -1,4 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import Animated, {
@@ -15,6 +16,7 @@ import Animated, {
   ZoomOut,
 } from "react-native-reanimated";
 
+import { ChallengeGoal, ChallengeResult, LevelsButton } from "../../components/Challenge";
 import GameHeader from "../../components/GameHeader";
 import GameOverModal from "../../components/GameOverModal";
 import { PrimaryButton } from "../../components/Buttons";
@@ -22,14 +24,15 @@ import GradientScreen from "../../components/GradientScreen";
 import Mascot from "../../components/Mascot";
 import ScorePopup from "../../components/ScorePopup";
 import { getGame } from "../../games/registry";
+import { TAP_RUSH_DEFAULTS } from "../../games/tapRush/levels";
+import useChallenge from "../../games/useChallenge";
 import { haptic } from "../../lib/haptics";
 import { popFor, sfx } from "../../lib/sound";
 import { useGameStore } from "../../store/useGameStore";
 import { display } from "../../theme";
 
 const GAME = getGame("tap-rush");
-const DURATION = 30_000;
-const MAX_ON_SCREEN = 4;
+const METRIC_UNITS = { score: "pts", combo: "combo", hits: "hits" };
 const ORB_COLORS = [
   ["#FF8A5B", "#FF4D4D"],
   ["#FF8CC6", "#FF3D8B"],
@@ -145,7 +148,7 @@ function Countdown({ value }) {
   );
 }
 
-function StartPanel({ onPress }) {
+function StartPanel({ onPress, challenge }) {
   const pulse = useSharedValue(1);
   useEffect(() => {
     pulse.set(withRepeat(withTiming(1.06, { duration: 650 }), -1, true));
@@ -157,22 +160,43 @@ function StartPanel({ onPress }) {
         <Mascot variant={GAME.mascot} size={150} mood="cheer" />
       </Animated.View>
       <Text style={[display(44), { marginTop: 6 }]}>Ready?</Text>
-      <Text className="mt-2 text-center font-body-semi text-sm leading-5 text-ink-soft">
-        Tap orbs before their ring closes.{"\n"}5 hits in a row raise your multiplier.{"\n"}⭐
-        Golden orbs are worth 5×.
-      </Text>
+      {challenge.level ? (
+        <ChallengeGoal level={challenge.level} n={challenge.n} />
+      ) : (
+        <Text className="mt-2 text-center font-body-semi text-sm leading-5 text-ink-soft">
+          Tap orbs before their ring closes.{"\n"}5 hits in a row raise your multiplier.{"\n"}⭐
+          Golden orbs are worth 5×.
+        </Text>
+      )}
       <Animated.View entering={FadeIn.delay(200)}>
-        <Animated.View style={[{ marginTop: 22 }, style]}>
+        <Animated.View style={[{ marginTop: 18 }, style]}>
           <PrimaryButton title="Tap to start" icon="flash" onPress={onPress} />
         </Animated.View>
       </Animated.View>
+      {!challenge.level && (
+        <LevelsButton
+          gameId={GAME.id}
+          count={challenge.count}
+          onPress={challenge.openLevels}
+          style={{ marginTop: 10 }}
+        />
+      )}
     </View>
   );
 }
 
-export default function TapRush() {
+// Remount per level so every level starts from a clean slate.
+export default function TapRushScreen() {
+  const { level } = useLocalSearchParams();
+  return <TapRush key={level ?? "endless"} />;
+}
+
+function TapRush() {
   const best = useGameStore((s) => s.best[GAME.id]);
   const recordGame = useGameStore((s) => s.recordGame);
+  const challenge = useChallenge(GAME.id);
+  const cfg = { ...TAP_RUSH_DEFAULTS, ...(challenge.level?.config ?? {}) };
+  const DURATION = cfg.duration * 1000;
 
   const [phase, setPhase] = useState("ready"); // ready | countdown | playing | over
   const [count, setCount] = useState(3);
@@ -219,13 +243,42 @@ export default function TapRush() {
     );
   }, [shake]);
 
+  const finish = useCallback(() => {
+    clearTimers();
+    live.current.clear();
+    setTargets([]);
+    setPhase("over");
+    haptic.heavy();
+    const s = stats.current;
+    if (challenge.level) {
+      const res = challenge.complete(
+        { score: s.score, combo: s.bestCombo, hits: s.hits },
+        { rushCombo: s.bestCombo },
+      );
+      setResult({ ...res, challenge: true });
+      return;
+    }
+    const outcome = recordGame(GAME.id, s.score, {
+      xp: 10 + Math.floor(s.score / 2),
+      records: { rushCombo: s.bestCombo },
+    });
+    setResult({ ...outcome, hits: s.hits, bestCombo: s.bestCombo });
+  }, [challenge, clearTimers, recordGame]);
+
+  /** A miss (empty tap or a faded orb): breaks the combo; ends Sudden Death. */
+  const miss = useCallback(() => {
+    stats.current.misses++;
+    breakCombo();
+    if (cfg.suddenDeath) later(finish, 250);
+  }, [breakCombo, cfg.suddenDeath, finish, later]);
+
   const spawnOrb = useCallback(() => {
     const elapsed = (Date.now() - startedAt.current) / 1000;
-    const size = Math.max(64, 96 - elapsed * 1.1);
-    const life = Math.max(850, 1900 - elapsed * 35);
+    const size = Math.max(64, 96 - elapsed * 1.1) * cfg.sizeScale;
+    const life = Math.max(850, 1900 - elapsed * 35) * cfg.lifeScale;
     const pad = size / 2 + 6;
 
-    if (live.current.size >= MAX_ON_SCREEN) return;
+    if (live.current.size >= cfg.maxOnScreen) return;
     const id = ++targetId;
     const target = {
       id,
@@ -233,7 +286,7 @@ export default function TapRush() {
       y: pad + Math.random() * (area.h - pad * 2),
       size,
       life,
-      golden: Math.random() < 0.08,
+      golden: Math.random() < cfg.goldenRate,
       colors: ORB_COLORS[id % ORB_COLORS.length],
     };
     live.current.add(id);
@@ -241,11 +294,10 @@ export default function TapRush() {
     // The orb faded before it was tapped: that is a miss.
     later(() => {
       if (!live.current.delete(id)) return;
-      stats.current.misses++;
-      breakCombo();
       setTargets((list) => list.filter((t) => t.id !== id));
+      miss();
     }, life);
-  }, [area, later, breakCombo]);
+  }, [area, later, miss, cfg.goldenRate, cfg.lifeScale, cfg.maxOnScreen, cfg.sizeScale]);
 
   // Spawn loop: runs while playing, getting faster as the round goes on.
   useEffect(() => {
@@ -260,20 +312,6 @@ export default function TapRush() {
     return () => clearTimeout(id);
   }, [phase, area, spawnOrb]);
 
-  const finish = useCallback(() => {
-    clearTimers();
-    live.current.clear();
-    setTargets([]);
-    setPhase("over");
-    haptic.heavy();
-    const s = stats.current;
-    const outcome = recordGame(GAME.id, s.score, {
-      xp: 10 + Math.floor(s.score / 2),
-      records: { rushCombo: s.bestCombo },
-    });
-    setResult({ ...outcome, hits: s.hits, bestCombo: s.bestCombo });
-  }, [clearTimers, recordGame]);
-
   const startPlaying = useCallback(() => {
     startedAt.current = Date.now();
     setPhase("playing");
@@ -281,7 +319,7 @@ export default function TapRush() {
     bar.set(1);
     bar.set(withTiming(0, { duration: DURATION, easing: Easing.linear }));
     later(finish, DURATION);
-  }, [bar, later, finish]);
+  }, [bar, later, finish, DURATION]);
 
   // Seconds counter shown above the bar.
   useEffect(() => {
@@ -290,7 +328,7 @@ export default function TapRush() {
       setTimeLeft(Math.max(0, DURATION - (Date.now() - startedAt.current)));
     }, 100);
     return () => clearInterval(id);
-  }, [phase]);
+  }, [phase, DURATION]);
 
   const start = () => {
     clearTimers();
@@ -349,12 +387,11 @@ export default function TapRush() {
 
   const missTap = () => {
     if (phase !== "playing") return;
-    stats.current.misses++;
-    if (stats.current.combo > 0) {
+    if (stats.current.combo > 0 || cfg.suddenDeath) {
       haptic.error();
       sfx("wrong");
     }
-    breakCombo();
+    miss();
   };
 
   const barStyle = useAnimatedStyle(() => ({ width: `${bar.value * 100}%` }));
@@ -363,7 +400,11 @@ export default function TapRush() {
 
   return (
     <GradientScreen theme={GAME.id} edges={["top", "bottom"]}>
-      <GameHeader title={GAME.title} score={score} best={best} />
+      <GameHeader
+        title={challenge.level ? `Level ${challenge.n}` : GAME.title}
+        score={score}
+        best={challenge.level ? undefined : best}
+      />
 
       <View className="mt-4 px-5">
         <View className="mb-2 flex-row items-center justify-between">
@@ -430,14 +471,22 @@ export default function TapRush() {
                 padding: 24,
               }}
             >
-              <StartPanel onPress={start} />
+              <StartPanel onPress={start} challenge={challenge} />
             </Animated.View>
           )}
           {phase === "countdown" && <Countdown value={count} />}
         </View>
       </Animated.View>
 
-      {phase === "over" && result && (
+      {phase === "over" && result?.challenge && (
+        <ChallengeResult
+          game={GAME}
+          challenge={challenge}
+          result={result}
+          unit={METRIC_UNITS[challenge.level.metric]}
+        />
+      )}
+      {phase === "over" && result && !result.challenge && (
         <GameOverModal
           title="Time's up!"
           game={GAME}

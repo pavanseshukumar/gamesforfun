@@ -41,11 +41,16 @@ export const useGameStore = create(
        * Records a finished round.
        * @returns {{ isNewBest: boolean, xpGained: number, levelUp: number | null }}
        */
-      recordGame: (gameId, score, { lowerIsBetter = false, xp = 10, records = {} } = {}) => {
+      recordGame: (
+        gameId,
+        score,
+        { lowerIsBetter = false, xp = 10, records = {}, countsForBest = true } = {},
+      ) => {
         const s = get();
         const prev = s.best[gameId];
-        // A zero in a points game is never a record worth celebrating.
-        const counts = lowerIsBetter || score > 0;
+        // A zero in a points game is never a record worth celebrating, and
+        // challenge-level rounds (different rules) never touch the endless best.
+        const counts = countsForBest && (lowerIsBetter || score > 0);
         const isNewBest = counts && (prev == null || (lowerIsBetter ? score < prev : score > prev));
 
         const today = dayKey();

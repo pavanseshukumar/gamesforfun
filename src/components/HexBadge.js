@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { Text, View } from "react-native";
 import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 
@@ -9,7 +10,7 @@ const INNER = "M50 16 L84 35 L84 76 L50 95 L16 76 L16 35 Z";
 /** A gem-like hexagon badge with an emoji and an optional label tag. */
 export default function HexBadge({ emoji, colors, size = 72, locked, label, id = "hex" }) {
   const [from, to] = locked ? ["#E9EAF0", "#C5C8D4"] : colors;
-  const gid = `hb-${id}`;
+  const gid = `hb-${id}-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   return (
     <View
       style={{ width: size, height: size * 1.1, alignItems: "center", justifyContent: "center" }}

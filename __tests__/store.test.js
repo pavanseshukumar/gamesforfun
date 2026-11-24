@@ -37,6 +37,15 @@ describe("recordGame", () => {
     expect(store().recordGame("fusion", 100, { xp: 1 }).levelUp).toBeNull();
   });
 
+  test("challenge rounds (countsForBest: false) never change the endless best", () => {
+    store().recordGame("tap-rush", 40);
+    const r = store().recordGame("tap-rush", 99, { countsForBest: false, xp: 15 });
+    expect(r.isNewBest).toBe(false);
+    expect(store().best["tap-rush"]).toBe(40);
+    expect(store().plays["tap-rush"]).toBe(2); // still counts as a game played
+    expect(store().xp).toBe(25);
+  });
+
   test("records keep maxima, and min: keys keep minima", () => {
     store().recordGame("bounce", 10, { records: { bounceHeight: 12, "min:x": 9 } });
     store().recordGame("bounce", 10, { records: { bounceHeight: 8, "min:x": 4 } });

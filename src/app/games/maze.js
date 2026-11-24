@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Platform, ScrollView, Text, View } from "react-native";
 import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
 import Animated, {
@@ -68,6 +68,7 @@ function KeyIcon({ size }) {
 }
 
 function Portal({ size, locked }) {
+  const gid = `portal-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   const spin = useSharedValue(0);
   useEffect(() => {
     spin.set(withRepeat(withTiming(1, { duration: 3000, easing: Easing.linear }), -1));
@@ -78,13 +79,13 @@ function Portal({ size, locked }) {
       <Animated.View style={[{ position: "absolute" }, style]}>
         <Svg width={size} height={size} viewBox="0 0 100 100">
           <Defs>
-            <RadialGradient id="portal" cx="50%" cy="50%" r="50%">
+            <RadialGradient id={gid} cx="50%" cy="50%" r="50%">
               <Stop offset="0" stopColor={locked ? "#D8D8E0" : "#FFF6B0"} />
               <Stop offset="0.6" stopColor={locked ? "#B5B5C3" : "#B98CFF"} />
               <Stop offset="1" stopColor={locked ? "#8E8EA0" : "#6B4CFF"} />
             </RadialGradient>
           </Defs>
-          <Circle cx={50} cy={50} r={44} fill="url(#portal)" />
+          <Circle cx={50} cy={50} r={44} fill={`url(#${gid})`} />
           <Path
             d="M50 14 A36 36 0 0 1 86 50"
             stroke="#FFFFFF"

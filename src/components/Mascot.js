@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 import { View } from "react-native";
 import Animated, {
   Easing,
@@ -184,7 +184,9 @@ export default function Mascot({
   }));
   const eyeStyle = useAnimatedStyle(() => ({ transform: [{ scaleY: blink.value }] }));
 
-  const gid = `g-${variant}`;
+  // Unique per drawing: on web, SVG ids are page-global, and a duplicate id
+  // inside a hidden screen would make this gradient resolve to nothing.
+  const gid = `g-${variant}-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   const height = size * (H / W);
 
   return (
