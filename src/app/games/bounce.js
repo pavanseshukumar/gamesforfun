@@ -1,5 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import Animated, {
   FadeIn,
@@ -15,12 +16,15 @@ import Animated, {
 import { scheduleOnRN } from "react-native-worklets";
 
 import { PrimaryButton } from "../../components/Buttons";
+import { ChallengeGoal, ChallengeResult, LevelsButton } from "../../components/Challenge";
 import GameHeader from "../../components/GameHeader";
 import GameOverModal from "../../components/GameOverModal";
 import GradientScreen from "../../components/GradientScreen";
 import Mascot from "../../components/Mascot";
 import ScorePopup from "../../components/ScorePopup";
+import { BOUNCE_DEFAULTS } from "../../games/bounce/levels";
 import { getGame } from "../../games/registry";
+import useChallenge from "../../games/useChallenge";
 import { haptic } from "../../lib/haptics";
 import { sfx } from "../../lib/sound";
 import { BOUNCY } from "../../lib/motion";
@@ -43,27 +47,29 @@ const TYPES = {
   spring: { top: "#D9FBC0", bottom: "#4CC46B" },
 };
 
-const widthFor = (level) => Math.max(58, 150 - level * 2.2);
-const speedFor = (level) => Math.min(560, 150 + level * 10);
+const METRIC_UNITS = { height: "high", score: "pts", perfects: "perfects" };
 
-function typeFor(level) {
+const widthFor = (level, cfg) => Math.max(58, 150 - level * 2.2) * cfg.widthScale;
+const speedFor = (level, cfg) => Math.min(560, 150 + level * 10) * cfg.speedScale;
+
+function typeFor(level, cfg) {
   if (level < 2) return "normal";
   const r = Math.random();
-  if (r < 0.14) return "star";
-  if (level > 5 && r < 0.26) return "cloud";
-  if (r < 0.34) return "spring";
+  if (r < cfg.starRate) return "star";
+  if (level >= cfg.cloudsFrom && r < cfg.starRate + cfg.cloudRate) return "cloud";
+  if (r < cfg.starRate + cfg.cloudRate + cfg.springRate) return "spring";
   return "normal";
 }
 
-const freshSim = (w, h) => ({
+const freshSim = (w, h, cfg = BOUNCE_DEFAULTS) => ({
   running: false,
   w,
   h,
   n: 0, // level Pip stands on
   mx: w / 2, // moving platform centre
-  mw: widthFor(1),
+  mw: widthFor(1, cfg),
   mdir: 1,
-  mspeed: speedFor(1),
+  mspeed: speedFor(1, cfg),
   waiting: false, // paused while JS sets up the next platform
   jt: -1, // jump progress 0..1, -1 when standing
   px: w / 2,
@@ -183,9 +189,20 @@ function ParallaxCloud({ cam, x, y, scale, height }) {
   );
 }
 
-export default function BounceBuddy() {
+// Remount per level so every level starts from a clean slate.
+export default function BounceBuddyScreen() {
+  const { level } = useLocalSearchParams();
+  return <BounceBuddy key={level ?? "endless"} />;
+}
+
+function BounceBuddy() {
   const best = useGameStore((s) => s.best[GAME.id]);
   const recordGame = useGameStore((s) => s.recordGame);
+  const challenge = useChallenge(GAME.id);
+  const cfg = useMemo(
+    () => ({ ...BOUNCE_DEFAULTS, ...(challenge.level?.config ?? {}) }),
+    [challenge.level],
+  );
 
   const [phase, setPhase] = useState("ready"); // ready | playing | over
   const [field, setField] = useState({ w: 360, h: 600 });
@@ -205,6 +222,8 @@ export default function BounceBuddy() {
   const baseY = field.h - 110;
 
   const handlers = useRef(null);
+  const timeLimit = useRef(null);
+  const [secondsLeft, setSecondsLeft] = useState(null);
   const emit = useCallback((type, a, b) => handlers.current?.(type, a, b), []);
 
   const loop = useFrameCallback((frame) => {
@@ -318,15 +337,15 @@ export default function BounceBuddy() {
         }
 
         // Set up the next moving platform and resume.
-        const upcoming = typeFor(level + 1);
+        const upcoming = typeFor(level + 1, cfg);
         setNextType(upcoming);
-        const w = widthFor(level + 1);
+        const w = widthFor(level + 1, cfg);
         const dir = Math.random() < 0.5 ? 1 : -1;
         sim.modify((s) => {
           "worklet";
           s.n = level;
           s.mw = w;
-          s.mspeed = speedFor(level + 1);
+          s.mspeed = speedFor(level + 1, cfg);
           s.mdir = dir;
           s.mx = dir === 1 ? w / 2 + EDGE : s.w - w / 2 - EDGE;
           s.waiting = false;
@@ -358,14 +377,31 @@ export default function BounceBuddy() {
         loop.setActive(false);
         setPhase("over");
         haptic.heavy();
-        const outcome = recordGame(GAME.id, r.score, {
-          xp: 10 + r.level,
-          records: { bounceHeight: r.level, bouncePerfects: r.bestPerfects },
-        });
+        clearTimeout(timeLimit.current);
+        const records = { bounceHeight: r.level, bouncePerfects: r.bestPerfects };
+        if (challenge.level) {
+          const res = challenge.complete(
+            { height: r.level, score: r.score, perfects: r.bestPerfects },
+            records,
+          );
+          setResult({ ...res, challenge: true });
+          return;
+        }
+        const outcome = recordGame(GAME.id, r.score, { xp: 10 + r.level, records });
         setResult({ ...outcome, height: r.level, perfects: r.bestPerfects });
       }
     };
-  }, [cam, dusk, loop, night, nextType, popup, recordGame, sim, squash]);
+  }, [cam, cfg, challenge, dusk, loop, night, nextType, popup, recordGame, sim, squash]);
+
+  useEffect(() => () => clearTimeout(timeLimit.current), []);
+
+  // Visible countdown for timed levels.
+  const timed = cfg.timeLimit > 0 && phase === "playing";
+  useEffect(() => {
+    if (!timed) return undefined;
+    const id = setInterval(() => setSecondsLeft((t) => Math.max(0, (t ?? 0) - 1)), 1000);
+    return () => clearInterval(id);
+  }, [timed]);
 
   const jump = () => {
     if (phase !== "playing") return;
@@ -391,12 +427,25 @@ export default function BounceBuddy() {
     cam.set(0);
     dusk.set(0);
     night.set(0);
-    const fresh = freshSim(field.w, field.h);
+    const fresh = freshSim(field.w, field.h, cfg);
     fresh.mx = fresh.mw / 2 + EDGE;
     fresh.running = true;
     sim.set(fresh);
     setPhase("playing");
     loop.setActive(true);
+    // Timed levels end the climb when the clock runs out.
+    clearTimeout(timeLimit.current);
+    setSecondsLeft(cfg.timeLimit > 0 ? cfg.timeLimit : null);
+    if (cfg.timeLimit > 0) {
+      timeLimit.current = setTimeout(() => {
+        sim.modify((v) => {
+          "worklet";
+          v.running = false;
+          return v;
+        });
+        handlers.current?.("over");
+      }, cfg.timeLimit * 1000);
+    }
   };
 
   const worldStyle = useAnimatedStyle(() => ({ transform: [{ translateY: cam.value }] }));
@@ -405,7 +454,22 @@ export default function BounceBuddy() {
 
   return (
     <GradientScreen theme={GAME.id} edges={["top", "bottom"]}>
-      <GameHeader title="Bounce" score={score} best={best} />
+      <GameHeader
+        title={challenge.level ? `Level ${challenge.n}` : "Bounce"}
+        score={score}
+        best={challenge.level ? undefined : best}
+      />
+      {cfg.timeLimit > 0 && phase === "playing" && secondsLeft != null && (
+        <View className="mt-2 items-center">
+          <View className="rounded-full bg-ink px-4 py-1">
+            <Text
+              className={`font-body-black text-sm ${secondsLeft <= 5 ? "text-[#FF8A8F]" : "text-white"}`}
+            >
+              ⏱ {secondsLeft}s
+            </Text>
+          </View>
+        </View>
+      )}
 
       <View
         style={{ flex: 1, margin: 20, marginTop: 14, borderRadius: 32, overflow: "hidden" }}
@@ -513,21 +577,41 @@ export default function BounceBuddy() {
               <Mascot variant={GAME.mascot} size={130} mood="cheer" />
             </Animated.View>
             <Text style={[display(44), { marginTop: 6 }]}>Bounce Buddy</Text>
-            <Text className="mt-2 text-center font-body-semi text-sm leading-5 text-ink-soft">
-              Tap to hop onto the sliding platform above.{"\n"}Land dead-centre for a PERFECT.
-              {"\n"}⭐ +5 · springs +3 · clouds melt fast!
-            </Text>
+            {challenge.level ? (
+              <ChallengeGoal level={challenge.level} n={challenge.n} />
+            ) : (
+              <Text className="mt-2 text-center font-body-semi text-sm leading-5 text-ink-soft">
+                Tap to hop onto the sliding platform above.{"\n"}Land dead-centre for a PERFECT.
+                {"\n"}⭐ +5 · springs +3 · clouds melt fast!
+              </Text>
+            )}
             <PrimaryButton
               title="Start climbing"
               icon="arrow-up"
               onPress={start}
               style={{ marginTop: 18 }}
             />
+            {!challenge.level && (
+              <LevelsButton
+                gameId={GAME.id}
+                count={challenge.count}
+                onPress={challenge.openLevels}
+                style={{ marginTop: 10 }}
+              />
+            )}
           </Animated.View>
         )}
       </View>
 
-      {phase === "over" && result && (
+      {phase === "over" && result?.challenge && (
+        <ChallengeResult
+          game={GAME}
+          challenge={challenge}
+          result={result}
+          unit={METRIC_UNITS[challenge.level.metric]}
+        />
+      )}
+      {phase === "over" && result && !result.challenge && (
         <GameOverModal
           title="Whoops!"
           game={GAME}

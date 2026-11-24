@@ -1,5 +1,6 @@
 import { CHALLENGES, starsFor, targetsText } from "../src/games/challenges";
 import { GAMES } from "../src/games/registry";
+import { BOUNCE_DEFAULTS } from "../src/games/bounce/levels";
 import { STACK_DEFAULTS } from "../src/games/stack/levels";
 import { TAP_RUSH_DEFAULTS } from "../src/games/tapRush/levels";
 
@@ -7,6 +8,7 @@ import { TAP_RUSH_DEFAULTS } from "../src/games/tapRush/levels";
 const DEFAULTS = {
   "tap-rush": TAP_RUSH_DEFAULTS,
   stack: STACK_DEFAULTS,
+  bounce: BOUNCE_DEFAULTS,
 };
 
 describe.each(Object.entries(CHALLENGES))("%s challenge levels", (gameId, levels) => {
