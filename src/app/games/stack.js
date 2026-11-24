@@ -1,4 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import Animated, {
@@ -15,13 +16,16 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { PrimaryButton } from "../../components/Buttons";
+import { ChallengeGoal, ChallengeResult, LevelsButton } from "../../components/Challenge";
 import GameHeader from "../../components/GameHeader";
 import GameOverModal from "../../components/GameOverModal";
 import GradientScreen from "../../components/GradientScreen";
 import Mascot from "../../components/Mascot";
 import ScorePopup from "../../components/ScorePopup";
 import { getGame } from "../../games/registry";
+import { STACK_DEFAULTS } from "../../games/stack/levels";
 import { colorFor, dropBlock, scoreFor, speedFor } from "../../games/stack/logic";
+import useChallenge from "../../games/useChallenge";
 import { haptic } from "../../lib/haptics";
 import { BOUNCY } from "../../lib/motion";
 import { popFor, sfx } from "../../lib/sound";
@@ -90,9 +94,24 @@ function MovingBlock({ sim, top, level }) {
   );
 }
 
-export default function StackTower() {
+const METRIC_UNITS = {
+  height: "blocks",
+  perfects: "perfects",
+  perfectRun: "in a row",
+  score: "pts",
+};
+
+// Remount per level so every level starts from a clean slate.
+export default function StackTowerScreen() {
+  const { level } = useLocalSearchParams();
+  return <StackTower key={level ?? "endless"} />;
+}
+
+function StackTower() {
   const best = useGameStore((s) => s.best[GAME.id]);
   const recordGame = useGameStore((s) => s.recordGame);
+  const challenge = useChallenge(GAME.id);
+  const cfg = { ...STACK_DEFAULTS, ...(challenge.level?.config ?? {}) };
 
   const [phase, setPhase] = useState("ready"); // ready | playing | over
   const [field, setField] = useState({ w: 350, h: 560 });
@@ -107,7 +126,7 @@ export default function StackTower() {
   const run = useRef({ height: 0, perfects: 0, bestRun: 0 });
   const busy = useRef(false);
 
-  const baseW = Math.min(field.w * 0.6, 210);
+  const baseW = Math.min(field.w * 0.6, 210) * cfg.baseScale;
   const baseY = field.h - 70; // top of the base block
   const topOf = (level) => baseY - level * BH;
   const rowsVisible = Math.floor((field.h * 0.5) / BH);
@@ -171,11 +190,11 @@ export default function StackTower() {
         x: fromLeft ? 0 : max,
         w: width,
         dir: fromLeft ? 1 : -1,
-        speed: speedFor(lvl),
+        speed: speedFor(lvl) * cfg.speedScale,
         max,
       });
     },
-    [field.w, sim],
+    [cfg.speedScale, field.w, sim],
   );
 
   const start = () => {
@@ -202,18 +221,36 @@ export default function StackTower() {
     setPhase("over");
     haptic.heavy();
     const r = run.current;
+    const records = {
+      stackHeight: r.height,
+      stackPerfectRun: r.bestRun,
+      stackPerfects: r.perfects,
+    };
+    if (challenge.level) {
+      const res = challenge.complete(
+        {
+          height: r.height,
+          perfects: r.perfects,
+          perfectRun: r.bestRun,
+          score: scoreFor(r.height, r.perfects),
+        },
+        records,
+      );
+      setResult({ ...res, challenge: true });
+      return;
+    }
     const outcome = recordGame(GAME.id, scoreFor(r.height, r.perfects), {
       xp: 10 + r.height,
-      records: { stackHeight: r.height, stackPerfectRun: r.bestRun, stackPerfects: r.perfects },
+      records,
     });
     setResult({ ...outcome, height: r.height, bestRun: r.bestRun });
-  }, [loop, recordGame]);
+  }, [challenge, loop, recordGame]);
 
   const drop = () => {
     if (phase !== "playing" || busy.current || !top) return;
     const s = sim.get();
     const moving = { x: s.x, w: s.w };
-    const res = dropBlock(top, moving, streak, baseW);
+    const res = dropBlock(top, moving, streak, cfg.grow ? baseW : 0);
     const r = run.current;
 
     if (res.miss) {
@@ -287,7 +324,11 @@ export default function StackTower() {
 
   return (
     <GradientScreen theme={GAME.id} edges={["top", "bottom"]}>
-      <GameHeader title="Stack" score={score} best={best} />
+      <GameHeader
+        title={challenge.level ? `Level ${challenge.n}` : "Stack"}
+        score={score}
+        best={challenge.level ? undefined : best}
+      />
 
       <View
         style={{ flex: 1, margin: 20, marginTop: 14, borderRadius: 32, overflow: "hidden" }}
@@ -379,21 +420,41 @@ export default function StackTower() {
               <Mascot variant={GAME.mascot} size={120} mood="cheer" />
             </Animated.View>
             <Text style={[display(44), { marginTop: 6 }]}>Stack Tower</Text>
-            <Text className="mt-2 text-center font-body-semi text-sm leading-5 text-ink-soft">
-              Tap to drop each sliding block onto the tower.{"\n"}Overhangs get sliced off, so line
-              them up!{"\n"}3 perfects in a row grows your block back.
-            </Text>
+            {challenge.level ? (
+              <ChallengeGoal level={challenge.level} n={challenge.n} />
+            ) : (
+              <Text className="mt-2 text-center font-body-semi text-sm leading-5 text-ink-soft">
+                Tap to drop each sliding block onto the tower.{"\n"}Overhangs get sliced off, so
+                line them up!{"\n"}3 perfects in a row grows your block back.
+              </Text>
+            )}
             <PrimaryButton
               title="Start stacking"
               icon="layers"
               onPress={start}
               style={{ marginTop: 18 }}
             />
+            {!challenge.level && (
+              <LevelsButton
+                gameId={GAME.id}
+                count={challenge.count}
+                onPress={challenge.openLevels}
+                style={{ marginTop: 10 }}
+              />
+            )}
           </Animated.View>
         )}
       </View>
 
-      {phase === "over" && result && (
+      {phase === "over" && result?.challenge && (
+        <ChallengeResult
+          game={GAME}
+          challenge={challenge}
+          result={result}
+          unit={METRIC_UNITS[challenge.level.metric]}
+        />
+      )}
+      {phase === "over" && result && !result.challenge && (
         <GameOverModal
           title="Toppled!"
           game={GAME}

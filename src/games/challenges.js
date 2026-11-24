@@ -13,10 +13,12 @@
  * Games register their list here; the shared level select, the useChallenge
  * hook and the tests all read from this one place.
  */
+import { STACK_LEVELS } from "./stack/levels";
 import { TAP_RUSH_LEVELS } from "./tapRush/levels";
 
 export const CHALLENGES = {
   "tap-rush": TAP_RUSH_LEVELS,
+  stack: STACK_LEVELS,
 };
 
 export const challengesFor = (gameId) => CHALLENGES[gameId] ?? null;

@@ -1,10 +1,12 @@
 import { CHALLENGES, starsFor, targetsText } from "../src/games/challenges";
 import { GAMES } from "../src/games/registry";
+import { STACK_DEFAULTS } from "../src/games/stack/levels";
 import { TAP_RUSH_DEFAULTS } from "../src/games/tapRush/levels";
 
 // Each game's challenge configs may only use keys its screen understands.
 const DEFAULTS = {
   "tap-rush": TAP_RUSH_DEFAULTS,
+  stack: STACK_DEFAULTS,
 };
 
 describe.each(Object.entries(CHALLENGES))("%s challenge levels", (gameId, levels) => {
