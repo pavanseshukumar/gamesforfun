@@ -41,12 +41,18 @@ Diamond Legend), and playing on consecutive days builds a **streak**.
 | 🎨 **Color Catch** | Tilt (or drag) to move Sunny's basket and catch only the target colour, which changes every 8s. ⭐ shield, ⏳ slow-mo, 3 hearts. | Wobbling drops, basket recolours, catch squash, red flash + shake on mistakes |
 | 🔤 **Word Pop** | Tap rising letter bubbles to spell words (3–8 letters) in 90 seconds. Tapped bubbles freeze; rare letters and long words score more; golden bubbles double a word. | Floating, swaying bubbles, live ✓ when your letters form a word, pop-and-score on submit |
 | 🧱 **Stack Tower** | Tap to drop each sliding block onto the tower; overhangs get sliced off so the blocks shrink. Perfect drops snap in, and 3 in a row grow the block back. | Tumbling sliced pieces, Gloop riding the top, camera climb, sky turns sunset → space |
-| 🎯 **Blob Launch** | Drag back to aim, let go to fling Zip at wobbly towers of wood, stone and ice. Pop every Grump within 3 shots; fewer shots earn more stars across 10 handmade levels. | Real physics (matter-js), stretchy sling bands, predicted-path dots, toppling structures, level-select with stars |
-| 🖼️ **Picture Slider** | Slide tiles to rebuild mascot pictures across 12 levels that grow from 3×3 to 5×5. Each board is a fixed scramble; finish at par for 3 stars. | Springy tiles, goal thumbnail, picture comes alive when solved, level select with stars |
-| 🌀 **Maze Dash** | Swipe and Pip runs along the corridor to the next junction. 15 seeded mazes from 5×7 to 15×21; from level 4 grab the key before the portal unlocks. Stars for matching the par swipe count. | Cell-by-cell running, breadcrumb trail, bobbing key, spinning portal |
+| 🎯 **Blob Launch** | Drag back to aim, let go to fling Zip at wobbly towers of wood, stone and ice. Pop every Grump within 3 shots; fewer shots earn more stars across 15 handmade levels. | Real physics (matter-js), stretchy sling bands, predicted-path dots, toppling structures, level-select with stars |
+| 🖼️ **Picture Slider** | Slide tiles to rebuild mascot pictures across 18 levels that grow from 3×3 to 6×6, including picture-only boards with no number hints. Each board is a fixed scramble; finish at par for 3 stars. | Springy tiles, goal thumbnail, picture comes alive when solved, level select with stars |
+| 🌀 **Maze Dash** | Swipe and Pip runs along the corridor to the next junction. 20 seeded mazes from 5×7 to 15×21; from level 4 grab the key before the portal unlocks, and levels 16–20 are dark, lit only around Pip. Stars for matching the par swipe count. | Cell-by-cell running, breadcrumb trail, bobbing key, spinning portal |
 | 🔪 **Slice Splash** | Swipe through jelly bubbles tossed up from below before they fall. Slice 3+ in one swipe for a combo, golden bubbles are worth 5, and don't slice the Grumps. 3 hearts. | Fading swipe trail, bubbles split in two along your cut, combo-pitched pops, screen flash on mistakes |
 | ➗ **Quick Math** | Equation cards: swipe right if true, left if false (or tap ✓ / ✗). 60 seconds, per-card timer, streak multiplier up to ×4, rounds climb from + to ÷; misses cost 3 s and show the right answer. | Tilting swipe cards with TRUE/FALSE stamps, green/red flashes, round-up toasts |
 | 🧩 **Daily Puzzle** | One 4×4 sliding picture puzzle per day, the same for everyone (seeded by date). First solve counts; replays are practice. | Spring-sliding tiles, picture reveal with the mascot coming alive, confetti |
+
+**Challenge levels.** Every other arcade game also has 10 challenge levels (a **Levels** button on
+its start screen) with their own twists: Sudden Death Tap Rush, timed Bounce Buddy, two-colour
+Color Catch, ×-only Quick Math, 5-letter-minimum Word Pop, Fusion goal tiles, Memory peeks and
+bigger decks, and more. Each level judges one stat against three star targets, and a level unlocks
+once the one before it has a star.
 
 All games share the same pieces: a themed gradient backdrop, a header whose score pops on every
 change, haptics, and a game-over sheet where the game's mascot cheers, shows the XP you earned, and
@@ -98,6 +104,10 @@ src/
    `GameOverModal`.
 
 The home screen picks it up automatically. See `AGENTS.md` for styling and animation conventions.
+
+To give it challenge levels, add `src/games/<id>/levels.js` (a `DEFAULTS` config and a list of
+`{ name, goal, config, metric, thresholds, lower? }`), register it in `src/games/challenges.js` and
+the DEFAULTS map in `__tests__/challenges.test.js`, and use `useChallenge(id)` in the screen.
 
 ## Roadmap ideas
 

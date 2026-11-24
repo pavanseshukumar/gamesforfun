@@ -87,5 +87,12 @@ Docs: https://docs.expo.dev/eas/index.md
   select and the store's `levels` slice (`recordLevel(gameId, n, stars, score)`), then call
   `recordGame(gameId, totalStars, …)` so "best" is total stars. Sliding-tile boards come from
   `src/games/sliding.js` (any N×N) and render with `components/SlidingBoard.js`.
+- **Challenge levels** (all other arcade games): `src/games/<id>/levels.js` exports `DEFAULTS` and
+  `LEVELS` (`{ name, goal, config, metric, thresholds, lower? }`), registered in
+  `src/games/challenges.js` and in the DEFAULTS map of `__tests__/challenges.test.js`. The screen
+  reads them with `useChallenge(id)` (`?level=n` route param), wraps its game in a component keyed by
+  the level, merges `{ ...DEFAULTS, ...level.config }`, and ends a level with
+  `challenge.complete(stats)` + `ChallengeResult`. Use `Infinity` for a lower-is-better stat when
+  the goal wasn't reached.
 - **Adding a game:** create `src/app/games/<id>.js`, add an entry to `src/games/registry.js`, use
   `GradientScreen`, `GameHeader` and `GameOverModal`, and pass the result of `recordGame(id, score, { xp, records })` to the modal.

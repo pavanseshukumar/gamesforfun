@@ -3,12 +3,9 @@
 Ideas and follow-ups we've agreed to come back to. Newest decisions at the top of each section.
 
 ## Content
-- **More levels for many games.** Level-based games share `components/LevelGrid.js` and the
-  `levels`/`recordLevel` store slice, so adding levels is mostly data:
-  - Blob Launch: more structures (`src/games/blob/levels.js`; the solver test checks each one).
-  - Picture Slider: more pictures and sizes.
-  - Maze game: more sizes and twists (keys, one-way doors, moving hazards).
-  - Consider level packs for the arcade games (e.g. Fusion goals, Word Pop themed rounds).
+- ~~More levels for many games~~: done. Every arcade game has 10 challenge levels; Blob Launch
+  has 15, Picture Slider 18 (picture-only and 6×6) and Maze Dash 20 (dark mazes).
+  - Next maybe: maze one-way doors or moving hazards; Blob Launch TNT blocks; Word Pop themed rounds.
 
 ## Games
 - Simon Blobs: mascots sing a growing colour+note sequence to repeat.
