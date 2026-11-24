@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import Animated, {
   cancelAnimation,
@@ -18,6 +19,7 @@ import Animated, {
 import { scheduleOnRN } from "react-native-worklets";
 
 import { PrimaryButton } from "../../components/Buttons";
+import { ChallengeGoal, ChallengeResult, LevelsButton } from "../../components/Challenge";
 import GameHeader from "../../components/GameHeader";
 import GameOverModal from "../../components/GameOverModal";
 import GradientScreen from "../../components/GradientScreen";
@@ -25,6 +27,8 @@ import Mascot from "../../components/Mascot";
 import PressableScale from "../../components/PressableScale";
 import ScorePopup from "../../components/ScorePopup";
 import { getGame } from "../../games/registry";
+import useChallenge from "../../games/useChallenge";
+import { WORD_POP_DEFAULTS } from "../../games/wordpop/levels";
 import {
   checkWord,
   hasRareLetter,
@@ -39,8 +43,7 @@ import { useGameStore } from "../../store/useGameStore";
 import { cardShadow, display, INK } from "../../theme";
 
 const GAME = getGame("word-pop");
-const DURATION = 90_000;
-const MAX_BUBBLES = 15;
+const METRIC_UNITS = { score: "pts", words: "words", longest: "letters" };
 const SIZE = 58;
 const LANES = 5;
 
@@ -147,9 +150,21 @@ function Bubble({ bubble, fieldH, selected, onTap, onEscape }) {
   );
 }
 
-export default function WordPop() {
+// Remount per level so every level starts from a clean slate.
+export default function WordPopScreen() {
+  const { level } = useLocalSearchParams();
+  return <WordPop key={level ?? "endless"} />;
+}
+
+function WordPop() {
   const best = useGameStore((s) => s.best[GAME.id]);
   const recordGame = useGameStore((s) => s.recordGame);
+  const challenge = useChallenge(GAME.id);
+  const cfg = useMemo(
+    () => ({ ...WORD_POP_DEFAULTS, ...(challenge.level?.config ?? {}) }),
+    [challenge.level],
+  );
+  const DURATION = cfg.duration * 1000;
 
   const [phase, setPhase] = useState("ready"); // ready | playing | over
   const [field, setField] = useState({ w: 360, h: 420 });
@@ -178,7 +193,7 @@ export default function WordPop() {
     if (phase !== "playing") return undefined;
     const spawn = (head = 0) =>
       setBubbles((list) => {
-        if (list.length >= MAX_BUBBLES) return list;
+        if (list.length >= cfg.maxBubbles) return list;
         // Prefer a lane that hasn't been used recently so bubbles don't stack.
         const lanes = Array.from({ length: LANES }, (_, i) => i).filter(
           (l) => !lastLanes.current.includes(l),
@@ -196,9 +211,9 @@ export default function WordPop() {
               12,
               Math.min(field.w - SIZE - 12, lane * laneW + (Math.random() - 0.5) * 16),
             ),
-            golden: Math.random() < 0.06,
+            golden: Math.random() < cfg.goldenRate,
             head,
-            duration: Math.max(8500, 15000 - elapsed * 60),
+            duration: Math.max(8500, 15000 - elapsed * 60) * cfg.riseScale,
           },
         ];
       });
@@ -206,7 +221,7 @@ export default function WordPop() {
     for (let i = 0; i < 9; i++) setTimeout(() => spawn(0.05 + Math.random() * 0.6), i * 90);
     const id = setInterval(() => spawn(), 850);
     return () => clearInterval(id);
-  }, [phase, field.w]);
+  }, [phase, field.w, cfg]);
 
   // ---- clock --------------------------------------------------------------------
   const finish = useCallback(() => {
@@ -214,12 +229,21 @@ export default function WordPop() {
     setSelection([]);
     haptic.heavy();
     const r = run.current;
+    const records = { wpLongest: r.longest, wpRare: r.rare };
+    if (challenge.level) {
+      const res = challenge.complete(
+        { score: r.score, words: r.words.size, longest: r.longest },
+        records,
+      );
+      setResult({ ...res, challenge: true });
+      return;
+    }
     const outcome = recordGame(GAME.id, r.score, {
       xp: 10 + Math.floor(r.score / 4),
-      records: { wpLongest: r.longest, wpRare: r.rare },
+      records,
     });
     setResult({ ...outcome, words: r.words.size, longest: r.longest });
-  }, [recordGame]);
+  }, [challenge, recordGame]);
 
   useEffect(() => {
     if (phase !== "playing") return undefined;
@@ -233,7 +257,7 @@ export default function WordPop() {
       }
     }, 100);
     return () => clearInterval(id);
-  }, [phase, finish]);
+  }, [phase, finish, DURATION]);
 
   const start = () => {
     run.current = { score: 0, longest: 0, rare: 0, words: new Set() };
@@ -299,6 +323,7 @@ export default function WordPop() {
       setSelection([]);
     };
     if (!check.ok) return reject(check.reason === "short" ? "3+ letters" : "Not a word");
+    if (wordLength(letters) < cfg.minLength) return reject(`${cfg.minLength}+ letters`);
     if (r.words.has(check.word)) return reject("Already found");
 
     const points = wordScore(letters, golden);
@@ -328,7 +353,11 @@ export default function WordPop() {
 
   return (
     <GradientScreen theme={GAME.id} edges={["top", "bottom"]}>
-      <GameHeader title={GAME.title} score={score} best={best} />
+      <GameHeader
+        title={challenge.level ? `Level ${challenge.n}` : GAME.title}
+        score={score}
+        best={challenge.level ? undefined : best}
+      />
 
       <View className="mt-4 px-5">
         <View className="mb-2 flex-row items-center justify-between">
@@ -401,11 +430,23 @@ export default function WordPop() {
               <Mascot variant={GAME.mascot} size={120} mood="cheer" />
             </Animated.View>
             <Text style={[display(44), { marginTop: 6 }]}>Word Pop</Text>
-            <Text className="mt-2 text-center font-body-semi text-sm leading-5 text-ink-soft">
-              Tap rising letters to spell a word, then send it!{"\n"}Tapped bubbles freeze · longer
-              words score more{"\n"}Golden bubbles double the word.
-            </Text>
+            {challenge.level ? (
+              <ChallengeGoal level={challenge.level} n={challenge.n} />
+            ) : (
+              <Text className="mt-2 text-center font-body-semi text-sm leading-5 text-ink-soft">
+                Tap rising letters to spell a word, then send it!{"\n"}Tapped bubbles freeze ·
+                longer words score more{"\n"}Golden bubbles double the word.
+              </Text>
+            )}
             <PrimaryButton title="Start" icon="text" onPress={start} style={{ marginTop: 18 }} />
+            {!challenge.level && (
+              <LevelsButton
+                gameId={GAME.id}
+                count={challenge.count}
+                onPress={challenge.openLevels}
+                style={{ marginTop: 10 }}
+              />
+            )}
           </Animated.View>
         )}
       </View>
@@ -476,7 +517,15 @@ export default function WordPop() {
         </View>
       </Animated.View>
 
-      {phase === "over" && result && (
+      {phase === "over" && result?.challenge && (
+        <ChallengeResult
+          game={GAME}
+          challenge={challenge}
+          result={result}
+          unit={METRIC_UNITS[challenge.level.metric]}
+        />
+      )}
+      {phase === "over" && result && !result.challenge && (
         <GameOverModal
           title="Time's up!"
           game={GAME}

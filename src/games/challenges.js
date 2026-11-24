@@ -19,6 +19,7 @@ import { MATH_LEVELS } from "./math/levels";
 import { SLICE_LEVELS } from "./slice/levels";
 import { STACK_LEVELS } from "./stack/levels";
 import { TAP_RUSH_LEVELS } from "./tapRush/levels";
+import { WORD_POP_LEVELS } from "./wordpop/levels";
 
 export const CHALLENGES = {
   "tap-rush": TAP_RUSH_LEVELS,
@@ -27,6 +28,7 @@ export const CHALLENGES = {
   "color-catch": COLOR_CATCH_LEVELS,
   slice: SLICE_LEVELS,
   "quick-math": MATH_LEVELS,
+  "word-pop": WORD_POP_LEVELS,
 };
 
 export const challengesFor = (gameId) => CHALLENGES[gameId] ?? null;

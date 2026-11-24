@@ -6,6 +6,7 @@ import { MATH_DEFAULTS } from "../src/games/math/levels";
 import { SLICE_DEFAULTS } from "../src/games/slice/levels";
 import { STACK_DEFAULTS } from "../src/games/stack/levels";
 import { TAP_RUSH_DEFAULTS } from "../src/games/tapRush/levels";
+import { WORD_POP_DEFAULTS } from "../src/games/wordpop/levels";
 
 // Each game's challenge configs may only use keys its screen understands.
 const DEFAULTS = {
@@ -15,6 +16,7 @@ const DEFAULTS = {
   "color-catch": COLOR_CATCH_DEFAULTS,
   slice: SLICE_DEFAULTS,
   "quick-math": MATH_DEFAULTS,
+  "word-pop": WORD_POP_DEFAULTS,
 };
 
 describe.each(Object.entries(CHALLENGES))("%s challenge levels", (gameId, levels) => {
