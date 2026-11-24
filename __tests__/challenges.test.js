@@ -4,6 +4,7 @@ import { BOUNCE_DEFAULTS } from "../src/games/bounce/levels";
 import { COLOR_CATCH_DEFAULTS } from "../src/games/colorCatch/levels";
 import { FUSION_DEFAULTS } from "../src/games/fusion/levels";
 import { MATH_DEFAULTS } from "../src/games/math/levels";
+import { MEMORY_DEFAULTS } from "../src/games/memory/levels";
 import { SLICE_DEFAULTS } from "../src/games/slice/levels";
 import { STACK_DEFAULTS } from "../src/games/stack/levels";
 import { TAP_RUSH_DEFAULTS } from "../src/games/tapRush/levels";
@@ -19,6 +20,7 @@ const DEFAULTS = {
   "quick-math": MATH_DEFAULTS,
   "word-pop": WORD_POP_DEFAULTS,
   fusion: FUSION_DEFAULTS,
+  memory: MEMORY_DEFAULTS,
 };
 
 describe.each(Object.entries(CHALLENGES))("%s challenge levels", (gameId, levels) => {
