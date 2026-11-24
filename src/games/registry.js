@@ -138,6 +138,18 @@ export const GAMES = [
     lowerIsBetter: false,
   },
   {
+    id: "quick-math",
+    route: "/games/quick-math",
+    title: "Quick Math",
+    tagline: "True or false? Swipe fast!",
+    emoji: "➗",
+    mascot: "gloop",
+    colors: ["#B8F28A", "#3FBF5F"],
+    accent: "#2E9E4E",
+    unit: "pts",
+    lowerIsBetter: false,
+  },
+  {
     // The daily puzzle has its own banner on Home, so it stays out of the
     // carousel and quick play. Its mascot changes every day.
     id: "daily",

@@ -14,7 +14,7 @@ Ideas and follow-ups we've agreed to come back to. Newest decisions at the top o
 - Simon Blobs: mascots sing a growing colour+note sequence to repeat.
 - Pipe Flow: rotate pipe tiles to connect water to the flower.
 - Dots Duel: two-player pass-and-play on one phone.
-- Light It Up, Quick Math, Odd Blob Out, Path Painter, Balance Buddy, Bubble Garden.
+- Light It Up, Odd Blob Out, Path Painter, Balance Buddy, Bubble Garden.
 
 ## Features
 - Mascot Dress-Up: spend XP/levels on hats and accessories for your buddy.

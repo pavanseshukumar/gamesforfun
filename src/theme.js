@@ -21,6 +21,7 @@ export const BACKDROPS = {
   slider: ["#FFD39A", "#FFE9CC", "#FFF8EE"],
   maze: ["#9FF0D6", "#D2FAEE", "#F2FFFB"],
   slice: ["#FFB3D1", "#FFDDEA", "#FFF5F9"],
+  "quick-math": ["#C2F59A", "#E3FBCB", "#F7FFF0"],
 };
 
 /** Shared soft shadow for white cards. */
