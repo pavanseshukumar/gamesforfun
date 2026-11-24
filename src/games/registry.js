@@ -78,6 +78,18 @@ export const GAMES = [
     lowerIsBetter: false,
   },
   {
+    id: "stack",
+    route: "/games/stack",
+    title: "Stack Tower",
+    tagline: "Drop, slice, stack to the sky",
+    emoji: "🧱",
+    mascot: "gloop",
+    colors: ["#C9B6FF", "#FF7BAC"],
+    accent: "#8A5CFF",
+    unit: "pts",
+    lowerIsBetter: false,
+  },
+  {
     // The daily puzzle has its own banner on Home, so it stays out of the
     // carousel and quick play. Its mascot changes every day.
     id: "daily",
