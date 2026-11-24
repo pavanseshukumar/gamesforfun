@@ -66,6 +66,18 @@ export const GAMES = [
     lowerIsBetter: false,
   },
   {
+    id: "word-pop",
+    route: "/games/word-pop",
+    title: "Word Pop",
+    tagline: "Spell words from rising letters",
+    emoji: "🔤",
+    mascot: "bloop",
+    colors: ["#7FE3FF", "#1BA9D9"],
+    accent: "#1BA9D9",
+    unit: "pts",
+    lowerIsBetter: false,
+  },
+  {
     // The daily puzzle has its own banner on Home, so it stays out of the
     // carousel and quick play. Its mascot changes every day.
     id: "daily",

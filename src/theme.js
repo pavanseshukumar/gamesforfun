@@ -15,6 +15,7 @@ export const BACKDROPS = {
   bounce: ["#FF9BCB", "#FFD0E6", "#FFF2F8"],
   "color-catch": ["#FFB49A", "#FFDCCB", "#FFF5EF"],
   daily: ["#8C7BFF", "#C3B8FF", "#F1EEFF"],
+  "word-pop": ["#7FE3FF", "#C4F3FF", "#EFFCFF"],
 };
 
 /** Shared soft shadow for white cards. */

@@ -39,11 +39,18 @@ Diamond Legend), and playing on consecutive days builds a **streak**.
 | 🔮 **Fusion** | Swipe to slide tiles; matching numbers fuse and double. Keep going until no moves are left. | Sliding tiles, spawn pop, merge pulse, glow on big tiles |
 | 🦘 **Bounce Buddy** | Tap to hop Pip onto the platform sliding above. Land dead-centre for a PERFECT; stars +5, springs +3, clouds melt in 1.4s. | Squash-and-stretch hops, camera climb, parallax clouds, sky turns sunset → night |
 | 🎨 **Color Catch** | Tilt (or drag) to move Sunny's basket and catch only the target colour, which changes every 8s. ⭐ shield, ⏳ slow-mo, 3 hearts. | Wobbling drops, basket recolours, catch squash, red flash + shake on mistakes |
+| 🔤 **Word Pop** | Tap rising letter bubbles to spell words (3–8 letters) in 90 seconds. Tapped bubbles freeze; rare letters and long words score more; golden bubbles double a word. | Floating, swaying bubbles, live ✓ when your letters form a word, pop-and-score on submit |
 | 🧩 **Daily Puzzle** | One 4×4 sliding picture puzzle per day, the same for everyone (seeded by date). First solve counts; replays are practice. | Spring-sliding tiles, picture reveal with the mascot coming alive, confetti |
 
 All games share the same pieces: a themed gradient backdrop, a header whose score pops on every
 change, haptics, and a game-over sheet where the game's mascot cheers, shows the XP you earned, and
 throws confetti for a new best. Everything is saved on the device.
+
+## Credits
+
+Word Pop's dictionary is built from [SCOWL](http://wordlist.aspell.net/) word lists (common tiers
+only, slurs and strong profanity removed) by `scripts/build-wordlist.py`. SCOWL copyright notice:
+`src/games/wordpop/WORDS-LICENSE.txt`.
 
 ## Run it
 
@@ -89,6 +96,6 @@ The home screen picks it up automatically. See `AGENTS.md` for styling and anima
 ## Roadmap ideas
 
 - Background music with its own volume control
-- More games: word pop, stack tower, simon-says blobs
+- More games: stack tower, simon-says blobs
 - Online leaderboards (Supabase or Firebase)
 - Store builds with EAS
