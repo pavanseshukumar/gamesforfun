@@ -101,6 +101,34 @@ function Portal({ size, locked }) {
   );
 }
 
+/**
+ * Dark levels: a ring with a huge border leaves a clear circle around Dash and
+ * blacks out everything else. It rides the same transform as the mascot.
+ */
+function Darkness({ cell, boardW, boardH, pipStyle }) {
+  const lit = cell * 2.3;
+  const border = Math.hypot(boardW, boardH) * 1.2;
+  const outer = lit + border;
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        {
+          position: "absolute",
+          left: cell / 2 - outer,
+          top: cell / 2 - outer,
+          width: outer * 2,
+          height: outer * 2,
+          borderRadius: outer,
+          borderWidth: border,
+          borderColor: "rgba(26,22,48,0.96)",
+        },
+        pipStyle,
+      ]}
+    />
+  );
+}
+
 export default function MazeDash() {
   const levels = useMemo(() => getLevels(), []);
   const progress = useGameStore((s) => s.levels?.[GAME.id] ?? NO_PROGRESS);
@@ -342,7 +370,7 @@ export default function MazeDash() {
             ⏱ {mm}:{ss}
           </Text>
           <Text className="font-body-bold text-xs text-ink-soft">
-            {level.name} · par {level.par} swipes
+            {level.name} · par {level.par} swipes{level.dark ? " · 🔦 dark" : ""}
           </Text>
         </View>
         {level.key != null && (
@@ -372,7 +400,14 @@ export default function MazeDash() {
             <View
               style={[{ padding: 6, borderRadius: 18, backgroundColor: "#FFFFFF" }, cardShadow]}
             >
-              <View style={{ width: boardW, height: boardH }}>
+              <View
+                style={{
+                  width: boardW,
+                  height: boardH,
+                  overflow: level.dark ? "hidden" : "visible",
+                  borderRadius: level.dark ? 12 : 0,
+                }}
+              >
                 {/* breadcrumbs */}
                 {[...visited].map((c) => {
                   const [vx, vy] = xyOf(level.maze, c);
@@ -420,6 +455,22 @@ export default function MazeDash() {
                     fill="none"
                   />
                 </Svg>
+                {level.dark && (
+                  <>
+                    <Darkness cell={cell} boardW={boardW} boardH={boardH} pipStyle={pipStyle} />
+                    {/* The exit glows through the dark as a beacon; the key doesn't. */}
+                    <View
+                      pointerEvents="none"
+                      style={{
+                        position: "absolute",
+                        left: ex * cell + cell * 0.08,
+                        top: ey * cell + cell * 0.08,
+                      }}
+                    >
+                      <Portal size={cell * 0.84} locked={level.key != null && !hasKey} />
+                    </View>
+                  </>
+                )}
                 <Animated.View
                   pointerEvents="none"
                   style={[{ position: "absolute", left: cell * 0.04, top: -cell * 0.08 }, pipStyle]}

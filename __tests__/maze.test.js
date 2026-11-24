@@ -106,11 +106,16 @@ describe("Maze Dash levels", () => {
   const levels = getLevels();
 
   test("grow in size and add keys from level 4", () => {
-    expect(levels).toHaveLength(15);
+    expect(levels).toHaveLength(20);
     expect(levels[0].key).toBeNull();
     expect(levels[3].key).not.toBeNull();
-    for (let i = 1; i < levels.length; i++)
-      expect(levels[i].maze.walls.length).toBeGreaterThan(levels[i - 1].maze.walls.length);
+    // Lit mazes grow throughout; the dark pack restarts smaller and grows again.
+    for (const group of [levels.filter((l) => !l.dark), levels.filter((l) => l.dark)]) {
+      expect(group.length).toBeGreaterThan(0);
+      for (let i = 1; i < group.length; i++)
+        expect(group[i].maze.walls.length).toBeGreaterThan(group[i - 1].maze.walls.length);
+    }
+    expect(levels.findIndex((l) => l.dark)).toBe(15);
   });
 
   test("keys sit on dead ends, away from start and exit", () => {

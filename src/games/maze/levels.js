@@ -1,6 +1,7 @@
 import { buildLevel } from "./logic";
 
-// [name, cols, rows, key?] — mazes grow, and keys arrive from level 4.
+// [name, cols, rows, key?, dark?] — mazes grow and keys arrive from level 4;
+// levels 16–20 are dark: only a small circle around Dash is lit.
 const SPEC = [
   ["First Steps", 5, 7, false],
   ["Twisty Turns", 6, 8, false],
@@ -17,12 +18,21 @@ const SPEC = [
   ["Labyrinth", 13, 19, false],
   ["Grand Maze", 14, 20, true],
   ["The Big One", 15, 21, true],
+  ["Lights Out", 7, 10, false, true],
+  ["Night Walk", 9, 13, false, true],
+  ["Moonlit Key", 9, 14, true, true],
+  ["Midnight Hedge", 11, 16, false, true],
+  ["Darkest Vault", 12, 18, true, true],
 ];
 
 let cache = null;
-/** Built lazily on first use (generation + pathfinding for all 15 mazes). */
+/** Built lazily on first use (generation + pathfinding for every maze). */
 export function getLevels() {
-  if (!cache) cache = SPEC.map(([name, c, r, key], i) => buildLevel(i + 1, name, c, r, key));
+  if (!cache)
+    cache = SPEC.map(([name, c, r, key, dark = false], i) => ({
+      ...buildLevel(i + 1, name, c, r, key),
+      dark,
+    }));
   return cache;
 }
 
