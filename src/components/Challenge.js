@@ -54,7 +54,8 @@ export function ChallengeResult({ game, challenge, result, unit }) {
         <View className="mt-2 items-center">
           <Stars count={result.stars} size={26} />
           <Text className="mt-1 text-center font-body-semi text-sm text-ink-mute">
-            {level.name}: {result.value} {unit}
+            {level.name}
+            {Number.isFinite(result.value) ? `: ${result.value} ${unit}` : ""}
           </Text>
           <Text className="mt-0.5 text-center font-body text-xs text-ink-mute">
             {targetsText(level)}

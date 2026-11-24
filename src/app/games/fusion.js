@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Platform, Text, useWindowDimensions, View } from "react-native";
 import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
 import Animated, {
@@ -13,13 +14,16 @@ import Animated, {
   ZoomIn,
 } from "react-native-reanimated";
 
+import { ChallengeGoal, ChallengeResult, LevelsButton } from "../../components/Challenge";
 import GameHeader from "../../components/GameHeader";
 import GameOverModal from "../../components/GameOverModal";
 import { IconButton } from "../../components/Buttons";
 import GradientScreen from "../../components/GradientScreen";
 import Mascot from "../../components/Mascot";
 import { addRandomTile, canMove, maxTile, move, newBoard, SIZE } from "../../games/fusion/logic";
+import { FUSION_DEFAULTS } from "../../games/fusion/levels";
 import { getGame } from "../../games/registry";
+import useChallenge from "../../games/useChallenge";
 import { haptic } from "../../lib/haptics";
 import { sfx } from "../../lib/sound";
 import { BOUNCY } from "../../lib/motion";
@@ -29,6 +33,7 @@ const GAME = getGame("fusion");
 const GAP = 10;
 const SLIDE_MS = 110;
 const GOAL = 2048;
+const METRIC_UNITS = { moves: "moves", score: "pts", maxTile: "biggest tile" };
 
 // [background, text] per value: soft pastels first, then saturated candy.
 const TILE_COLORS = {
@@ -120,8 +125,19 @@ function Tile({ tile, cell }) {
   );
 }
 
-export default function Fusion() {
+// Remount per level so every level starts from a clean slate.
+export default function FusionScreen() {
+  const { level } = useLocalSearchParams();
+  return <Fusion key={level ?? "endless"} />;
+}
+
+function Fusion() {
   const { width } = useWindowDimensions();
+  const challenge = useChallenge(GAME.id);
+  const cfg = useMemo(
+    () => ({ ...FUSION_DEFAULTS, ...(challenge.level?.config ?? {}) }),
+    [challenge.level],
+  );
   const boardSize = Math.min(width - 32, 420);
   const cell = (boardSize - GAP * (SIZE + 1)) / SIZE;
 
@@ -136,11 +152,12 @@ export default function Fusion() {
   const busy = useRef(false);
   // Mirror of the board for the gesture/keyboard handlers, which can fire
   // between renders. React state drives rendering; this ref drives input.
-  const game = useRef({ tiles, score, over: false });
+  const game = useRef({ tiles, score, over: false, moves: 0 });
+  const [moves, setMoves] = useState(0);
 
   const handleMove = useCallback(
     (dir) => {
-      const { tiles: current, score: currentScore, over: isOver } = game.current;
+      const { tiles: current, score: currentScore, over: isOver, moves: prevMoves } = game.current;
       if (isOver || busy.current) return;
       const result = move(current, dir);
       if (!result.moved) {
@@ -154,15 +171,39 @@ export default function Fusion() {
 
       const next = addRandomTile(result.tiles);
       const nextScore = currentScore + result.gained;
+      const nextMoves = prevMoves + 1;
+      const top = maxTile(next);
+      const reached = cfg.goalTile > 0 && top >= cfg.goalTile;
+      const outOfMoves = cfg.moveLimit > 0 && nextMoves >= cfg.moveLimit;
       const stuck = !canMove(next);
-      game.current = { tiles: next, score: nextScore, over: stuck };
+      const ends = stuck || (challenge.level != null && (reached || outOfMoves));
+      game.current = { tiles: next, score: nextScore, over: ends, moves: nextMoves };
       setTiles(next);
       setScore(nextScore);
+      setMoves(nextMoves);
       if (result.gained >= 128) haptic.medium();
       else if (result.gained) haptic.tap();
       sfx(result.gained >= 128 ? "star" : result.gained ? "merge" : "whoosh");
 
-      if (!reachedGoal.current && maxTile(next) >= GOAL) {
+      if (challenge.level && ends) {
+        // Goal levels judge moves only if the goal tile was made.
+        const res = challenge.complete(
+          {
+            moves: reached || !cfg.goalTile ? nextMoves : Infinity,
+            score: nextScore,
+            maxTile: top,
+          },
+          { fusionTile: top },
+        );
+        if (reached) {
+          haptic.success();
+          sfx("levelup");
+        }
+        setTimeout(() => setOver({ ...res, challenge: true }), reached ? 700 : 500);
+        return;
+      }
+
+      if (!challenge.level && !reachedGoal.current && top >= GOAL) {
         reachedGoal.current = true;
         haptic.success();
         sfx("levelup");
@@ -182,7 +223,7 @@ export default function Fusion() {
         }, 500);
       }
     },
-    [recordGame],
+    [cfg, challenge, recordGame],
   );
 
   // Arrow keys / WASD on web, for testing on a laptop.
@@ -225,18 +266,19 @@ export default function Fusion() {
   const restart = () => {
     reachedGoal.current = false;
     const board = newBoard();
-    game.current = { tiles: board, score: 0, over: false };
+    game.current = { tiles: board, score: 0, over: false, moves: 0 };
     setTiles(board);
     setScore(0);
+    setMoves(0);
     setOver(null);
   };
 
   return (
     <GradientScreen theme={GAME.id} edges={["top", "bottom"]}>
       <GameHeader
-        title={GAME.title}
+        title={challenge.level ? `Level ${challenge.n}` : GAME.title}
         score={score}
-        best={best}
+        best={challenge.level ? undefined : best}
         right={<IconButton icon="refresh" label="Restart" onPress={restart} />}
       />
 
@@ -277,12 +319,35 @@ export default function Fusion() {
             </View>
           </Animated.View>
 
-          <View className="mt-5 flex-row items-center">
-            <Mascot variant={GAME.mascot} size={54} mood="happy" />
-            <View className="ml-2 rounded-2xl bg-white px-4 py-2.5">
-              <Text className="font-body-bold text-sm text-ink">Swipe to slide · fuse twins!</Text>
+          {challenge.level ? (
+            <View className="mt-3 w-full items-center px-5">
+              <View className="mb-1 rounded-full bg-ink px-4 py-1">
+                <Text className="font-body-black text-xs text-white">
+                  Moves {moves}
+                  {cfg.moveLimit ? ` / ${cfg.moveLimit}` : ""}
+                  {cfg.goalTile ? ` · goal ${cfg.goalTile}` : ""}
+                </Text>
+              </View>
+              <ChallengeGoal level={challenge.level} n={challenge.n} />
             </View>
-          </View>
+          ) : (
+            <>
+              <View className="mt-5 flex-row items-center">
+                <Mascot variant={GAME.mascot} size={54} mood="happy" />
+                <View className="ml-2 rounded-2xl bg-white px-4 py-2.5">
+                  <Text className="font-body-bold text-sm text-ink">
+                    Swipe to slide · fuse twins!
+                  </Text>
+                </View>
+              </View>
+              <LevelsButton
+                gameId={GAME.id}
+                count={challenge.count}
+                onPress={challenge.openLevels}
+                style={{ marginTop: 12 }}
+              />
+            </>
+          )}
         </View>
       </GestureDetector>
 
@@ -298,7 +363,15 @@ export default function Fusion() {
         </Animated.View>
       )}
 
-      {over && (
+      {over?.challenge && (
+        <ChallengeResult
+          game={GAME}
+          challenge={challenge}
+          result={over}
+          unit={METRIC_UNITS[challenge.level.metric]}
+        />
+      )}
+      {over && !over.challenge && (
         <GameOverModal
           title="No moves left"
           game={GAME}

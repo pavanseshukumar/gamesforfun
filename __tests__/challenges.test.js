@@ -2,6 +2,7 @@ import { CHALLENGES, starsFor, targetsText } from "../src/games/challenges";
 import { GAMES } from "../src/games/registry";
 import { BOUNCE_DEFAULTS } from "../src/games/bounce/levels";
 import { COLOR_CATCH_DEFAULTS } from "../src/games/colorCatch/levels";
+import { FUSION_DEFAULTS } from "../src/games/fusion/levels";
 import { MATH_DEFAULTS } from "../src/games/math/levels";
 import { SLICE_DEFAULTS } from "../src/games/slice/levels";
 import { STACK_DEFAULTS } from "../src/games/stack/levels";
@@ -17,6 +18,7 @@ const DEFAULTS = {
   slice: SLICE_DEFAULTS,
   "quick-math": MATH_DEFAULTS,
   "word-pop": WORD_POP_DEFAULTS,
+  fusion: FUSION_DEFAULTS,
 };
 
 describe.each(Object.entries(CHALLENGES))("%s challenge levels", (gameId, levels) => {
@@ -57,6 +59,10 @@ describe("starsFor", () => {
 
   test("handles lower-is-better metrics", () => {
     expect([40, 30, 15, 10].map((moves) => starsFor(down, { moves }))).toEqual([0, 1, 2, 3]);
+  });
+
+  test("an unreached goal (Infinity moves) earns nothing", () => {
+    expect(starsFor(down, { moves: Infinity })).toBe(0);
   });
 
   test("a missing stat earns nothing", () => {

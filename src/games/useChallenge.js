@@ -21,8 +21,17 @@ export default function useChallenge(gameId) {
   const complete = useCallback(
     (stats, records = {}) => {
       const stars = starsFor(level, stats);
-      const score = Math.round(stats[level.metric] ?? 0);
-      const { prevStars } = stars > 0 ? recordLevel(gameId, n, stars, score) : { prevStars: 0 };
+      const raw = stats[level.metric] ?? 0;
+      const score = Number.isFinite(raw) ? Math.round(raw) : raw; // Infinity = goal not reached
+      const { prevStars } =
+        stars > 0
+          ? recordLevel(
+              gameId,
+              n,
+              stars,
+              Math.round(stats.score ?? (Number.isFinite(score) ? score : 0)),
+            )
+          : { prevStars: 0 };
       const gained = Math.max(0, stars - prevStars);
       const outcome = recordGame(gameId, stats.score ?? 0, {
         xp: 5 + gained * 10,
