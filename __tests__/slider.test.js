@@ -3,13 +3,13 @@ import { LEVELS, scoreFor, starsFor } from "../src/games/slider/levels";
 import { hashString } from "../src/lib/random";
 
 describe("Sliding rules at any size", () => {
-  test.each([3, 4, 5])("%i×%i: neighbours respect edges", (size) => {
+  test.each([3, 4, 5, 6])("%i×%i: neighbours respect edges", (size) => {
     expect(neighbors(0, size).sort((a, b) => a - b)).toEqual([1, size]);
     const last = size * size - 1;
     expect(neighbors(last, size).sort((a, b) => a - b)).toEqual([last - size, last - 1]);
   });
 
-  test.each([3, 4, 5])("%i×%i: slide only moves tiles next to the gap", (size) => {
+  test.each([3, 4, 5, 6])("%i×%i: slide only moves tiles next to the gap", (size) => {
     const board = solvedBoard(size);
     expect(slide(board, 0)).toBeNull();
     const moved = slide(board, board.length - 2);
@@ -26,9 +26,11 @@ describe("Sliding rules at any size", () => {
 });
 
 describe("Picture Slider levels", () => {
-  test("grow from 3×3 to 5×5 and are never pre-solved", () => {
+  test("grow from 3×3 to 6×6 and are never pre-solved", () => {
+    expect(LEVELS).toHaveLength(18);
     expect(LEVELS[0].size).toBe(3);
-    expect(LEVELS[LEVELS.length - 1].size).toBe(5);
+    expect(LEVELS[LEVELS.length - 1].size).toBe(6);
+    expect(LEVELS.filter((l) => l.pictureOnly).length).toBe(4);
     LEVELS.forEach((l) => {
       expect(l.board).toHaveLength(l.size * l.size);
       expect(isSolved(l.board)).toBe(false);

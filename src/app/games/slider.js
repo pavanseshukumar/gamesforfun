@@ -142,11 +142,13 @@ export default function PictureSlider() {
         scoreLabel="Moves"
         best={progress[n]?.stars ? "⭐".repeat(progress[n].stars) : undefined}
         right={
-          <IconButton
-            icon={showNumbers ? "eye" : "eye-off"}
-            label={showNumbers ? "Hide numbers" : "Show numbers"}
-            onPress={() => setShowNumbers((v) => !v)}
-          />
+          level.pictureOnly ? undefined : (
+            <IconButton
+              icon={showNumbers ? "eye" : "eye-off"}
+              label={showNumbers ? "Hide numbers" : "Show numbers"}
+              onPress={() => setShowNumbers((v) => !v)}
+            />
+          )
         }
       />
 
@@ -157,6 +159,7 @@ export default function PictureSlider() {
           </Text>
           <Text className="font-body-bold text-xs text-ink-soft">
             {level.name} · par {level.par}
+            {level.pictureOnly ? " · 🖼 no numbers" : ""}
           </Text>
         </View>
         <View className="flex-row items-center">
@@ -175,7 +178,7 @@ export default function PictureSlider() {
           board={board}
           variant={level.variant}
           boardSize={boardSize}
-          showNumbers={showNumbers}
+          showNumbers={showNumbers && !level.pictureOnly}
           solved={solved}
           onTap={tap}
         />

@@ -1,5 +1,6 @@
 /**
- * Picture Slider levels: sliding-tile pictures that grow from 3×3 to 5×5.
+ * Picture Slider levels: sliding-tile pictures that grow from 3×3 to 6×6.
+ * Levels 13–16 are "picture only": the number hints are switched off.
  * Each board is a fixed seeded scramble, and "par" is the scramble's length —
  * always achievable (undo the scramble), so 3 stars is always within reach.
  */
@@ -7,7 +8,7 @@ import { hashString } from "../../lib/random";
 import { scramble } from "../sliding";
 
 const SPEC = [
-  // [name, size, mascot, scramble moves]
+  // [name, size, mascot, scramble moves, picture only?]
   ["Zip Says Hi", 3, "zip", 20],
   ["Bloop's Glasses", 3, "bloop", 26],
   ["Gloop Glows", 3, "gloop", 32],
@@ -20,11 +21,17 @@ const SPEC = [
   ["Sunny Day", 5, "sunny", 120],
   ["Zip Marathon", 5, "zip", 150],
   ["Grand Gallery", 5, "bloop", 180],
+  ["Picture Only", 3, "gloop", 30, true],
+  ["Pip Portrait", 4, "pip", 60, true],
+  ["Sunny Sketch", 4, "sunny", 90, true],
+  ["Bloop Blur", 5, "bloop", 130, true],
+  ["Six by Six", 6, "zip", 170],
+  ["Mega Mosaic", 6, "gloop", 220],
 ];
 
-export const LEVELS = SPEC.map(([name, size, variant, moves], i) => {
+export const LEVELS = SPEC.map(([name, size, variant, moves, pictureOnly = false], i) => {
   const { board, path } = scramble(hashString(`slider:${i + 1}`), size, moves);
-  return { name, size, variant, board, par: path.length - 1 };
+  return { name, size, variant, board, par: path.length - 1, pictureOnly };
 });
 
 /** 3 stars at or under par, 2 within 60% over, otherwise 1. */
