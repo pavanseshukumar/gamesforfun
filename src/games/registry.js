@@ -126,6 +126,18 @@ export const GAMES = [
     lowerIsBetter: false,
   },
   {
+    id: "slice",
+    route: "/games/slice",
+    title: "Slice Splash",
+    tagline: "Swipe to slice, dodge the Grumps",
+    emoji: "🔪",
+    mascot: "sunny",
+    colors: ["#FFB3D1", "#FF5C8A"],
+    accent: "#FF3D7A",
+    unit: "pts",
+    lowerIsBetter: false,
+  },
+  {
     // The daily puzzle has its own banner on Home, so it stays out of the
     // carousel and quick play. Its mascot changes every day.
     id: "daily",

@@ -20,6 +20,7 @@ export const BACKDROPS = {
   "blob-launch": ["#8FD3FF", "#CDEBFF", "#F2FAFF"],
   slider: ["#FFD39A", "#FFE9CC", "#FFF8EE"],
   maze: ["#9FF0D6", "#D2FAEE", "#F2FFFB"],
+  slice: ["#FFB3D1", "#FFDDEA", "#FFF5F9"],
 };
 
 /** Shared soft shadow for white cards. */
