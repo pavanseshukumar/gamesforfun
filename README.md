@@ -53,7 +53,8 @@ npm start          # then scan the QR code with Expo Go on your phone
 npm run web        # or try it in a browser (arrow keys work in Fusion and Color Catch)
 ```
 
-Other scripts: `npm run lint`, `npm run format`, `npm run export:web`.
+Other scripts: `npm test` (unit tests), `npm run lint`, `npm run format`, `npm run export:web`.
+GitHub Actions runs lint, tests and a web build on every push.
 
 App art is generated, not hand-exported: `node scripts/generate-icons.mjs` renders the app icon,
 Android adaptive and themed icon layers, splash image and favicon from the same mascot geometry as

@@ -16,11 +16,12 @@ Use `bunx` instead of `npx` if the project uses bun (`bun.lock` present).
 npx expo install <package>  # ALWAYS use instead of npm/yarn/pnpm/bun add — resolves SDK-compatible versions
 npx expo start              # start the dev server
 npx expo lint               # lint
+npm test                    # unit tests (Jest, jest-expo preset; tests live in __tests__/)
 npx expo-doctor             # diagnose dependency and config issues
 npx expo install --fix      # fix incompatible package versions
 ```
 
-Run `npx expo lint` before declaring any task done. This project is plain JavaScript (no TypeScript).
+Run `npx expo lint` and `npm test` before declaring any task done; CI (.github/workflows/ci.yml) runs both plus a web build on every push. This project is plain JavaScript (no TypeScript).
 
 ## Navigation & Routing
 
