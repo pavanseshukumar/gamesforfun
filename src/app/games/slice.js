@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
 import Animated, {
@@ -14,6 +15,7 @@ import Animated, {
 import { scheduleOnRN } from "react-native-worklets";
 
 import { PrimaryButton } from "../../components/Buttons";
+import { ChallengeGoal, ChallengeResult, LevelsButton } from "../../components/Challenge";
 import GameHeader from "../../components/GameHeader";
 import GameOverModal from "../../components/GameOverModal";
 import GradientScreen from "../../components/GradientScreen";
@@ -21,6 +23,8 @@ import Grump from "../../components/Grump";
 import Mascot from "../../components/Mascot";
 import ScorePopup from "../../components/ScorePopup";
 import { getGame } from "../../games/registry";
+import { SLICE_DEFAULTS } from "../../games/slice/levels";
+import useChallenge from "../../games/useChallenge";
 import { comboBonus, GRAVITY, launchVy, segmentDistance, waveFor } from "../../games/slice/logic";
 import { haptic } from "../../lib/haptics";
 import { popFor, sfx } from "../../lib/sound";
@@ -30,7 +34,7 @@ import { display } from "../../theme";
 const GAME = getGame("slice");
 const POOL = 12;
 const R = 30; // bubble radius
-const LIVES = 3;
+const METRIC_UNITS = { score: "pts", combo: "in one swipe", sliced: "sliced" };
 const TRAIL = 10; // trail points kept
 const TRAIL_LIFE = 0.18; // seconds a trail point stays visible
 const COLORS = ["#FF5C8A", "#3F8CFF", "#2BD67B", "#FFB800", "#A26BFA", "#FF8A3D"];
@@ -56,7 +60,12 @@ const freshItems = () =>
     vr: 0,
   }));
 
-const freshSim = (w, h) => ({
+// Level rules live in the sim so the UI-thread worklet can read them.
+const freshSim = (w, h, cfg = SLICE_DEFAULTS) => ({
+  grumpScale: cfg.grumpScale,
+  goldenRate: cfg.goldenRate,
+  waveScale: cfg.waveScale,
+  sizeBonus: cfg.sizeBonus,
   running: false,
   w,
   h,
@@ -211,9 +220,21 @@ function TrailSegment({ j, sim }) {
   );
 }
 
-export default function SliceSplash() {
+// Remount per level so every level starts from a clean slate.
+export default function SliceSplashScreen() {
+  const { level } = useLocalSearchParams();
+  return <SliceSplash key={level ?? "endless"} />;
+}
+
+function SliceSplash() {
   const best = useGameStore((s) => s.best[GAME.id]);
   const recordGame = useGameStore((s) => s.recordGame);
+  const challenge = useChallenge(GAME.id);
+  const cfg = useMemo(
+    () => ({ ...SLICE_DEFAULTS, ...(challenge.level?.config ?? {}) }),
+    [challenge.level],
+  );
+  const LIVES = cfg.lives;
 
   const [phase, setPhase] = useState("ready"); // ready | playing | over
   const [score, setScore] = useState(0);
@@ -224,7 +245,16 @@ export default function SliceSplash() {
   const sim = useSharedValue(freshSim(360, 600));
   const shake = useSharedValue(0);
   const flash = useSharedValue(0);
-  const run = useRef({ score: 0, lives: LIVES, bestCombo: 0, clean: 0, hitGrump: false });
+  const run = useRef({
+    score: 0,
+    lives: LIVES,
+    bestCombo: 0,
+    clean: 0,
+    sliced: 0,
+    hitGrump: false,
+  });
+  const roundTimer = useRef(null);
+  const [secondsLeft, setSecondsLeft] = useState(null);
   const popupId = useRef(0);
 
   const handlers = useRef(null);
@@ -240,14 +270,15 @@ export default function SliceSplash() {
 
       if (s.t >= s.nextWave) {
         const wave = waveFor(s.t);
-        s.nextWave = s.t + wave.interval * (0.8 + Math.random() * 0.4);
+        s.nextWave = s.t + wave.interval * s.waveScale * (0.8 + Math.random() * 0.4);
+        const grumpChance = wave.grumpChance * s.grumpScale;
         let launched = 0;
-        for (let i = 0; i < POOL && launched < wave.size; i++) {
+        for (let i = 0; i < POOL && launched < wave.size + s.sizeBonus; i++) {
           const it = s.items[i];
           if (it.a) continue;
           const x = R + Math.random() * (s.w - 2 * R);
           const roll = Math.random();
-          it.k = roll < wave.grumpChance ? GRUMP : roll < wave.grumpChance + 0.06 ? GOLDEN : BUBBLE;
+          it.k = roll < grumpChance ? GRUMP : roll < grumpChance + s.goldenRate ? GOLDEN : BUBBLE;
           it.c = Math.floor(Math.random() * COLORS.length);
           it.x = x;
           it.y = s.h + R;
@@ -345,13 +376,32 @@ export default function SliceSplash() {
     });
     setPhase("over");
     haptic.heavy();
+    clearTimeout(roundTimer.current);
     const r = run.current;
+    const records = { ssBestCombo: r.bestCombo, ssClean: r.clean };
+    if (challenge.level) {
+      const res = challenge.complete(
+        { score: r.score, combo: r.bestCombo, sliced: r.sliced },
+        records,
+      );
+      setResult({ ...res, challenge: true });
+      return;
+    }
     const outcome = recordGame(GAME.id, r.score, {
       xp: 10 + Math.floor(r.score / 2),
-      records: { ssBestCombo: r.bestCombo, ssClean: r.clean },
+      records,
     });
     setResult({ ...outcome, bestCombo: r.bestCombo });
-  }, [loop, recordGame, sim]);
+  }, [challenge, loop, recordGame, sim]);
+  useEffect(() => () => clearTimeout(roundTimer.current), []);
+
+  // Visible countdown for timed levels.
+  const timed = cfg.duration > 0 && phase === "playing";
+  useEffect(() => {
+    if (!timed) return undefined;
+    const id = setInterval(() => setSecondsLeft((t) => Math.max(0, (t ?? 0) - 1)), 1000);
+    return () => clearInterval(id);
+  }, [timed]);
 
   const loseLife = useCallback(() => {
     const r = run.current;
@@ -389,6 +439,7 @@ export default function SliceSplash() {
         }
         const points = kind === GOLDEN ? 5 : 1;
         r.score += points;
+        r.sliced += 1;
         if (!r.hitGrump) r.clean = r.score;
         setScore(r.score);
         haptic.tap();
@@ -412,18 +463,22 @@ export default function SliceSplash() {
   }, [addPopup, loseLife]);
 
   const start = () => {
-    run.current = { score: 0, lives: LIVES, bestCombo: 0, clean: 0, hitGrump: false };
+    run.current = { score: 0, lives: LIVES, bestCombo: 0, clean: 0, sliced: 0, hitGrump: false };
     setScore(0);
     setLives(LIVES);
     setPopups([]);
     setResult(null);
     const { w, h } = sim.get();
-    const fresh = freshSim(w, h);
+    const fresh = freshSim(w, h, cfg);
     fresh.running = true;
     sim.set(fresh);
     setPhase("playing");
     loop.setActive(true);
     sfx("go");
+    // Timed levels end when the clock runs out (hearts still apply).
+    clearTimeout(roundTimer.current);
+    setSecondsLeft(cfg.duration > 0 ? cfg.duration : null);
+    if (cfg.duration > 0) roundTimer.current = setTimeout(() => endGame(), cfg.duration * 1000);
   };
 
   const fieldStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shake.value }] }));
@@ -432,12 +487,19 @@ export default function SliceSplash() {
 
   return (
     <GradientScreen theme={GAME.id} edges={["top", "bottom"]}>
-      <GameHeader title={GAME.title} score={score} best={best} />
+      <GameHeader
+        title={challenge.level ? `Level ${challenge.n}` : GAME.title}
+        score={score}
+        best={challenge.level ? undefined : best}
+      />
       <View className="mt-3 flex-row items-center justify-between px-5">
         <Text className="font-body-bold text-xs text-ink-soft">
           Swipe to slice · avoid the Grumps
         </Text>
-        <View className="flex-row gap-1">
+        <View className="flex-row items-center gap-1">
+          {secondsLeft != null && phase === "playing" && (
+            <Text className="mr-2 font-body-black text-sm text-ink">⏱ {secondsLeft}s</Text>
+          )}
           {Array.from({ length: LIVES }, (_, i) => (
             <Text key={i} style={{ fontSize: 20, opacity: i < lives ? 1 : 0.25 }}>
               ❤️
@@ -499,26 +561,48 @@ export default function SliceSplash() {
                   <Mascot variant={GAME.mascot} size={120} mood="cheer" />
                 </Animated.View>
                 <Text style={[display(44), { marginTop: 6 }]}>Slice Splash</Text>
-                <Text className="mt-2 text-center font-body-semi text-sm leading-5 text-ink-soft">
-                  Swipe through the jelly bubbles before they fall.{"\n"}Slice 3+ in one swipe for a
-                  combo · golden = +5{"\n"}Don&apos;t slice the Grumps!
-                </Text>
-                <View className="mt-3">
-                  <Grump size={44} />
-                </View>
+                {challenge.level ? (
+                  <ChallengeGoal level={challenge.level} n={challenge.n} />
+                ) : (
+                  <>
+                    <Text className="mt-2 text-center font-body-semi text-sm leading-5 text-ink-soft">
+                      Swipe through the jelly bubbles before they fall.{"\n"}Slice 3+ in one swipe
+                      for a combo · golden = +5{"\n"}Don&apos;t slice the Grumps!
+                    </Text>
+                    <View className="mt-3">
+                      <Grump size={44} />
+                    </View>
+                  </>
+                )}
                 <PrimaryButton
                   title="Start slicing"
                   icon="cut"
                   onPress={start}
                   style={{ marginTop: 16 }}
                 />
+                {!challenge.level && (
+                  <LevelsButton
+                    gameId={GAME.id}
+                    count={challenge.count}
+                    onPress={challenge.openLevels}
+                    style={{ marginTop: 10 }}
+                  />
+                )}
               </Animated.View>
             )}
           </View>
         </Animated.View>
       </GestureDetector>
 
-      {phase === "over" && result && (
+      {phase === "over" && result?.challenge && (
+        <ChallengeResult
+          game={GAME}
+          challenge={challenge}
+          result={result}
+          unit={METRIC_UNITS[challenge.level.metric]}
+        />
+      )}
+      {phase === "over" && result && !result.challenge && (
         <GameOverModal
           title="Splashed out!"
           game={GAME}
