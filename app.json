@@ -12,7 +12,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#0B0A1A",
+        "backgroundColor": "#FFE14D",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -28,10 +28,17 @@
       "expo-router",
       "expo-status-bar",
       "expo-font",
-      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "backgroundColor": "#FFF04D",
+          "imageWidth": 240
+        }
+      ],
       "expo-audio"
     ],
     "scheme": "gamesforfun",
-    "backgroundColor": "#0B0A1A"
+    "backgroundColor": "#FFF04D"
   }
 }

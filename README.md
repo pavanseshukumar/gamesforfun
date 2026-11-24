@@ -55,6 +55,10 @@ npm run web        # or try it in a browser (arrow keys work in Fusion and Color
 
 Other scripts: `npm run lint`, `npm run format`, `npm run export:web`.
 
+App art is generated, not hand-exported: `node scripts/generate-icons.mjs` renders the app icon,
+Android adaptive and themed icon layers, splash image and favicon from the same mascot geometry as
+the app (needs Playwright + Chromium).
+
 ## Project layout
 
 ```
@@ -86,4 +90,4 @@ The home screen picks it up automatically. See `AGENTS.md` for styling and anima
 - Background music with its own volume control
 - More games: word pop, stack tower, simon-says blobs
 - Online leaderboards (Supabase or Firebase)
-- App icon, splash screen and store builds with EAS
+- Store builds with EAS
