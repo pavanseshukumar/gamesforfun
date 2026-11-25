@@ -72,6 +72,9 @@ Docs: https://docs.expo.dev/eas/index.md
   must stand still at rest and be clearable within 3 shots; `__tests__/blob.test.js` checks this with
   a headless solver, so re-run `npm test` after editing physics constants or levels. Create bodies
   dynamic and *then* `Body.setStatic(true)`: a body created static has infinite mass once released.
+- **Launch flow:** the root layout waits for the store to hydrate (`lib/useHydrated.js`), shows
+  `AnimatedSplash`, and gates `(tabs)` behind `Stack.Protected guard={onboarded}`; `welcome.js` sets
+  `onboarded` when done (Settings → Replay intro clears it).
 - **Store selectors:** never return a fresh `{}`/`[]` fallback from a `useGameStore` selector (it
   re-renders forever, React error #185); use a module-level constant instead.
 - **Tilt:** use `src/lib/useTilt.js`, which normalises the accelerometer sign across iOS, Android

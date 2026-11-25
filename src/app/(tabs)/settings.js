@@ -46,6 +46,7 @@ export default function Settings() {
   const sound = useGameStore((s) => s.sound ?? true);
   const setSound = useGameStore((s) => s.setSound);
   const resetStats = useGameStore((s) => s.resetStats);
+  const setOnboarded = useGameStore((s) => s.setOnboarded);
   const catchMode = useGameStore((s) => s.controls?.colorCatch ?? "tilt");
   const setControl = useGameStore((s) => s.setControl);
 
@@ -198,6 +199,23 @@ export default function Settings() {
           <Text className="ml-2 mt-2 font-body text-xs text-ink-mute">
             Tilt falls back to drag on devices without a motion sensor.
           </Text>
+        </Section>
+
+        <Section title="Help" delay={320}>
+          <PressableScale scaleTo={0.97} onPress={() => setOnboarded(false)}>
+            <View className="flex-row items-center">
+              <View className="h-11 w-11 items-center justify-center rounded-full bg-[#F3F1FA]">
+                <Ionicons name="play-circle-outline" size={20} color={INK} />
+              </View>
+              <View className="ml-3 flex-1">
+                <Text className="font-body-bold text-base text-ink">Replay intro</Text>
+                <Text className="font-body text-xs text-ink-mute">
+                  See the welcome screens again
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#9A98A8" />
+            </View>
+          </PressableScale>
         </Section>
 
         <Section title="Danger zone" delay={360}>

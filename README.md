@@ -12,6 +12,8 @@ quick-play button in the middle.
 
 ## Screens
 
+- **Splash**: the native splash hands off to an animated one (mascot crew pops in, loading bar)
+- **Welcome** (first launch, replayable from Settings): four swipeable intro pages ending with buddy and name setup
 - **Home**: "Hey {name}!" hero with the mascot crew, streak pill, numbered game carousel, level card
 - **Profile**: your name huge, your buddy, level, games played, streak, XP, rank and badge showcase
 - **Dress Up**: 16 hats, eyewear and neckwear for your buddy, unlocked by level, level stars, streaks and games played

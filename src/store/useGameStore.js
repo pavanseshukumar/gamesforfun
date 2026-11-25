@@ -34,6 +34,7 @@ export const useGameStore = create(
       ...FRESH_STATS,
       name: "Player",
       avatar: "zip",
+      onboarded: false, // false until the intro screens are finished
       outfit: EMPTY_OUTFIT, // Dress-Up: { hat, face, neck } item ids or null
       haptics: true,
       sound: true,
@@ -105,6 +106,7 @@ export const useGameStore = create(
       setControl: (game, mode) => set((s) => ({ controls: { ...s.controls, [game]: mode } })),
       markAwardsSeen: (ids) => set({ seenAwards: ids }),
       setName: (name) => set({ name }),
+      setOnboarded: (onboarded) => set({ onboarded }),
       setAvatar: (avatar) => set({ avatar }),
       /** Puts an item on (or takes the slot off with null). */
       setOutfitItem: (slot, id) =>
