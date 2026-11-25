@@ -217,6 +217,19 @@ export const ALL_GAMES = [
     lowerIsBetter: false,
   },
   {
+    id: "odd",
+    category: "brain",
+    route: "/games/odd",
+    title: "Odd One Out",
+    tagline: "Spot the different one, fast",
+    emoji: "👀",
+    mascot: "pip",
+    colors: ["#FFB86B", "#FF5E8A"],
+    accent: "#F0457A",
+    unit: "pts",
+    lowerIsBetter: false,
+  },
+  {
     // The daily puzzle has its own banner on Home, so it stays out of the
     // carousel and quick play. Its mascot changes every day.
     id: "daily",

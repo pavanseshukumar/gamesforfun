@@ -19,6 +19,7 @@ import { COLOR_CATCH_LEVELS } from "./colorCatch/levels";
 import { FUSION_LEVELS } from "./fusion/levels";
 import { MATH_LEVELS } from "./math/levels";
 import { MEMORY_LEVELS } from "./memory/levels";
+import { ODD_LEVELS } from "./odd/levels";
 import { SLICE_LEVELS } from "./slice/levels";
 import { STACK_LEVELS } from "./stack/levels";
 import { TAP_RUSH_LEVELS } from "./tapRush/levels";
@@ -35,6 +36,7 @@ export const CHALLENGES = {
   fusion: FUSION_LEVELS,
   memory: MEMORY_LEVELS,
   balance: BALANCE_LEVELS,
+  odd: ODD_LEVELS,
 };
 
 export const challengesFor = (gameId) => CHALLENGES[gameId] ?? null;

@@ -6,6 +6,7 @@ import { FUSION_DEFAULTS } from "../src/games/fusion/levels";
 import { BALANCE_DEFAULTS } from "../src/games/balance/levels";
 import { MATH_DEFAULTS } from "../src/games/math/levels";
 import { MEMORY_DEFAULTS } from "../src/games/memory/levels";
+import { ODD_DEFAULTS } from "../src/games/odd/levels";
 import { SLICE_DEFAULTS } from "../src/games/slice/levels";
 import { STACK_DEFAULTS } from "../src/games/stack/levels";
 import { TAP_RUSH_DEFAULTS } from "../src/games/tapRush/levels";
@@ -23,6 +24,7 @@ const DEFAULTS = {
   fusion: FUSION_DEFAULTS,
   memory: MEMORY_DEFAULTS,
   balance: BALANCE_DEFAULTS,
+  odd: ODD_DEFAULTS,
 };
 
 describe.each(Object.entries(CHALLENGES))("%s challenge levels", (gameId, levels) => {
