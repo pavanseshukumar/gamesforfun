@@ -150,6 +150,18 @@ export const GAMES = [
     lowerIsBetter: false,
   },
   {
+    id: "pipes",
+    route: "/games/pipes",
+    title: "Pipe Flow",
+    tagline: "Turn pipes, water the flower",
+    emoji: "🚿",
+    mascot: "pip",
+    colors: ["#8FE0FF", "#2F9BFF"],
+    accent: "#1F84E6",
+    unit: "stars",
+    lowerIsBetter: false,
+  },
+  {
     // The daily puzzle has its own banner on Home, so it stays out of the
     // carousel and quick play. Its mascot changes every day.
     id: "daily",
