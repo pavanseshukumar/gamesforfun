@@ -281,6 +281,15 @@ export const ACHIEVEMENTS = [
     value: (s) => Object.values(s.levels?.lights ?? {}).filter((l) => l.stars > 0).length,
   },
   {
+    id: "one-stroke",
+    title: "One Stroke",
+    desc: "Paint 5 Path Painter levels",
+    emoji: "🖌️",
+    colors: ["#FFD6CC", "#F0507A"],
+    goal: 5,
+    value: (s) => Object.values(s.levels?.paint ?? {}).filter((l) => l.stars > 0).length,
+  },
+  {
     id: "juicy",
     title: "Juicy",
     desc: "Score 60 in Slice Splash",

@@ -188,6 +188,19 @@ export const GAMES = [
     lowerIsBetter: false,
   },
   {
+    id: "paint",
+    category: "puzzle",
+    route: "/games/paint",
+    title: "Path Painter",
+    tagline: "One line through every square",
+    emoji: "🖌️",
+    mascot: "gloop",
+    colors: ["#FFB3A7", "#FF6F91"],
+    accent: "#F0507A",
+    unit: "stars",
+    lowerIsBetter: false,
+  },
+  {
     // The daily puzzle has its own banner on Home, so it stays out of the
     // carousel and quick play. Its mascot changes every day.
     id: "daily",
