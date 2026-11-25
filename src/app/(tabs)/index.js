@@ -11,6 +11,7 @@ import XpBar from "../../components/XpBar";
 import { ARCADE } from "../../games/registry";
 import useAchievements from "../../games/useAchievements";
 import useOutfit from "../../games/useOutfit";
+import { greetingLines } from "../../lib/fitText";
 import { levelInfo, rankFor } from "../../lib/progress";
 import useFocusKey from "../../lib/useFocusKey";
 import { useGameStore } from "../../store/useGameStore";
@@ -69,17 +70,20 @@ export default function Home() {
 
         {/* Hero: giant greeting with the mascot crew stepping in front */}
         <View style={{ alignItems: "center", marginTop: 14 }}>
-          <Animated.Text
-            entering={ZoomIn.springify().damping(12)}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            style={[
-              display(Math.min(84, heroSize * 0.2)),
-              { paddingHorizontal: 16, textAlign: "center" },
-            ]}
-          >
-            Hey {firstName}!
-          </Animated.Text>
+          {/* Long names drop onto their own line instead of being cut off. */}
+          <Animated.View entering={ZoomIn.springify().damping(12)}>
+            {greetingLines(firstName, heroSize - 32, { max: Math.min(84, heroSize * 0.2) }).map(
+              (line) => (
+                <Text
+                  key={line.text}
+                  numberOfLines={1}
+                  style={[display(line.size), { paddingHorizontal: 16, textAlign: "center" }]}
+                >
+                  {line.text}
+                </Text>
+              ),
+            )}
+          </Animated.View>
           <View
             style={{ flexDirection: "row", alignItems: "flex-end", marginTop: -heroSize * 0.07 }}
           >

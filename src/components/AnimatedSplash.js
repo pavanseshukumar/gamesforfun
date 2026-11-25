@@ -45,7 +45,7 @@ export default function AnimatedSplash({ done }) {
       style={[StyleSheet.absoluteFill, { zIndex: 50 }]}
     >
       <LinearGradient
-        colors={BACKDROPS.home}
+        colors={BACKDROPS.welcome}
         locations={[0, 0.45, 1]}
         style={StyleSheet.absoluteFill}
       />

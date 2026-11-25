@@ -32,13 +32,13 @@
         "expo-splash-screen",
         {
           "image": "./assets/splash-icon.png",
-          "backgroundColor": "#FFF04D",
+          "backgroundColor": "#5EB6FF",
           "imageWidth": 240
         }
       ],
       "expo-audio"
     ],
     "scheme": "gamesforfun",
-    "backgroundColor": "#FFF04D"
+    "backgroundColor": "#5EB6FF"
   }
 }

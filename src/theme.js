@@ -6,6 +6,8 @@ export const INK = "#141414";
 
 export const BACKDROPS = {
   home: ["#FFF04D", "#E4F98A", "#F6FDE4"],
+  // Launch splash and intro: a calm sky blue fading to soft lilac.
+  welcome: ["#5EB6FF", "#A3D8FF", "#EEE9FF"],
   profile: ["#6FB1FF", "#AFD3FF", "#EAF4FF"],
   awards: ["#A8EE5B", "#D6F9A3", "#F4FFE6"],
   settings: ["#CDB8FF", "#E6DCFF", "#FAF7FF"],

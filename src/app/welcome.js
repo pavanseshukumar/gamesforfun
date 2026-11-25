@@ -232,7 +232,7 @@ export default function Welcome() {
   const last = page === PAGES - 1;
 
   return (
-    <GradientScreen theme="home" edges={["top", "bottom"]}>
+    <GradientScreen theme="welcome" edges={["top", "bottom"]}>
       <Animated.View entering={FadeIn.duration(300)} style={{ flex: 1 }}>
         <View className="h-14 flex-row items-center justify-end px-5">
           {!last && (

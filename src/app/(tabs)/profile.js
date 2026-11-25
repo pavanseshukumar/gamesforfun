@@ -11,6 +11,7 @@ import XpBar from "../../components/XpBar";
 import { GAMES, mascotFor } from "../../games/registry";
 import useAchievements from "../../games/useAchievements";
 import useOutfit from "../../games/useOutfit";
+import { fitSize } from "../../lib/fitText";
 import { levelInfo, rankFor } from "../../lib/progress";
 import useFocusKey from "../../lib/useFocusKey";
 import { useGameStore } from "../../store/useGameStore";
@@ -78,9 +79,8 @@ export default function Profile() {
         <Animated.Text
           entering={ZoomIn.springify().damping(12)}
           numberOfLines={1}
-          adjustsFontSizeToFit
           style={[
-            display(Math.min(92, width * 0.22)),
+            display(fitSize(name || "Player", width - 32, Math.min(92, width * 0.22))),
             { textAlign: "center", marginTop: 12, paddingHorizontal: 16 },
           ]}
         >
