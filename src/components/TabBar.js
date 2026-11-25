@@ -35,6 +35,7 @@ const PAD = 8;
 const CENTER = 84; // gap left for the raised Play bubble
 const BLOB_W = 50;
 const BLOB_H = 32;
+const EDGE = 8; // closest the blob may get to the bar's rounded ends
 const MUTED = "#9A97AE";
 
 function Tab({ name, focused, onPress, width }) {
@@ -146,22 +147,19 @@ export default function TabBar({ state, emitter, navigateToTab }) {
   const centres = [0, 1, 2, 3].map((i) => PAD + tabW * (i + 0.5) + (i >= 2 ? CENTER : 0));
 
   const blobStyle = useAnimatedStyle(() => {
-    const raw = pos.value;
-    // The spring overshoots past the first and last tab; keep the blob inside the
-    // bar and turn that overshoot into a squish against the edge instead.
-    const p = Math.min(3, Math.max(0, raw));
-    const over = Math.min(0.3, Math.abs(raw - p) * 1.6);
-    const i = Math.min(2, Math.floor(p));
-    const x = centres[i] + (centres[i + 1] - centres[i]) * (p - i);
+    const p = pos.value;
+    const i = Math.min(2, Math.max(0, Math.floor(p)));
+    const raw = centres[i] + (centres[i + 1] - centres[i]) * (p - i);
     // Stretch a little while travelling, like jelly.
     const travel = Math.abs(p - Math.round(p));
+    const scaleX = 1 + travel * 0.5;
+    // The spring may overshoot past Home or Settings: the blob moves exactly as
+    // before but simply stops at the bar's inner edge instead of sliding out.
+    const half = (BLOB_W / 2) * scaleX;
+    const x = Math.min(barW - EDGE - half, Math.max(EDGE + half, raw));
     return {
       backgroundColor: interpolateColor(p, [0, 1, 2, 3], COLORS),
-      transform: [
-        { translateX: x - BLOB_W / 2 },
-        { scaleX: (1 + travel * 0.5) * (1 - over) },
-        { scaleY: 1 + over * 0.6 },
-      ],
+      transform: [{ translateX: x - BLOB_W / 2 }, { scaleX }],
     };
   });
 
