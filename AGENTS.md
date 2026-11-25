@@ -88,7 +88,7 @@ Docs: https://docs.expo.dev/eas/index.md
 - **Tab bar:** Expo Router 58 passes custom `tabBar` components `state`, `descriptors`, `emitter`
   and `navigateToTab(routeKey)`, with no `navigation` object. See `components/TabBar.js`.
 - **Haptics:** always go through `src/lib/haptics.js` (respects the settings toggle, no-op on web).
-- **Level-based games** (Blob Launch, Picture Slider, Maze Dash, Pipe Flow): use `components/LevelGrid.js` for the level
+- **Level-based games** (Blob Launch, Picture Slider, Maze Dash, Pipe Flow, Light It Up): use `components/LevelGrid.js` for the level
   select and the store's `levels` slice (`recordLevel(gameId, n, stars, score)`), then call
   `recordGame(gameId, totalStars, …)` so "best" is total stars. Sliding-tile boards come from
   `src/games/sliding.js` (any N×N) and render with `components/SlidingBoard.js`.

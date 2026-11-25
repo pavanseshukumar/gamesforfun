@@ -4,6 +4,7 @@
  */
 import { LEVELS as BLOB_LEVELS } from "./blob/levels";
 import { CHALLENGES } from "./challenges";
+import { LEVEL_NAMES as LIGHT_LEVELS } from "./lights/levels";
 import { LEVEL_NAMES as MAZE_LEVELS } from "./maze/levels";
 import { LEVEL_NAMES as PIPE_LEVELS } from "./pipes/levels";
 import { LEVELS as SLIDER_LEVELS } from "./slider/levels";
@@ -13,6 +14,7 @@ const LEVEL_GAMES = {
   slider: SLIDER_LEVELS.length,
   maze: MAZE_LEVELS.length,
   pipes: PIPE_LEVELS.length,
+  lights: LIGHT_LEVELS.length,
 };
 
 /** Number of levels a game has (level games and challenge levels alike). */

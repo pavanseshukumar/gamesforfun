@@ -272,6 +272,15 @@ export const ACHIEVEMENTS = [
     value: (s) => Object.values(s.levels?.pipes ?? {}).filter((l) => l.stars > 0).length,
   },
   {
+    id: "bright-spark",
+    title: "Bright Spark",
+    desc: "Clear 5 Light It Up levels",
+    emoji: "💡",
+    colors: ["#D6CEFF", "#6B4DFF"],
+    goal: 5,
+    value: (s) => Object.values(s.levels?.lights ?? {}).filter((l) => l.stars > 0).length,
+  },
+  {
     id: "juicy",
     title: "Juicy",
     desc: "Score 60 in Slice Splash",

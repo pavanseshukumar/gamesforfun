@@ -175,6 +175,19 @@ export const GAMES = [
     lowerIsBetter: false,
   },
   {
+    id: "lights",
+    category: "puzzle",
+    route: "/games/lights",
+    title: "Light It Up",
+    tagline: "Flip lamps, light the whole board",
+    emoji: "💡",
+    mascot: "sunny",
+    colors: ["#9C8CFF", "#3D2F9E"],
+    accent: "#6B4DFF",
+    unit: "stars",
+    lowerIsBetter: false,
+  },
+  {
     // The daily puzzle has its own banner on Home, so it stays out of the
     // carousel and quick play. Its mascot changes every day.
     id: "daily",
