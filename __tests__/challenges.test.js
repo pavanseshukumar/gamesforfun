@@ -3,6 +3,7 @@ import { GAMES } from "../src/games/registry";
 import { BOUNCE_DEFAULTS } from "../src/games/bounce/levels";
 import { COLOR_CATCH_DEFAULTS } from "../src/games/colorCatch/levels";
 import { FUSION_DEFAULTS } from "../src/games/fusion/levels";
+import { BALANCE_DEFAULTS } from "../src/games/balance/levels";
 import { MATH_DEFAULTS } from "../src/games/math/levels";
 import { MEMORY_DEFAULTS } from "../src/games/memory/levels";
 import { SLICE_DEFAULTS } from "../src/games/slice/levels";
@@ -21,6 +22,7 @@ const DEFAULTS = {
   "word-pop": WORD_POP_DEFAULTS,
   fusion: FUSION_DEFAULTS,
   memory: MEMORY_DEFAULTS,
+  balance: BALANCE_DEFAULTS,
 };
 
 describe.each(Object.entries(CHALLENGES))("%s challenge levels", (gameId, levels) => {

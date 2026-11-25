@@ -13,6 +13,7 @@
  * Games register their list here; the shared level select, the useChallenge
  * hook and the tests all read from this one place.
  */
+import { BALANCE_LEVELS } from "./balance/levels";
 import { BOUNCE_LEVELS } from "./bounce/levels";
 import { COLOR_CATCH_LEVELS } from "./colorCatch/levels";
 import { FUSION_LEVELS } from "./fusion/levels";
@@ -33,6 +34,7 @@ export const CHALLENGES = {
   "word-pop": WORD_POP_LEVELS,
   fusion: FUSION_LEVELS,
   memory: MEMORY_LEVELS,
+  balance: BALANCE_LEVELS,
 };
 
 export const challengesFor = (gameId) => CHALLENGES[gameId] ?? null;

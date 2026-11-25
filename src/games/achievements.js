@@ -290,6 +290,15 @@ export const ACHIEVEMENTS = [
     value: (s) => Object.values(s.levels?.paint ?? {}).filter((l) => l.stars > 0).length,
   },
   {
+    id: "steady-hands",
+    title: "Steady Hands",
+    desc: "Score 60 in Balance Buddy",
+    emoji: "⚖️",
+    colors: ["#BFF2DE", "#1E9E89"],
+    goal: 60,
+    value: (s) => s.best.balance ?? 0,
+  },
+  {
     id: "juicy",
     title: "Juicy",
     desc: "Score 60 in Slice Splash",

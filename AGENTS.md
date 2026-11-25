@@ -66,7 +66,8 @@ Docs: https://docs.expo.dev/eas/index.md
   fixed pool of sprites whose `useAnimatedStyle` reads from the sim, so React never re-renders per
   frame. Send discrete events (catch, land, game over) to JS with `scheduleOnRN` from
   `react-native-worklets`, through a stable `emit` callback that forwards to a handler ref.
-- **Physics games** (Blob Launch): simulation lives in a React-free module (`src/games/blob/world.js`,
+- **Physics games** (Blob Launch, Balance Buddy — `src/games/balance/world.js`, whose tests drive it with
+  `autoBalance` and check every challenge level is clearable): simulation lives in a React-free module (`src/games/blob/world.js`,
   matter-js) so the app and the tests share it. The screen steps it at a fixed 60 Hz in a
   `requestAnimationFrame` loop and writes poses into one shared value for the sprites. Every level
   must stand still at rest and be clearable within 3 shots; `__tests__/blob.test.js` checks this with

@@ -201,6 +201,19 @@ export const GAMES = [
     lowerIsBetter: false,
   },
   {
+    id: "balance",
+    category: "action",
+    route: "/games/balance",
+    title: "Balance Buddy",
+    tagline: "Tip the seesaw, keep Bloop on",
+    emoji: "⚖️",
+    mascot: "bloop",
+    colors: ["#9EE6C9", "#2FB8A0"],
+    accent: "#1E9E89",
+    unit: "pts",
+    lowerIsBetter: false,
+  },
+  {
     // The daily puzzle has its own banner on Home, so it stays out of the
     // carousel and quick play. Its mascot changes every day.
     id: "daily",

@@ -29,6 +29,7 @@ export const BACKDROPS = {
   pipes: ["#8FE0FF", "#CFF0FF", "#F1FBFF"],
   lights: ["#A99BFF", "#D6CEFF", "#F4F1FF"],
   paint: ["#FFC2B3", "#FFE0D6", "#FFF6F2"],
+  balance: ["#A8EBD3", "#D4F7EA", "#F2FFFA"],
 };
 
 /** Shared soft shadow for white cards. */
