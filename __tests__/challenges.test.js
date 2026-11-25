@@ -1,5 +1,5 @@
 import { CHALLENGES, starsFor, targetsText } from "../src/games/challenges";
-import { GAMES } from "../src/games/registry";
+import { ALL_GAMES } from "../src/games/registry";
 import { BOUNCE_DEFAULTS } from "../src/games/bounce/levels";
 import { COLOR_CATCH_DEFAULTS } from "../src/games/colorCatch/levels";
 import { FUSION_DEFAULTS } from "../src/games/fusion/levels";
@@ -27,7 +27,7 @@ const DEFAULTS = {
 
 describe.each(Object.entries(CHALLENGES))("%s challenge levels", (gameId, levels) => {
   test("belong to a real game", () => {
-    expect(GAMES.map((g) => g.id)).toContain(gameId);
+    expect(ALL_GAMES.map((g) => g.id)).toContain(gameId);
   });
 
   test("are well formed: name, goal, metric and three rising star targets", () => {

@@ -7,7 +7,7 @@ const total = (plays) => Object.values(plays).reduce((a, b) => a + b, 0);
  * Every achievement: `value(state)` reads the current number and `goal` is the
  * target. For "lower is better" goals, set `lower: true`.
  */
-export const ACHIEVEMENTS = [
+const ALL_ACHIEVEMENTS = [
   {
     id: "first-game",
     title: "First Steps",
@@ -291,6 +291,7 @@ export const ACHIEVEMENTS = [
   },
   {
     id: "steady-hands",
+    game: "balance",
     title: "Steady Hands",
     desc: "Score 60 in Balance Buddy",
     emoji: "⚖️",
@@ -401,6 +402,11 @@ export const ACHIEVEMENTS = [
 ];
 
 /** Progress of one achievement for a state snapshot (state.level must be set). */
+/** Trophies for hidden games are left out until the game comes back. */
+export const ACHIEVEMENTS = ALL_ACHIEVEMENTS.filter(
+  (a) => !a.game || GAMES.some((g) => g.id === a.game),
+);
+
 export function progressOf(a, state) {
   const v = a.value(state);
   if (a.lower) {

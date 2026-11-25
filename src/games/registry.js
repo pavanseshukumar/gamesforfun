@@ -4,7 +4,8 @@ import { mascotOfDay } from "./daily/logic";
  * Every game in the hub. Add a new game by creating a route in
  * src/app/games/<id>.js and adding an entry here.
  */
-export const GAMES = [
+/** Every game, including ones hidden from the app for now (`hidden: true`). */
+export const ALL_GAMES = [
   {
     id: "tap-rush",
     category: "action",
@@ -202,6 +203,8 @@ export const GAMES = [
   },
   {
     id: "balance",
+    // Hidden for now: the code and route stay, but it isn't listed anywhere.
+    hidden: true,
     category: "action",
     route: "/games/balance",
     title: "Balance Buddy",
@@ -238,10 +241,14 @@ export const CATEGORIES = [
   { id: "brain", label: "Brain", emoji: "🧠" },
 ];
 
+/** Games shown in the app. */
+export const GAMES = ALL_GAMES.filter((g) => !g.hidden);
+
 /** Games that appear in the carousel and quick play. */
 export const ARCADE = GAMES.filter((g) => !g.daily);
 
-export const getGame = (id) => GAMES.find((g) => g.id === id);
+/** Looks up any game by id, hidden ones included (their routes still work). */
+export const getGame = (id) => ALL_GAMES.find((g) => g.id === id);
 
 /** Mascot shown for a game; the daily puzzle's changes every day. */
 export const mascotFor = (game) => (game.daily ? mascotOfDay() : game.mascot);

@@ -37,3 +37,18 @@ describe("game library", () => {
     expect(recent).toHaveLength(ARCADE.length);
   });
 });
+
+describe("hidden games", () => {
+  test("stay out of every list but keep their route", () => {
+    const { ALL_GAMES, GAMES, getGame } = require("../src/games/registry");
+    const { ACHIEVEMENTS } = require("../src/games/achievements");
+    const hidden = ALL_GAMES.filter((g) => g.hidden).map((g) => g.id);
+    expect(hidden).toContain("balance");
+    for (const id of hidden) {
+      expect(GAMES.some((g) => g.id === id)).toBe(false);
+      expect(ARCADE.some((g) => g.id === id)).toBe(false);
+      expect(getGame(id)).toBeTruthy();
+      expect(ACHIEVEMENTS.some((a) => a.game === id)).toBe(false);
+    }
+  });
+});
