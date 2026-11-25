@@ -27,7 +27,7 @@ page = f"""<title>Games For Fun</title>
 <meta name="description" content="Twelve arcade games and a daily puzzle with bright mascots.">
 <style>
   html, body {{ height: 100%; }}
-  body {{ overflow: hidden; background: #FFF04D; color: #141414; }}
+  body {{ overflow: hidden; background: #5EB6FF; color: #141414; }}
   #root {{ display: flex; height: 100%; flex: 1; }}
 </style>
 <script>

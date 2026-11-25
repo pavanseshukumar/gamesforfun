@@ -98,9 +98,11 @@ function mascot(variant, mood = "happy", { shadow = true } = {}) {
     ${mouth(mood)}${accessory(variant, c)}${eyes(variant, mood)}`;
 }
 
-const sunnyBg = (w, h) => `
-  <defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0" stop-color="#FFF04D"/><stop offset="1" stop-color="#FFC933"/>
+// Cotton candy: pink top-left, through lilac, to baby blue bottom-right.
+const CANDY = ["#FF9BCF", "#D7B6FF", "#9FD3FF"];
+const candyBg = (w, h) => `
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="${CANDY[0]}"/><stop offset=".55" stop-color="${CANDY[1]}"/><stop offset="1" stop-color="${CANDY[2]}"/>
   </linearGradient></defs>
   <rect width="${w}" height="${h}" fill="url(#bg)"/>
   <circle cx="${w * 0.12}" cy="${h * 0.1}" r="${w * 0.32}" fill="#fff" opacity=".25"/>
@@ -132,14 +134,14 @@ const JOBS = [
     file: "icon.png",
     w: 1024,
     h: 1024,
-    body: sunnyBg(1024, 1024) + sparkles(1024) + place(mascot("zip", "cheer"), 162, 150, 700),
+    body: candyBg(1024, 1024) + sparkles(1024) + place(mascot("zip", "cheer"), 162, 150, 700),
   },
   {
     // Android adaptive icon, background layer
     file: "android-icon-background.png",
     w: 512,
     h: 512,
-    body: sunnyBg(512, 512) + sparkles(512),
+    body: candyBg(512, 512) + sparkles(512),
   },
   {
     // Android adaptive icon, foreground layer: keep inside the central safe zone
@@ -185,7 +187,7 @@ const JOBS = [
     h: 48,
     transparent: true,
     body:
-      `<defs><linearGradient id="fb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF04D"/><stop offset="1" stop-color="#FFC933"/></linearGradient></defs>
+      `<defs><linearGradient id="fb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${CANDY[0]}"/><stop offset=".55" stop-color="${CANDY[1]}"/><stop offset="1" stop-color="${CANDY[2]}"/></linearGradient></defs>
        <rect width="48" height="48" rx="12" fill="url(#fb)"/>` + place(mascot("zip", "happy", { shadow: false }), 4, 2, 40),
   },
 ];

@@ -1,11 +1,12 @@
 /**
  * Design tokens for the bright "playground" look: each screen gets its own
- * sunny gradient, ink-black type and white cards.
+ * bright gradient, ink-black type and white cards.
  */
 export const INK = "#141414";
 
 export const BACKDROPS = {
-  home: ["#FFF04D", "#E4F98A", "#F6FDE4"],
+  // Cotton candy: a punchy pink under the big greeting, fading to lilac and baby blue.
+  home: ["#FFA3D4", "#E5C9FF", "#D6EDFF"],
   // Launch splash and intro: a calm sky blue fading to soft lilac.
   welcome: ["#5EB6FF", "#A3D8FF", "#EEE9FF"],
   profile: ["#6FB1FF", "#AFD3FF", "#EAF4FF"],
