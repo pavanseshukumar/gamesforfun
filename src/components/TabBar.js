@@ -146,14 +146,22 @@ export default function TabBar({ state, emitter, navigateToTab }) {
   const centres = [0, 1, 2, 3].map((i) => PAD + tabW * (i + 0.5) + (i >= 2 ? CENTER : 0));
 
   const blobStyle = useAnimatedStyle(() => {
-    const p = pos.value;
-    const i = Math.min(2, Math.max(0, Math.floor(p)));
+    const raw = pos.value;
+    // The spring overshoots past the first and last tab; keep the blob inside the
+    // bar and turn that overshoot into a squish against the edge instead.
+    const p = Math.min(3, Math.max(0, raw));
+    const over = Math.min(0.3, Math.abs(raw - p) * 1.6);
+    const i = Math.min(2, Math.floor(p));
     const x = centres[i] + (centres[i + 1] - centres[i]) * (p - i);
     // Stretch a little while travelling, like jelly.
     const travel = Math.abs(p - Math.round(p));
     return {
       backgroundColor: interpolateColor(p, [0, 1, 2, 3], COLORS),
-      transform: [{ translateX: x - BLOB_W / 2 }, { scaleX: 1 + travel * 0.5 }],
+      transform: [
+        { translateX: x - BLOB_W / 2 },
+        { scaleX: (1 + travel * 0.5) * (1 - over) },
+        { scaleY: 1 + over * 0.6 },
+      ],
     };
   });
 
