@@ -490,7 +490,7 @@ function SliceSplash() {
       <GameHeader
         title={challenge.level ? `Level ${challenge.n}` : GAME.title}
         score={score}
-        best={challenge.level ? undefined : best}
+        best={challenge.level ? challenge.bestLabel : best}
       />
       <View className="mt-3 flex-row items-center justify-between px-5">
         <Text className="font-body-bold text-xs text-ink-soft">

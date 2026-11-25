@@ -5,7 +5,6 @@ import { Platform, ScrollView, Text, View } from "react-native";
 import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
 import Animated, {
   Easing,
-  FadeInDown,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -20,6 +19,7 @@ import Confetti from "../../components/Confetti";
 import GameHeader from "../../components/GameHeader";
 import GameOverModal from "../../components/GameOverModal";
 import GradientScreen from "../../components/GradientScreen";
+import LevelsHeader from "../../components/LevelsHeader";
 import LevelGrid, { Stars, totalStars } from "../../components/LevelGrid";
 import Mascot from "../../components/Mascot";
 import { getLevels, LEVEL_NAMES } from "../../games/maze/levels";
@@ -318,28 +318,18 @@ export default function MazeDash() {
           <View style={{ width: 48 }} />
         </View>
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
-          <Animated.View entering={FadeInDown.springify()}>
-            <View
-              style={cardShadow}
-              className="mb-5 flex-row items-center rounded-[28px] bg-white p-4"
-            >
-              <Mascot variant={GAME.mascot} size={70} mood="cheer" />
-              <View className="ml-3 flex-1">
-                <Text style={display(30)}>Maze Dash</Text>
-                <Text className="font-body text-xs leading-4 text-ink-mute">
-                  Swipe and Pip runs to the next junction. Grab the key, reach the portal in as few
-                  swipes as you can!
-                </Text>
-              </View>
-              <View className="items-center">
-                <Text style={display(26)}>{totalStars(progress)}</Text>
-                <Text className="font-body-bold text-[10px] text-ink-mute">
-                  / {LEVEL_NAMES.length * 3} ⭐
-                </Text>
-              </View>
-            </View>
-          </Animated.View>
-          <LevelGrid levels={LEVEL_NAMES} progress={progress} onPick={startLevel} />
+          <LevelsHeader
+            game={GAME}
+            blurb="Swipe and Pip runs to the next junction. Grab the key, reach the portal in as few swipes as you can!"
+            stars={totalStars(progress)}
+            max={levels.length * 3}
+          />
+          <LevelGrid
+            levels={LEVEL_NAMES}
+            progress={progress}
+            onPick={startLevel}
+            accent={GAME.accent}
+          />
         </ScrollView>
       </GradientScreen>
     );

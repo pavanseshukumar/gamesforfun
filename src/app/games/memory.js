@@ -346,7 +346,7 @@ function Memory() {
         title={challenge.level ? `Level ${challenge.n}` : "Memory"}
         score={moves}
         scoreLabel="Moves"
-        best={challenge.level ? undefined : best}
+        best={challenge.level ? challenge.bestLabel : best}
         right={<IconButton icon="shuffle" label="New deck" onPress={restart} />}
       />
 

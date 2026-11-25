@@ -1,15 +1,14 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { IconButton } from "../../components/Buttons";
+import LevelsHeader from "../../components/LevelsHeader";
 import LevelGrid, { totalStars } from "../../components/LevelGrid";
 import GradientScreen from "../../components/GradientScreen";
-import Mascot from "../../components/Mascot";
 import { challengesFor } from "../../games/challenges";
 import { getGame } from "../../games/registry";
 import { useGameStore } from "../../store/useGameStore";
-import { cardShadow, display } from "../../theme";
+import { display } from "../../theme";
 
 const NO_PROGRESS = {};
 
@@ -29,29 +28,16 @@ export default function ChallengeLevels() {
         <View style={{ width: 48 }} />
       </View>
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
-        <Animated.View entering={FadeInDown.springify()}>
-          <View
-            style={cardShadow}
-            className="mb-5 flex-row items-center rounded-[28px] bg-white p-4"
-          >
-            <Mascot variant={game.mascot} size={70} mood="cheer" />
-            <View className="ml-3 flex-1">
-              <Text style={display(30)}>{game.title}</Text>
-              <Text className="font-body text-xs leading-4 text-ink-mute">
-                Special challenges with their own rules. Clear one to unlock the next!
-              </Text>
-            </View>
-            <View className="items-center">
-              <Text style={display(26)}>{totalStars(progress)}</Text>
-              <Text className="font-body-bold text-[10px] text-ink-mute">
-                / {levels.length * 3} ⭐
-              </Text>
-            </View>
-          </View>
-        </Animated.View>
+        <LevelsHeader
+          game={game}
+          blurb="Special challenges with their own rules. Clear one to unlock the next!"
+          stars={totalStars(progress)}
+          max={levels.length * 3}
+        />
         <LevelGrid
           levels={levels}
           progress={progress}
+          accent={game.accent}
           onPick={(i) => router.push(`/games/${game.id}?level=${i + 1}`)}
         />
       </ScrollView>

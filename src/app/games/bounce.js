@@ -457,7 +457,7 @@ function BounceBuddy() {
       <GameHeader
         title={challenge.level ? `Level ${challenge.n}` : "Bounce"}
         score={score}
-        best={challenge.level ? undefined : best}
+        best={challenge.level ? challenge.bestLabel : best}
       />
       {cfg.timeLimit > 0 && phase === "playing" && secondsLeft != null && (
         <View className="mt-2 items-center">

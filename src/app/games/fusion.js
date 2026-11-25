@@ -278,7 +278,7 @@ function Fusion() {
       <GameHeader
         title={challenge.level ? `Level ${challenge.n}` : GAME.title}
         score={score}
-        best={challenge.level ? undefined : best}
+        best={challenge.level ? challenge.bestLabel : best}
         right={<IconButton icon="refresh" label="Restart" onPress={restart} />}
       />
 

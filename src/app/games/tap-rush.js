@@ -403,7 +403,7 @@ function TapRush() {
       <GameHeader
         title={challenge.level ? `Level ${challenge.n}` : GAME.title}
         score={score}
-        best={challenge.level ? undefined : best}
+        best={challenge.level ? challenge.bestLabel : best}
       />
 
       <View className="mt-4 px-5">

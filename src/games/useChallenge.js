@@ -16,6 +16,7 @@ export default function useChallenge(gameId) {
   const level = n && list[n - 1] ? list[n - 1] : null;
   const recordLevel = useGameStore((s) => s.recordLevel);
   const recordGame = useGameStore((s) => s.recordGame);
+  const levelStars = useGameStore((s) => (n ? (s.levels?.[gameId]?.[n]?.stars ?? 0) : 0));
 
   /** Judges a finished round. Returns the result for the result sheet. */
   const complete = useCallback(
@@ -55,6 +56,8 @@ export default function useChallenge(gameId) {
       level,
       n,
       hasNext: level != null && n < list.length,
+      /** Header "best" for a level: its best stars so far ("–" before the first clear). */
+      bestLabel: levelStars > 0 ? "⭐".repeat(levelStars) : "–",
       count: list?.length ?? 0,
       complete,
       goNext: () => router.replace(`/games/${gameId}?level=${n + 1}`),
@@ -62,6 +65,6 @@ export default function useChallenge(gameId) {
       toList: () => router.replace(`/levels/${gameId}`),
       openLevels: () => router.push(`/levels/${gameId}`),
     }),
-    [complete, gameId, level, list, n],
+    [complete, gameId, level, levelStars, list, n],
   );
 }

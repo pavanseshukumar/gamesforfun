@@ -86,7 +86,12 @@ export default function Awards() {
                   label={a.done ? "✓" : a.label}
                   size={col * 0.62}
                 />
-                <Text numberOfLines={1} className="mt-3 font-body-black text-[13px] text-ink">
+                {/* Long titles shrink a little instead of being cut off on small phones. */}
+                <Text
+                  numberOfLines={1}
+                  className="mt-3 font-body-black text-ink"
+                  style={{ fontSize: Math.min(13, (col - 18) / (a.title.length * 0.6)) }}
+                >
                   {a.title}
                 </Text>
                 <Text

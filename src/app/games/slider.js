@@ -1,15 +1,14 @@
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { ScrollView, Text, useWindowDimensions, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { IconButton } from "../../components/Buttons";
 import Confetti from "../../components/Confetti";
 import GameHeader from "../../components/GameHeader";
 import GameOverModal from "../../components/GameOverModal";
 import GradientScreen from "../../components/GradientScreen";
+import LevelsHeader from "../../components/LevelsHeader";
 import LevelGrid, { Stars, totalStars } from "../../components/LevelGrid";
-import Mascot from "../../components/Mascot";
 import PuzzleArt from "../../components/PuzzleArt";
 import SlidingBoard from "../../components/SlidingBoard";
 import { getGame } from "../../games/registry";
@@ -18,7 +17,7 @@ import { LEVELS, scoreFor, starsFor } from "../../games/slider/levels";
 import { haptic } from "../../lib/haptics";
 import { sfx } from "../../lib/sound";
 import { useGameStore } from "../../store/useGameStore";
-import { cardShadow, display } from "../../theme";
+import { display } from "../../theme";
 
 const GAME = getGame("slider");
 // Stable fallback: a fresh {} per render would make the store selector loop forever.
@@ -105,27 +104,13 @@ export default function PictureSlider() {
           <View style={{ width: 48 }} />
         </View>
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
-          <Animated.View entering={FadeInDown.springify()}>
-            <View
-              style={cardShadow}
-              className="mb-5 flex-row items-center rounded-[28px] bg-white p-4"
-            >
-              <Mascot variant={GAME.mascot} size={70} mood="cheer" />
-              <View className="ml-3 flex-1">
-                <Text style={display(30)}>Picture Slider</Text>
-                <Text className="font-body text-xs leading-4 text-ink-mute">
-                  Slide the tiles to rebuild each picture. Match par for 3 stars!
-                </Text>
-              </View>
-              <View className="items-center">
-                <Text style={display(26)}>{totalStars(progress)}</Text>
-                <Text className="font-body-bold text-[10px] text-ink-mute">
-                  / {LEVELS.length * 3} ⭐
-                </Text>
-              </View>
-            </View>
-          </Animated.View>
-          <LevelGrid levels={LEVELS} progress={progress} onPick={startLevel} />
+          <LevelsHeader
+            game={GAME}
+            blurb="Slide the tiles to rebuild each picture. Match par for 3 stars!"
+            stars={totalStars(progress)}
+            max={LEVELS.length * 3}
+          />
+          <LevelGrid levels={LEVELS} progress={progress} onPick={startLevel} accent={GAME.accent} />
         </ScrollView>
       </GradientScreen>
     );

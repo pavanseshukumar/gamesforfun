@@ -2,12 +2,7 @@ import { router } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
-import Animated, {
-  FadeIn,
-  FadeInDown,
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated";
+import Animated, { FadeIn, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import Svg, { Path } from "react-native-svg";
 
 import { IconButton } from "../../components/Buttons";
@@ -15,6 +10,7 @@ import GameHeader from "../../components/GameHeader";
 import GameOverModal from "../../components/GameOverModal";
 import GradientScreen from "../../components/GradientScreen";
 import Grump from "../../components/Grump";
+import LevelsHeader from "../../components/LevelsHeader";
 import LevelGrid, { Stars, totalStars } from "../../components/LevelGrid";
 import Mascot from "../../components/Mascot";
 import ScorePopup from "../../components/ScorePopup";
@@ -34,7 +30,7 @@ import { getGame } from "../../games/registry";
 import { haptic } from "../../lib/haptics";
 import { sfx } from "../../lib/sound";
 import { useGameStore } from "../../store/useGameStore";
-import { cardShadow, display } from "../../theme";
+import { display } from "../../theme";
 
 const GAME = getGame("blob-launch");
 const SHOTS = 3;
@@ -178,25 +174,14 @@ function LevelSelect({ progress, onPick }) {
   const total = totalStars(progress);
   return (
     <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
-      <Animated.View entering={FadeInDown.springify()}>
-        <View style={cardShadow} className="mb-5 flex-row items-center rounded-[28px] bg-white p-4">
-          <Mascot variant={GAME.mascot} size={70} mood="cheer" />
-          <View className="ml-3 flex-1">
-            <Text style={display(30)}>Blob Launch</Text>
-            <Text className="font-body text-xs leading-4 text-ink-mute">
-              Drag back to aim, let go to fling Zip. Pop every Grump in 3 shots!
-            </Text>
-          </View>
-          <View className="items-center">
-            <Text style={display(26)}>{total}</Text>
-            <Text className="font-body-bold text-[10px] text-ink-mute">
-              / {LEVELS.length * 3} ⭐
-            </Text>
-          </View>
-        </View>
-      </Animated.View>
+      <LevelsHeader
+        game={GAME}
+        blurb="Drag back to aim, let go to fling Zip. Pop every Grump in 3 shots!"
+        stars={total}
+        max={LEVELS.length * 3}
+      />
 
-      <LevelGrid levels={LEVELS} progress={progress} onPick={onPick} />
+      <LevelGrid levels={LEVELS} progress={progress} onPick={onPick} accent={GAME.accent} />
     </ScrollView>
   );
 }

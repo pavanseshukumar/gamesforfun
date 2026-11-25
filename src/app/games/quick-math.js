@@ -289,7 +289,7 @@ function QuickMath() {
       <GameHeader
         title={challenge.level ? `Level ${challenge.n}` : GAME.title}
         score={score}
-        best={challenge.level ? undefined : best}
+        best={challenge.level ? challenge.bestLabel : best}
       />
 
       <View className="mt-4 flex-row items-center justify-between px-5">

@@ -327,7 +327,7 @@ function StackTower() {
       <GameHeader
         title={challenge.level ? `Level ${challenge.n}` : "Stack"}
         score={score}
-        best={challenge.level ? undefined : best}
+        best={challenge.level ? challenge.bestLabel : best}
       />
 
       <View
