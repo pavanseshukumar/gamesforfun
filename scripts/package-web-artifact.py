@@ -23,7 +23,7 @@ for root, _, files in os.walk(out):
 orig = open(os.path.join(src, "index.html")).read()
 css = re.findall(r'href="/(_expo/static/css/[^"]+)"', orig)
 js = [renames.get(os.path.basename(j), os.path.basename(j)) for j in re.findall(r'src="/_expo/static/js/web/([^"]+)"', orig)]
-page = f"""<title>Games For Fun</title>
+page = f"""<title>Playzo</title>
 <meta name="description" content="Bite-size arcade and puzzle games with bright mascots.">
 <style>
   html, body {{ height: 100%; }}

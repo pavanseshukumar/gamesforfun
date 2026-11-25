@@ -1,4 +1,4 @@
-# Games for Fun 🎮
+# Playzo 🎮
 
 A bright, playful mobile hub of quick mini-games, built with **Expo (React Native)**, **JavaScript**,
 **NativeWind (Tailwind CSS)** and **Reanimated** for smooth, native-thread animations.

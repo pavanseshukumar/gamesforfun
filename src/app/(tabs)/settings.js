@@ -246,7 +246,7 @@ export default function Settings() {
         </Section>
 
         <Text className="mt-8 text-center font-body text-xs text-ink-mute">
-          Games for Fun · v2.1
+          Playzo · v2.1
         </Text>
       </ScrollView>
     </GradientScreen>

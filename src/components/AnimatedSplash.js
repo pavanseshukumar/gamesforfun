@@ -69,8 +69,12 @@ export default function AnimatedSplash({ done }) {
           ))}
         </View>
         <Animated.View style={[{ marginTop: 18, alignItems: "center" }, titleStyle]}>
-          <Text style={[display(64), { lineHeight: 66, textAlign: "center" }]}>GAMES</Text>
-          <Text style={[display(34), { lineHeight: 38, textAlign: "center" }]}>FOR FUN</Text>
+          <Text style={[display(78), { lineHeight: 84, textAlign: "center", letterSpacing: 1 }]}>
+            Playzo
+          </Text>
+          <Text className="text-center font-body-bold text-sm text-ink-soft">
+            Bite-size games, big fun
+          </Text>
         </Animated.View>
         <View
           style={{

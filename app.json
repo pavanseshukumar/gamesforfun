@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "Games For Fun",
-    "slug": "gamesforfun",
+    "name": "Playzo",
+    "slug": "playzo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.gamesforfun.app"
+      "bundleIdentifier": "com.playzo.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +17,7 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "package": "com.gamesforfun.app"
+      "package": "com.playzo.app"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -38,7 +38,7 @@
       ],
       "expo-audio"
     ],
-    "scheme": "gamesforfun",
+    "scheme": "playzo",
     "backgroundColor": "#5EB6FF"
   }
 }

@@ -179,7 +179,7 @@ const JOBS = [
       place(mascot("bloop", "cool"), 150, 250, 300) +
       place(mascot("gloop", "wow"), 574, 250, 300) +
       place(mascot("zip", "cheer"), 312, 170, 400) +
-      `<text x="512" y="800" text-anchor="middle" font-family="Anton" font-size="150" fill="#141414">GAMES FOR FUN</text>`,
+      `<text x="512" y="800" text-anchor="middle" font-family="Anton" font-size="190" fill="#141414">PLAYZO</text>`,
   },
   {
     file: "favicon.png",

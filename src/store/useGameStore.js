@@ -159,6 +159,7 @@ export const useGameStore = create(
       resetStats: () => set({ ...FRESH_STATS }),
     }),
     {
+      // The storage key keeps the app's original name: changing it would wipe saved progress.
       name: "gamesforfun-v1",
       storage: createJSONStorage(() => AsyncStorage),
     },

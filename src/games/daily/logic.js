@@ -22,6 +22,8 @@ export const slide = sliding.slide;
 export const shuffledBoard = (seed, moves = SHUFFLE_MOVES) =>
   sliding.scramble(seed, SIZE, moves).board;
 
+// The seed keeps the app's original name on purpose: changing it would change every
+// daily puzzle (including today's) and break server-side checks of daily results.
 export const seedForDay = (day = dayKey()) => hashString(`gamesforfun:${day}`);
 
 export const todaysBoard = (day = dayKey()) => shuffledBoard(seedForDay(day));

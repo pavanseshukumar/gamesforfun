@@ -62,7 +62,7 @@ function Hello({ width, height }) {
       </View>
       <Title>Hey there!</Title>
       <Body>
-        Welcome to Games for Fun: bite-size games starring Zip, Bloop, Gloop, Pip and Sunny.
+        Welcome to Playzo: bite-size games starring Zip, Bloop, Gloop, Pip and Sunny.
       </Body>
     </Page>
   );
