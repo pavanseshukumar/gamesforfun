@@ -24,7 +24,7 @@ orig = open(os.path.join(src, "index.html")).read()
 css = re.findall(r'href="/(_expo/static/css/[^"]+)"', orig)
 js = [renames.get(os.path.basename(j), os.path.basename(j)) for j in re.findall(r'src="/_expo/static/js/web/([^"]+)"', orig)]
 page = f"""<title>Games For Fun</title>
-<meta name="description" content="Twelve arcade games and a daily puzzle with bright mascots.">
+<meta name="description" content="Bite-size arcade and puzzle games with bright mascots.">
 <style>
   html, body {{ height: 100%; }}
   body {{ overflow: hidden; background: #5EB6FF; color: #141414; }}
