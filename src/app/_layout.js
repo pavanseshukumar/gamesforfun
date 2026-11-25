@@ -16,6 +16,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import AnimatedSplash, { SPLASH_MS } from "../components/AnimatedSplash";
+import { markRevealed } from "../lib/launch";
 import { initSound } from "../lib/sound";
 import useHydrated from "../lib/useHydrated";
 import { useGameStore } from "../store/useGameStore";
@@ -48,6 +49,13 @@ export default function RootLayout() {
     return () => clearTimeout(id);
   }, []);
 
+  // The splash leaves once its minimum time is up (or it's tapped) and saved
+  // progress has loaded; the first screen then plays its entrance underneath.
+  const revealed = splashDone && hydrated;
+  useEffect(() => {
+    if (revealed) markRevealed();
+  }, [revealed]);
+
   if (!loaded && !error) return null;
 
   return (
@@ -69,7 +77,7 @@ export default function RootLayout() {
             <Stack.Screen name="games/color-catch" options={{ gestureEnabled: false }} />
           </Stack>
         )}
-        <AnimatedSplash done={splashDone && hydrated} />
+        <AnimatedSplash done={revealed} onSkip={() => hydrated && setSplashDone(true)} />
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

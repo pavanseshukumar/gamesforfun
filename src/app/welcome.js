@@ -12,6 +12,7 @@ import XpBar from "../components/XpBar";
 import { totalLevelCount } from "../games/library";
 import { ARCADE } from "../games/registry";
 import { haptic } from "../lib/haptics";
+import { useLaunch } from "../lib/launch";
 import { sfx } from "../lib/sound";
 import { useGameStore } from "../store/useGameStore";
 import { cardShadow, display, INK } from "../theme";
@@ -61,9 +62,7 @@ function Hello({ width, height }) {
         <Mascot variant="gloop" size={86} mood="wow" delay={500} />
       </View>
       <Title>Hey there!</Title>
-      <Body>
-        Welcome to Playzo: bite-size games starring Zip, Bloop, Gloop, Pip and Sunny.
-      </Body>
+      <Body>Welcome to Playzo: bite-size games starring Zip, Bloop, Gloop, Pip and Sunny.</Body>
     </Page>
   );
 }
@@ -196,6 +195,8 @@ function Setup({ width, height, avatar, setAvatar, name, setName, onDone }) {
 export default function Welcome() {
   const { width } = useWindowDimensions();
   const scroller = useRef(null);
+  // Fade in again as the splash leaves, so the intro arrives on cue.
+  const revealed = useLaunch((st) => st.revealed);
   const [page, setPage] = useState(0);
   const [pageH, setPageH] = useState(0);
   const storedName = useGameStore((s) => s.name);
@@ -224,7 +225,11 @@ export default function Welcome() {
 
   return (
     <GradientScreen theme="welcome" edges={["top", "bottom"]}>
-      <Animated.View entering={FadeIn.duration(300)} style={{ flex: 1 }}>
+      <Animated.View
+        key={revealed ? "shown" : "hidden"}
+        entering={FadeIn.duration(300)}
+        style={{ flex: 1 }}
+      >
         <View className="h-14 flex-row items-center justify-end px-5">
           {!last && (
             <PressableScale onPress={() => goTo(PAGES - 1)} accessibilityRole="button">

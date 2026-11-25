@@ -17,7 +17,7 @@ import { BACKDROPS, display } from "../theme";
 import Mascot from "./Mascot";
 
 /** How long the opening plays before the app may take over. */
-export const SPLASH_MS = 2600;
+export const SPLASH_MS = 2200;
 const EXIT_MS = 420;
 
 const CREW = [
@@ -202,7 +202,7 @@ function Sparkle({ x, y, size, delay }) {
  * the crew dropping in, the PLAYZO letters popping up, a celebration hop, then
  * a zoom-and-fade into the app once `done` is set.
  */
-export default function AnimatedSplash({ done }) {
+export default function AnimatedSplash({ done, onSkip }) {
   const { width, height } = useWindowDimensions();
   const [gone, setGone] = useState(false);
   const bar = useSharedValue(0);
@@ -211,7 +211,7 @@ export default function AnimatedSplash({ done }) {
 
   useEffect(() => {
     bar.set(withTiming(1, { duration: SPLASH_MS - 250, easing: Easing.inOut(Easing.cubic) }));
-    tag.set(withDelay(1350, withTiming(1, { duration: 450, easing: Easing.out(Easing.cubic) })));
+    tag.set(withDelay(1050, withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) })));
   }, [bar, tag]);
 
   useEffect(() => {
@@ -246,6 +246,10 @@ export default function AnimatedSplash({ done }) {
   return (
     <Animated.View
       pointerEvents={done ? "none" : "auto"}
+      // Tap anywhere to skip straight to the app.
+      onStartShouldSetResponder={() => !done}
+      onResponderGrant={onSkip}
+      accessibilityLabel="Skip intro animation"
       style={[StyleSheet.absoluteFill, { zIndex: 50 }, sceneStyle]}
     >
       <LinearGradient
@@ -270,8 +274,8 @@ export default function AnimatedSplash({ done }) {
               key={m.variant}
               {...m}
               // Outside-in: the edges land first and Zip drops last, in the middle.
-              delay={150 + [0, 2, 4, 3, 1][i] * 110}
-              hopDelay={1250 + i * 80}
+              delay={100 + [0, 2, 4, 3, 1][i] * 90}
+              hopDelay={1000 + i * 70}
             />
           ))}
         </View>
@@ -279,12 +283,12 @@ export default function AnimatedSplash({ done }) {
         <View style={{ marginTop: 18 }}>
           <View style={{ flexDirection: "row" }}>
             {LETTERS.map((l, i) => (
-              <Letter key={l.ch} {...l} size={letterSize} delay={650 + i * 75} />
+              <Letter key={l.ch} {...l} size={letterSize} delay={480 + i * 65} />
             ))}
           </View>
-          <Sparkle x={-18} y={-6} size={20} delay={1150} />
-          <Sparkle x={letterSize * 5.1} y={-14} size={26} delay={1300} />
-          <Sparkle x={letterSize * 4.6} y={letterSize * 0.9} size={16} delay={1450} />
+          <Sparkle x={-18} y={-6} size={20} delay={950} />
+          <Sparkle x={letterSize * 5.1} y={-14} size={26} delay={1080} />
+          <Sparkle x={letterSize * 4.6} y={letterSize * 0.9} size={16} delay={1200} />
         </View>
 
         <Animated.View style={[{ marginTop: 10 }, tagStyle]}>

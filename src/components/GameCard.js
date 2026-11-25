@@ -52,7 +52,8 @@ export default function GameCard({ game, index, best, width }) {
               {index + 1}
             </Text>
             <View style={{ marginBottom: -6, marginLeft: 36 }}>
-              <Mascot variant={game.mascot} size={124} delay={index * 350} />
+              {/* Only the first cards bob: off-screen ones stay still to keep Home light. */}
+              <Mascot variant={game.mascot} size={124} delay={index * 350} animated={index < 3} />
             </View>
           </LinearGradient>
 

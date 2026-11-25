@@ -16,6 +16,7 @@ import useAchievements from "../../games/useAchievements";
 import useOutfit from "../../games/useOutfit";
 import { greetingLines } from "../../lib/fitText";
 import { levelInfo, rankFor } from "../../lib/progress";
+import { useLaunch } from "../../lib/launch";
 import useFocusKey from "../../lib/useFocusKey";
 import { useGameStore } from "../../store/useGameStore";
 import { cardShadow, display, INK } from "../../theme";
@@ -30,6 +31,8 @@ function greeting() {
 export default function Home() {
   const { width } = useWindowDimensions();
   const focusKey = useFocusKey();
+  // Replays the entrance once the splash starts leaving, so Home arrives on cue.
+  const revealed = useLaunch((s) => s.revealed);
   const name = useGameStore((s) => s.name);
   const avatar = useGameStore((s) => s.avatar);
   const { outfit } = useOutfit();
@@ -47,7 +50,7 @@ export default function Home() {
   return (
     <GradientScreen theme="home">
       <ScrollView
-        key={focusKey}
+        key={`${focusKey}-${revealed ? 1 : 0}`}
         contentContainerStyle={{ paddingBottom: 140 }}
         showsVerticalScrollIndicator={false}
       >

@@ -245,9 +245,7 @@ export default function Settings() {
           </PressableScale>
         </Section>
 
-        <Text className="mt-8 text-center font-body text-xs text-ink-mute">
-          Playzo · v2.1
-        </Text>
+        <Text className="mt-8 text-center font-body text-xs text-ink-mute">Playzo · v2.1</Text>
       </ScrollView>
     </GradientScreen>
   );
