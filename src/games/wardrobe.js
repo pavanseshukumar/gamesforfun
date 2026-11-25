@@ -11,7 +11,10 @@ export const SLOTS = [
   { id: "neck", label: "Neck" },
 ];
 
-/** need.kind: "level" (player level), "stars" (level stars), "streak" (best streak), "plays". */
+/**
+ * need.kind: "level" (player level), "stars" (level stars), "streak" (best streak),
+ * "plays" (games played), "goals" (daily goals completed).
+ */
 export const ITEMS = [
   { id: "party", slot: "hat", name: "Party Hat", need: { kind: "level", n: 2 } },
   { id: "cap", slot: "hat", name: "Cap", need: { kind: "stars", n: 10 } },
@@ -20,6 +23,8 @@ export const ITEMS = [
   { id: "tophat", slot: "hat", name: "Top Hat", need: { kind: "level", n: 5 } },
   { id: "wizard", slot: "hat", name: "Wizard Hat", need: { kind: "stars", n: 60 } },
   { id: "crown", slot: "hat", name: "Crown", need: { kind: "level", n: 8 } },
+  { id: "propeller", slot: "hat", name: "Propeller Cap", need: { kind: "goals", n: 3 } },
+  { id: "bunny", slot: "hat", name: "Bunny Ears", need: { kind: "goals", n: 9 } },
 
   { id: "specs", slot: "face", name: "Round Specs", need: { kind: "level", n: 3 } },
   { id: "shades", slot: "face", name: "Shades", need: { kind: "stars", n: 20 } },
@@ -31,6 +36,7 @@ export const ITEMS = [
   { id: "scarf", slot: "neck", name: "Scarf", need: { kind: "stars", n: 15 } },
   { id: "bandana", slot: "neck", name: "Bandana", need: { kind: "streak", n: 5 } },
   { id: "medal", slot: "neck", name: "Gold Medal", need: { kind: "level", n: 7 } },
+  { id: "lei", slot: "neck", name: "Flower Lei", need: { kind: "goals", n: 6 } },
 ];
 
 export const EMPTY_OUTFIT = { hat: null, face: null, neck: null };
@@ -38,7 +44,7 @@ export const EMPTY_OUTFIT = { hat: null, face: null, neck: null };
 export const itemById = (id) => ITEMS.find((i) => i.id === id) ?? null;
 
 /** The numbers unlocks are judged on, from the store's state. */
-export function playerStats({ xp = 0, levels = {}, bestStreak = 0, plays = {} }) {
+export function playerStats({ xp = 0, levels = {}, bestStreak = 0, plays = {}, goalsDone = 0 }) {
   let stars = 0;
   for (const game of Object.values(levels ?? {}))
     for (const l of Object.values(game ?? {})) stars += l?.stars ?? 0;
@@ -47,6 +53,7 @@ export function playerStats({ xp = 0, levels = {}, bestStreak = 0, plays = {} })
     stars,
     streak: bestStreak,
     plays: Object.values(plays ?? {}).reduce((a, b) => a + b, 0),
+    goals: goalsDone ?? 0,
   };
 }
 
@@ -60,6 +67,7 @@ const NEED_TEXT = {
   stars: (n) => `${n} ⭐`,
   streak: (n) => `${n}-day streak`,
   plays: (n) => `${n} games`,
+  goals: (n) => `${n} daily goals`,
 };
 export const needText = (need) => NEED_TEXT[need.kind](need.n);
 

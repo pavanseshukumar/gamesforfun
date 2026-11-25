@@ -173,6 +173,33 @@ function Hat({ id }) {
           <Path d={starPath(80, 56, 5, 2.2)} fill="#FFE14D" />
         </G>
       );
+    case "propeller":
+      return (
+        <G>
+          <Path d="M52 70 Q54 30 100 28 Q146 30 148 70 Q100 60 52 70 Z" fill="#4D8CFF" />
+          <Path d="M76 32 Q100 26 124 32 L124 66 Q100 60 76 66 Z" fill="#FF4D4D" />
+          <Rect x={97} y={10} width={6} height={20} rx={3} fill="#22223A" />
+          <Path d="M100 12 Q74 2 60 12 Q76 20 100 12 Z" fill="#FFD43B" />
+          <Path d="M100 12 Q126 2 140 12 Q124 20 100 12 Z" fill="#2BD67B" />
+          <Circle cx={100} cy={12} r={5} fill="#22223A" />
+        </G>
+      );
+    case "bunny":
+      return (
+        <G>
+          <Ellipse cx={74} cy={34} rx={15} ry={34} fill="#FFFFFF" rotation={-14} origin="74,34" />
+          <Ellipse cx={126} cy={34} rx={15} ry={34} fill="#FFFFFF" rotation={14} origin="126,34" />
+          <Ellipse cx={74} cy={36} rx={7} ry={24} fill="#FFB8D9" rotation={-14} origin="74,36" />
+          <Ellipse cx={126} cy={36} rx={7} ry={24} fill="#FFB8D9" rotation={14} origin="126,36" />
+          <Path
+            d="M58 64 Q100 46 142 64"
+            stroke="#FF6FB1"
+            strokeWidth={8}
+            fill="none"
+            strokeLinecap="round"
+          />
+        </G>
+      );
     case "crown":
       return (
         <G>
@@ -228,6 +255,29 @@ function Neckwear({ id }) {
           ].map(([x, y]) => (
             <Circle key={`${x}-${y}`} cx={x} cy={y} r={3} fill="#FFFFFF" />
           ))}
+        </G>
+      );
+    case "lei":
+      return (
+        <G>
+          {[44, 60, 78, 100, 122, 140, 156].map((x, i) => {
+            const y = 166 + Math.sin((i / 6) * Math.PI) * 18;
+            const colour = ["#FF6FB1", "#FFD43B", "#FF8A3D", "#B97AFF"][i % 4];
+            return (
+              <G key={x}>
+                {[0, 72, 144, 216, 288].map((a) => (
+                  <Circle
+                    key={a}
+                    cx={x + 6 * Math.cos((a * Math.PI) / 180)}
+                    cy={y + 6 * Math.sin((a * Math.PI) / 180)}
+                    r={5}
+                    fill={colour}
+                  />
+                ))}
+                <Circle cx={x} cy={y} r={3.5} fill="#FFF3B0" />
+              </G>
+            );
+          })}
         </G>
       );
     case "medal":

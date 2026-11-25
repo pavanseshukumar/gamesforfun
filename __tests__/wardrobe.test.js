@@ -18,7 +18,7 @@ describe("Dress-Up wardrobe", () => {
     const slots = SLOTS.map((s) => s.id);
     for (const item of ITEMS) {
       expect(slots).toContain(item.slot);
-      expect(["level", "stars", "streak", "plays"]).toContain(item.need.kind);
+      expect(["level", "stars", "streak", "plays", "goals"]).toContain(item.need.kind);
       expect(item.need.n).toBeGreaterThan(0);
       expect(needText(item.need)).toMatch(/\d/);
     }
@@ -33,7 +33,7 @@ describe("Dress-Up wardrobe", () => {
       bestStreak: 4,
       plays: { maze: 3, stack: 2 },
     });
-    expect(stats).toEqual({ level: 1, stars: 6, streak: 4, plays: 5 });
+    expect(stats).toEqual({ level: 1, stars: 6, streak: 4, plays: 5, goals: 0 });
   });
 
   test("items unlock exactly at their target", () => {

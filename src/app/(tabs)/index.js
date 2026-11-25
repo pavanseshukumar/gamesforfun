@@ -5,6 +5,7 @@ import Animated, { FadeIn, FadeInDown, FadeInUp, ZoomIn } from "react-native-rea
 
 import { IconButton } from "../../components/Buttons";
 import DailyBanner from "../../components/DailyBanner";
+import DailyGoals from "../../components/DailyGoals";
 import GameCard from "../../components/GameCard";
 import GradientScreen from "../../components/GradientScreen";
 import Mascot from "../../components/Mascot";
@@ -122,6 +123,14 @@ export default function Home() {
               </Text>
             </View>
           </View>
+        </Animated.View>
+
+        {/* Today's goals */}
+        <Animated.View
+          entering={FadeInUp.delay(240).springify()}
+          style={{ paddingHorizontal: 20, marginTop: 18 }}
+        >
+          <DailyGoals />
         </Animated.View>
 
         {/* Today's puzzle */}

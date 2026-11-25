@@ -15,6 +15,7 @@ quick-play button in the middle.
 - **Splash**: the native splash hands off to an animated one (mascot crew pops in, loading bar)
 - **Welcome** (first launch, replayable from Settings): four swipeable intro pages ending with buddy and name setup
 - **Home**: "Hey {name}!" hero with the mascot crew, streak pill, numbered game carousel, level card
+- **Daily goals** (on Home): three goals a day picked from a pool (play rounds, try different games, clear levels, 3-star a level, hit a score, solve the Daily Puzzle, reach a streak). Claim +30 XP each and +60 XP for all three; finishing goals unlocks the Propeller Cap, Flower Lei and Bunny Ears
 - **All games** (Home → See all): every game in a 2-column grid with Action / Puzzle / Brain filters, Featured / Recent / A–Z sorting, best score, star progress and a NEW badge
 - **Profile**: your name huge, your buddy, level, games played, streak, XP, rank and badge showcase
 - **Dress Up**: 16 hats, eyewear and neckwear for your buddy, unlocked by level, level stars, streaks and games played

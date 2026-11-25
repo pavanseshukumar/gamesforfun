@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+import { BONUS_XP, GOAL_XP, goalsFor, isDone, trackGoals } from "../games/goals";
 import { EMPTY_OUTFIT } from "../games/wardrobe";
 import { dayKey, levelInfo } from "../lib/progress";
 
@@ -23,6 +24,9 @@ const FRESH_STATS = {
   daily: {}, // { [YYYY-MM-DD]: moves } — first solve of each daily puzzle
   levels: {}, // { [gameId]: { [levelNumber]: { stars, score } } } — best per level
   lastPlayed: {}, // { [gameId]: timestamp } — for "recently played" sorting
+  goalStats: null, // today's activity for daily goals (see games/goals.js)
+  goalClaims: { day: null, ids: [], bonus: false }, // goals already cashed in today
+  goalsDone: 0, // lifetime goals claimed (unlocks some Dress-Up items)
 };
 
 /**
@@ -74,6 +78,7 @@ export const useGameStore = create(
 
         set({
           plays: { ...s.plays, [gameId]: (s.plays[gameId] ?? 0) + 1 },
+          goalStats: trackGoals(s.goalStats, { type: "round", gameId, score, records }, today),
           lastPlayed: { ...(s.lastPlayed ?? {}), [gameId]: Date.now() },
           best: isNewBest ? { ...s.best, [gameId]: score } : s.best,
           records: nextRecords,
@@ -88,7 +93,10 @@ export const useGameStore = create(
       /** Stores the first solve of a daily puzzle; later solves that day don't count. */
       recordDaily: (day, moves) => {
         if (get().daily[day] != null) return false;
-        set((s) => ({ daily: { ...s.daily, [day]: moves } }));
+        set((s) => ({
+          daily: { ...s.daily, [day]: moves },
+          goalStats: trackGoals(s.goalStats, { type: "daily" }, dayKey()),
+        }));
         return true;
       },
 
@@ -101,8 +109,41 @@ export const useGameStore = create(
         };
         set((s) => ({
           levels: { ...s.levels, [gameId]: { ...(s.levels?.[gameId] ?? {}), [n]: next } },
+          goalStats: trackGoals(s.goalStats, { type: "level", stars }, dayKey()),
         }));
         return { prevStars: prev?.stars ?? 0 };
+      },
+
+      /**
+       * Cashes in one of today's finished goals (or the all-three bonus with
+       * id "bonus"). Returns { xpGained, levelUp } or null if not claimable.
+       */
+      claimGoal: (id) => {
+        const s = get();
+        const today = dayKey();
+        const claims =
+          s.goalClaims?.day === today ? s.goalClaims : { day: today, ids: [], bonus: false };
+        const goals = goalsFor(today);
+        let xp = 0;
+        let nextClaims = claims;
+        if (id === "bonus") {
+          if (claims.bonus || claims.ids.length < goals.length) return null;
+          xp = BONUS_XP;
+          nextClaims = { ...claims, bonus: true };
+        } else {
+          const goal = goals.find((g) => g.id === id);
+          if (!goal || claims.ids.includes(id) || !isDone(goal, s.goalStats, today)) return null;
+          xp = GOAL_XP;
+          nextClaims = { ...claims, ids: [...claims.ids, id] };
+        }
+        const before = levelInfo(s.xp).level;
+        const after = levelInfo(s.xp + xp).level;
+        set({
+          xp: s.xp + xp,
+          goalClaims: nextClaims,
+          goalsDone: (s.goalsDone ?? 0) + (id === "bonus" ? 0 : 1),
+        });
+        return { xpGained: xp, levelUp: after > before ? after : null };
       },
 
       setControl: (game, mode) => set((s) => ({ controls: { ...s.controls, [game]: mode } })),

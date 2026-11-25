@@ -76,6 +76,9 @@ Docs: https://docs.expo.dev/eas/index.md
 - **Launch flow:** the root layout waits for the store to hydrate (`lib/useHydrated.js`), shows
   `AnimatedSplash`, and gates `(tabs)` behind `Stack.Protected guard={onboarded}`; `welcome.js` sets
   `onboarded` when done (Settings → Replay intro clears it).
+- **Daily goals:** `src/games/goals.js` picks the day's goals (seeded by date) and folds events into
+  `goalStats`; the store calls `trackGoals` from `recordGame`, `recordLevel` and `recordDaily`, so new
+  games count automatically. Pass personal records (e.g. `oddStreak`) in `records` to feed record goals.
 - **Store selectors:** never return a fresh `{}`/`[]` fallback from a `useGameStore` selector (it
   re-renders forever, React error #185); use a module-level constant instead.
 - **Tilt:** use `src/lib/useTilt.js`, which normalises the accelerometer sign across iOS, Android

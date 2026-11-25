@@ -10,9 +10,10 @@ export default function useOutfit() {
   const levels = useGameStore((s) => s.levels);
   const bestStreak = useGameStore((s) => s.bestStreak);
   const plays = useGameStore((s) => s.plays);
+  const goalsDone = useGameStore((s) => s.goalsDone ?? 0);
   const stats = useMemo(
-    () => playerStats({ xp, levels, bestStreak, plays }),
-    [xp, levels, bestStreak, plays],
+    () => playerStats({ xp, levels, bestStreak, plays, goalsDone }),
+    [xp, levels, bestStreak, plays, goalsDone],
   );
   const worn = useMemo(() => wornOutfit(outfit, stats), [outfit, stats]);
   return { outfit: worn, stats };
