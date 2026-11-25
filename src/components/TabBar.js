@@ -8,7 +8,7 @@ import Animated, {
   interpolateColor,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
+  withSequence,
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -16,7 +16,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ARCADE } from "../games/registry";
 import { haptic } from "../lib/haptics";
 import { sfx } from "../lib/sound";
-import { SPRING } from "../lib/motion";
 import { cardShadow, INK } from "../theme";
 import Mascot from "./Mascot";
 
@@ -27,93 +26,61 @@ const TABS = {
   awards: { on: "trophy", off: "trophy-outline", label: "Trophies", color: "#1FB865" },
   settings: { on: "options", off: "options-outline", label: "Settings", color: "#8A5CFF" },
 };
+const ORDER = ["index", "profile", "awards", "settings"];
+const COLORS = ORDER.map((k) => TABS[k].color);
 
-const BAR_H = 64;
+const BAR_H = 66;
 const PAD = 8;
-const CENTER = 78; // gap left for the raised Play bubble
-const ICON_W = 44; // an inactive tab: just its icon
-const PILL_H = 52;
+const CENTER = 84; // gap left for the raised Play bubble
+const BLOB_W = 50;
+const BLOB_H = 32;
+const EDGE = 8; // closest the blob may get to the bar's rounded ends
 const MUTED = "#9A97AE";
-// One smooth glide for everything: no overshoot, so nothing ever pokes out of the bar.
-const GLIDE = { duration: 320, easing: Easing.out(Easing.cubic) };
+// Every tab-bar motion uses one smooth ease-in-out: no springs, no overshoot.
+const EASE = Easing.inOut(Easing.cubic);
+const SLIDE = { duration: 380, easing: EASE };
 
-/**
- * One tab. Inactive it's a grey icon; active it grows into a pill in its
- * screen's colour with the label under the icon. Width, colour and label all
- * glide together; the label's height grows from 0 so the icon stays centred.
- */
 function Tab({ name, focused, onPress, width }) {
+  const pop = useSharedValue(1);
+  useEffect(() => {
+    if (focused) {
+      pop.set(
+        withSequence(
+          withTiming(0.86, { duration: 140, easing: EASE }),
+          withTiming(1, { duration: 220, easing: EASE }),
+        ),
+      );
+    }
+  }, [focused, pop]);
+  const iconStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }] }));
   const t = TABS[name];
-  const on = useSharedValue(focused ? 1 : 0);
-  const w = useSharedValue(width);
-  const [labelW, setLabelW] = useState(0);
-
-  useEffect(() => {
-    on.set(withTiming(focused ? 1 : 0, GLIDE));
-  }, [focused, on]);
-  useEffect(() => {
-    w.set(withTiming(width, GLIDE));
-  }, [width, w]);
-
-  // Show the label only if it fits across the pill (it always does on phones).
-  const showLabel = labelW > 0 && labelW + 14 <= width - 6;
-
-  const boxStyle = useAnimatedStyle(() => ({ width: w.value }));
-  const pillStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(on.value, [0, 1], ["rgba(255,255,255,0)", t.color]),
-  }));
-  const labelStyle = useAnimatedStyle(() => ({
-    height: showLabel ? on.value * 15 : 0,
-    opacity: showLabel ? on.value : 0,
-  }));
-
   return (
-    <Animated.View style={[{ height: BAR_H, justifyContent: "center" }, boxStyle]}>
-      <Pressable
-        onPress={onPress}
-        accessibilityRole="tab"
-        accessibilityLabel={t.label}
-        accessibilityState={{ selected: focused }}
-        style={{ height: PILL_H, marginHorizontal: 3 }}
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="tab"
+      accessibilityLabel={t.label}
+      accessibilityState={{ selected: focused }}
+      style={{ width, height: BAR_H, alignItems: "center", justifyContent: "center" }}
+    >
+      <Animated.View
+        style={[
+          { width: BLOB_W, height: BLOB_H, alignItems: "center", justifyContent: "center" },
+          iconStyle,
+        ]}
       >
-        <Animated.View
-          style={[
-            {
-              flex: 1,
-              borderRadius: 22,
-              alignItems: "center",
-              justifyContent: "center",
-              overflow: "hidden",
-            },
-            pillStyle,
-          ]}
-        >
-          <Ionicons name={focused ? t.on : t.off} size={22} color={focused ? "#FFFFFF" : MUTED} />
-          <Animated.View style={[{ overflow: "hidden", alignItems: "center" }, labelStyle]}>
-            <Text
-              numberOfLines={1}
-              style={{ fontFamily: "Outfit_800ExtraBold", fontSize: 11, color: "#FFFFFF" }}
-            >
-              {t.label}
-            </Text>
-          </Animated.View>
-        </Animated.View>
-      </Pressable>
-      {/* Invisible copy that measures the label's natural width once. */}
+        <Ionicons name={focused ? t.on : t.off} size={21} color={focused ? "#FFFFFF" : MUTED} />
+      </Animated.View>
       <Text
-        onLayout={(e) => setLabelW(Math.ceil(e.nativeEvent.layout.width))}
         style={{
-          position: "absolute",
-          opacity: 0,
-          fontFamily: "Outfit_800ExtraBold",
+          marginTop: 2,
+          fontFamily: focused ? "Outfit_800ExtraBold" : "Outfit_600SemiBold",
           fontSize: 11,
+          color: focused ? t.color : MUTED,
         }}
-        pointerEvents="none"
-        accessible={false}
       >
         {t.label}
       </Text>
-    </Animated.View>
+    </Pressable>
   );
 }
 
@@ -128,8 +95,8 @@ function PlayBubble() {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="Quick play a random game"
-      onPressIn={() => scale.set(withSpring(0.88, SPRING))}
-      onPressOut={() => scale.set(withSpring(1, SPRING))}
+      onPressIn={() => scale.set(withTiming(0.9, { duration: 120, easing: EASE }))}
+      onPressOut={() => scale.set(withTiming(1, { duration: 180, easing: EASE }))}
       onPress={() => {
         haptic.medium();
         sfx("whoosh");
@@ -172,21 +139,37 @@ function PlayBubble() {
 }
 
 /**
- * Floating candy tab bar: four tabs around a raised Play bubble. The active tab
- * expands into a pill in its screen's colour with its label; the others shrink
- * to icons. Each side of the Play bubble shares its half of the bar.
+ * Floating candy tab bar: four labelled tabs around a raised Play bubble. A
+ * coloured blob glides (ease-in-out) to the active tab and takes on that screen's colour.
  */
 export default function TabBar({ state, emitter, navigateToTab }) {
   const insets = useSafeAreaInsets();
   const [barW, setBarW] = useState(0);
+  const pos = useSharedValue(state.index);
 
-  const side = barW ? (barW - PAD * 2 - CENTER) / 2 : 0;
-  const widthOf = (i) => {
-    const partner = i ^ 1; // 0↔1 on the left, 2↔3 on the right
-    if (state.index === i) return side - ICON_W;
-    if (state.index === partner) return ICON_W;
-    return side / 2;
-  };
+  useEffect(() => {
+    pos.set(withTiming(state.index, SLIDE));
+  }, [state.index, pos]);
+
+  const tabW = barW ? (barW - PAD * 2 - CENTER) / 4 : 0;
+  // Centre x of each tab's icon, with the Play gap between tabs 2 and 3.
+  const centres = [0, 1, 2, 3].map((i) => PAD + tabW * (i + 0.5) + (i >= 2 ? CENTER : 0));
+
+  const blobStyle = useAnimatedStyle(() => {
+    const p = pos.value;
+    const i = Math.min(2, Math.max(0, Math.floor(p)));
+    const raw = centres[i] + (centres[i + 1] - centres[i]) * (p - i);
+    // Stretch a little while travelling, like jelly.
+    const travel = Math.abs(p - Math.round(p));
+    const scaleX = 1 + travel * 0.5;
+    // The ease never overshoots, so this limit only guards the bar's rounded ends.
+    const half = (BLOB_W / 2) * scaleX;
+    const x = Math.min(barW - EDGE - half, Math.max(EDGE + half, raw));
+    return {
+      backgroundColor: interpolateColor(p, [0, 1, 2, 3], COLORS),
+      transform: [{ translateX: x - BLOB_W / 2 }, { scaleX }],
+    };
+  });
 
   const go = (route, index) => {
     // Expo Router 58 hands custom tab bars an `emitter` and `navigateToTab`
@@ -205,7 +188,7 @@ export default function TabBar({ state, emitter, navigateToTab }) {
       <Tab
         key={route.key}
         name={route.name}
-        width={widthOf(i)}
+        width={tabW}
         focused={state.index === i}
         onPress={() => go(route, i)}
       />
@@ -227,7 +210,7 @@ export default function TabBar({ state, emitter, navigateToTab }) {
         style={[
           {
             height: BAR_H,
-            borderRadius: BAR_H / 2,
+            borderRadius: 30,
             backgroundColor: "#FFFFFF",
             borderWidth: 1,
             borderColor: "rgba(138,92,255,0.12)",
@@ -236,18 +219,34 @@ export default function TabBar({ state, emitter, navigateToTab }) {
         ]}
       >
         {barW > 0 && (
-          <View style={{ flexDirection: "row", paddingHorizontal: PAD }}>
-            {tab(0)}
-            {tab(1)}
-            <View style={{ width: CENTER }} />
-            {tab(2)}
-            {tab(3)}
-          </View>
+          <>
+            <Animated.View
+              pointerEvents="none"
+              style={[
+                {
+                  position: "absolute",
+                  top: (BAR_H - 16 - BLOB_H) / 2,
+                  left: 0,
+                  width: BLOB_W,
+                  height: BLOB_H,
+                  borderRadius: BLOB_H / 2,
+                },
+                blobStyle,
+              ]}
+            />
+            <View style={{ flexDirection: "row", paddingHorizontal: PAD }}>
+              {tab(0)}
+              {tab(1)}
+              <View style={{ width: CENTER }} />
+              {tab(2)}
+              {tab(3)}
+            </View>
+          </>
         )}
       </View>
       <View
         pointerEvents="box-none"
-        style={{ position: "absolute", top: -28, left: 0, right: 0, alignItems: "center" }}
+        style={{ position: "absolute", top: -26, left: 0, right: 0, alignItems: "center" }}
       >
         <PlayBubble />
       </View>
