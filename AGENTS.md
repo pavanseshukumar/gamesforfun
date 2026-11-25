@@ -47,7 +47,9 @@ Docs: https://docs.expo.dev/eas/index.md
   (`components/Buttons.js`), Anton display headlines via `display(size)`, Outfit body text via
   `font-body`, `font-body-semi`, `font-body-bold` and `font-body-black`. Never rely on `fontWeight`
   with these custom fonts. The mascots in `components/Mascot.js` are original SVG characters;
-  reuse them rather than adding emoji art.
+  reuse them rather than adding emoji art. Pass `outfit` (from `useOutfit()`) wherever the
+  player's own buddy appears; Dress-Up items are listed in `src/games/wardrobe.js` and drawn in
+  `Mascot.js` (`Hat`, `Eyewear`, `Neckwear`).
 - **Styling:** NativeWind v4 (Tailwind v3). Theme colors and font families live in `tailwind.config.js`.
   `className` works on core RN components (`View`, `Text`, `Pressable`, …) but **not** on
   Reanimated `Animated.*` components: give those inline `style`, and put Tailwind classes on a

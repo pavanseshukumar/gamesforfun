@@ -9,6 +9,7 @@ export const BACKDROPS = {
   profile: ["#6FB1FF", "#AFD3FF", "#EAF4FF"],
   awards: ["#A8EE5B", "#D6F9A3", "#F4FFE6"],
   settings: ["#CDB8FF", "#E6DCFF", "#FAF7FF"],
+  wardrobe: ["#FF9ED2", "#FFD1EA", "#FFF4FA"],
   "tap-rush": ["#FFC94A", "#FFE5A0", "#FFF8E5"],
   memory: ["#8FBDFF", "#C7DEFF", "#F0F6FF"],
   fusion: ["#6DECB9", "#C2F8DD", "#EFFFF7"],

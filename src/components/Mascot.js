@@ -73,7 +73,243 @@ function Accessory({ variant, c }) {
   }
 }
 
-function Eyes({ variant, mood }) {
+/** Five-point star centred on (cx, cy). */
+function starPath(cx, cy, R, r) {
+  let d = "";
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const rad = i % 2 ? r : R;
+    d += `${i ? "L" : "M"}${(cx + rad * Math.cos(a)).toFixed(1)} ${(cy + rad * Math.sin(a)).toFixed(1)}`;
+  }
+  return `${d}Z`;
+}
+
+/** Heart centred on (cx, cy), about 2s wide. */
+const heartPath = (cx, cy, s) =>
+  `M${cx} ${cy + s * 0.9} C${cx - s * 1.6} ${cy - s * 0.1} ${cx - s * 0.7} ${cy - s * 1.2} ${cx} ${cy - s * 0.35} ` +
+  `C${cx + s * 0.7} ${cy - s * 1.2} ${cx + s * 1.6} ${cy - s * 0.1} ${cx} ${cy + s * 0.9}Z`;
+
+/** Dress-Up hats, drawn on the head in the body's 200×220 space. */
+function Hat({ id }) {
+  switch (id) {
+    case "party":
+      return (
+        <G>
+          <Path d="M100 8 L132 64 Q100 74 68 64 Z" fill="#FF5C8A" />
+          <Path d="M89 27 L111 27 L116 36 L84 36 Z" fill="#FFE14D" />
+          <Path d="M78 46 L122 46 L127 55 L73 55 Z" fill="#FFE14D" />
+          <Circle cx={100} cy={9} r={9} fill="#4DD9FF" />
+        </G>
+      );
+    case "cap":
+      return (
+        <G>
+          <Path d="M120 62 Q168 56 184 72 Q152 80 120 72 Z" fill="#C81E3A" />
+          <Path d="M50 70 Q52 30 100 28 Q148 30 150 70 Q100 60 50 70 Z" fill="#FF3B5C" />
+          <Path d="M100 28 L100 64" stroke="#C81E3A" strokeWidth={3} />
+          <Circle cx={100} cy={29} r={6} fill="#C81E3A" />
+        </G>
+      );
+    case "beanie":
+      return (
+        <G>
+          <Path d="M48 72 Q50 26 100 24 Q150 26 152 72 Z" fill="#22B8A7" />
+          <Path
+            d="M74 30 L74 66 M100 26 L100 64 M126 30 L126 66"
+            stroke="#1A9486"
+            strokeWidth={4}
+          />
+          <Rect x={42} y={60} width={116} height={20} rx={10} fill="#1A9486" />
+          <Circle cx={100} cy={20} r={13} fill="#FFFFFF" />
+        </G>
+      );
+    case "flowers":
+      return (
+        <G>
+          {[
+            [50, 76, "#FF6FB1"],
+            [68, 60, "#FFD43B"],
+            [100, 54, "#7A6CFF"],
+            [132, 60, "#FF8A3D"],
+            [150, 76, "#FF6FB1"],
+          ].map(([x, y, col]) => (
+            <G key={`${x}`}>
+              {[0, 72, 144, 216, 288].map((a) => (
+                <Circle
+                  key={a}
+                  cx={x + 8 * Math.cos((a * Math.PI) / 180)}
+                  cy={y + 8 * Math.sin((a * Math.PI) / 180)}
+                  r={6.5}
+                  fill={col}
+                />
+              ))}
+              <Circle cx={x} cy={y} r={5} fill="#FFF3B0" />
+            </G>
+          ))}
+          <Path
+            d="M58 66 L64 62 M84 54 L90 54 M112 54 L118 56 M138 64 L144 68"
+            stroke="#2BC46E"
+            strokeWidth={4}
+            strokeLinecap="round"
+          />
+        </G>
+      );
+    case "tophat":
+      return (
+        <G>
+          <Rect x={68} y={6} width={64} height={54} rx={6} fill="#22223A" />
+          <Rect x={68} y={42} width={64} height={11} fill="#FF3B5C" />
+          <Ellipse cx={100} cy={60} rx={54} ry={10} fill="#22223A" />
+          <Rect x={76} y={12} width={8} height={26} rx={4} fill="#FFFFFF" opacity={0.18} />
+        </G>
+      );
+    case "wizard":
+      return (
+        <G>
+          <Path d="M108 4 Q100 30 142 64 Q100 74 58 64 Q90 40 108 4 Z" fill="#6C4DFF" />
+          <Ellipse cx={100} cy={64} rx={58} ry={9} fill="#4B2FD6" />
+          <Path d={starPath(96, 36, 9, 4)} fill="#FFE14D" />
+          <Path d={starPath(118, 52, 6, 2.6)} fill="#FFE14D" />
+          <Path d={starPath(80, 56, 5, 2.2)} fill="#FFE14D" />
+        </G>
+      );
+    case "crown":
+      return (
+        <G>
+          <Path d="M58 68 L56 28 L79 48 L100 18 L121 48 L144 28 L142 68 Z" fill="#FFC300" />
+          <Rect x={56} y={58} width={88} height={12} rx={4} fill="#E0A100" />
+          <Circle cx={56} cy={28} r={6} fill="#FFE14D" />
+          <Circle cx={100} cy={18} r={6} fill="#FFE14D" />
+          <Circle cx={144} cy={28} r={6} fill="#FFE14D" />
+          <Circle cx={78} cy={64} r={4.5} fill="#FF3B5C" />
+          <Circle cx={100} cy={64} r={4.5} fill="#4D8CFF" />
+          <Circle cx={122} cy={64} r={4.5} fill="#2BD67B" />
+        </G>
+      );
+    default:
+      return null;
+  }
+}
+
+/** Dress-Up neckwear, under the mouth. */
+function Neckwear({ id }) {
+  switch (id) {
+    case "bowtie":
+      return (
+        <G>
+          <Path d="M100 180 L76 168 Q72 180 76 192 Z" fill="#FF3B5C" />
+          <Path d="M100 180 L124 168 Q128 180 124 192 Z" fill="#FF3B5C" />
+          <Rect x={93} y={173} width={14} height={14} rx={5} fill="#C81E3A" />
+        </G>
+      );
+    case "scarf":
+      return (
+        <G>
+          <Path d="M124 182 L136 214 L118 216 L112 186 Z" fill="#3F6DFF" />
+          <Path d="M40 166 Q100 196 160 166 L162 180 Q100 212 38 180 Z" fill="#4D8CFF" />
+          <Path
+            d="M64 180 L68 192 M100 186 L100 198 M136 180 L132 192"
+            stroke="#FFFFFF"
+            strokeWidth={4}
+            opacity={0.75}
+          />
+        </G>
+      );
+    case "bandana":
+      return (
+        <G>
+          <Path d="M46 168 Q100 186 154 168 L100 208 Z" fill="#FF4D4D" />
+          {[
+            [86, 184],
+            [114, 184],
+            [100, 196],
+            [72, 176],
+            [128, 176],
+          ].map(([x, y]) => (
+            <Circle key={`${x}-${y}`} cx={x} cy={y} r={3} fill="#FFFFFF" />
+          ))}
+        </G>
+      );
+    case "medal":
+      return (
+        <G>
+          <Path
+            d="M78 166 L96 186 M122 166 L104 186"
+            stroke="#3F6DFF"
+            strokeWidth={9}
+            strokeLinecap="round"
+          />
+          <Circle cx={100} cy={192} r={14} fill="#FFC300" />
+          <Circle cx={100} cy={192} r={9} fill="#FFE14D" />
+          <Path d={starPath(100, 192, 6, 2.6)} fill="#E0A100" />
+        </G>
+      );
+    default:
+      return null;
+  }
+}
+
+/** Dress-Up eyewear. Drawn above the blinking eyes so it doesn't blink with them. */
+function Eyewear({ id }) {
+  switch (id) {
+    case "specs":
+      return (
+        <G>
+          <Circle cx={78} cy={EYE_Y} r={25} stroke="#7A3CFF" strokeWidth={5} fill="none" />
+          <Circle cx={122} cy={EYE_Y} r={25} stroke="#7A3CFF" strokeWidth={5} fill="none" />
+          <Path d="M96 108 Q100 102 104 108" stroke="#7A3CFF" strokeWidth={5} fill="none" />
+        </G>
+      );
+    case "shades":
+      return (
+        <G>
+          <Rect x={50} y={96} width={46} height={30} rx={12} fill="#141414" />
+          <Rect x={104} y={96} width={46} height={30} rx={12} fill="#141414" />
+          <Rect x={94} y={104} width={12} height={5} fill="#141414" />
+          <Rect x={58} y={101} width={15} height={5} rx={2.5} fill="#FFFFFF" opacity={0.6} />
+          <Rect x={112} y={101} width={15} height={5} rx={2.5} fill="#FFFFFF" opacity={0.6} />
+        </G>
+      );
+    case "hearts":
+      return (
+        <G>
+          <Path d={heartPath(78, EYE_Y, 15)} fill="#FF3B6B" />
+          <Path d={heartPath(122, EYE_Y, 15)} fill="#FF3B6B" />
+          <Circle cx={72} cy={EYE_Y - 6} r={3.5} fill="#FFFFFF" opacity={0.8} />
+          <Circle cx={116} cy={EYE_Y - 6} r={3.5} fill="#FFFFFF" opacity={0.8} />
+        </G>
+      );
+    case "monocle":
+      return (
+        <G>
+          <Circle
+            cx={122}
+            cy={EYE_Y}
+            r={24}
+            stroke="#E0A100"
+            strokeWidth={5}
+            fill="#FFFFFF"
+            fillOpacity={0.15}
+          />
+          <Path d="M144 122 Q156 150 140 172" stroke="#E0A100" strokeWidth={2.5} fill="none" />
+        </G>
+      );
+    case "starry":
+      return (
+        <G>
+          <Path d={starPath(78, EYE_Y, 26, 12)} fill="#FFC300" />
+          <Path d={starPath(122, EYE_Y, 26, 12)} fill="#FFC300" />
+          <Path d="M98 108 L102 108" stroke="#E0A100" strokeWidth={5} />
+          <Path d={starPath(78, EYE_Y + 2, 14, 6.5)} fill="#141414" opacity={0.85} />
+          <Path d={starPath(122, EYE_Y + 2, 14, 6.5)} fill="#141414" opacity={0.85} />
+        </G>
+      );
+    default:
+      return null;
+  }
+}
+
+function Eyes({ variant, mood, hideSpecs }) {
   const cool = mood === "cool";
   return (
     <Svg width="100%" height="100%" viewBox={`0 0 ${W} ${H}`}>
@@ -93,7 +329,7 @@ function Eyes({ variant, mood }) {
           <Circle cx={118} cy={EYE_Y + 3} r={10} fill="#141414" />
           <Circle cx={86} cy={EYE_Y - 2} r={3.5} fill="#FFFFFF" />
           <Circle cx={122} cy={EYE_Y - 2} r={3.5} fill="#FFFFFF" />
-          {variant === "bloop" && (
+          {variant === "bloop" && !hideSpecs && (
             <G>
               <Circle cx={78} cy={EYE_Y} r={25} stroke="#141414" strokeWidth={5} fill="none" />
               <Circle cx={122} cy={EYE_Y} r={25} stroke="#141414" strokeWidth={5} fill="none" />
@@ -136,6 +372,8 @@ function Mouth({ mood }) {
  * @param {"happy"|"cheer"|"wow"|"cool"} [props.mood]
  * @param {boolean} [props.animated]  idle bob + blink
  * @param {number} [props.delay]      offsets the idle loop so groups don't move in sync
+ * @param {{hat?: string|null, face?: string|null, neck?: string|null}} [props.outfit]
+ *        Dress-Up items (see games/wardrobe.js). A hat replaces the built-in head accessory.
  */
 export default function Mascot({
   variant = "zip",
@@ -143,11 +381,17 @@ export default function Mascot({
   mood = "happy",
   animated = true,
   delay = 0,
+  outfit = null,
 }) {
   const c = MASCOTS[variant] ?? MASCOTS.zip;
   const bob = useSharedValue(0);
   const blink = useSharedValue(1);
   const armsUp = mood === "cheer";
+  const hat = outfit?.hat ?? null;
+  const face = outfit?.face ?? null;
+  const neck = outfit?.neck ?? null;
+  // Eyewear replaces the "cool" mood's built-in shades.
+  const eyeMood = face && mood === "cool" ? "happy" : mood;
 
   useEffect(() => {
     if (!animated) return;
@@ -284,7 +528,8 @@ export default function Mascot({
           <Ellipse cx={56} cy={140} rx={12} ry={7} fill="#FF5C8A" opacity={0.35} />
           <Ellipse cx={144} cy={140} rx={12} ry={7} fill="#FF5C8A" opacity={0.35} />
           <Mouth mood={mood} />
-          <Accessory variant={variant} c={c} />
+          {neck && <Neckwear id={neck} />}
+          {hat ? <Hat id={hat} /> : <Accessory variant={variant} c={c} />}
         </Svg>
         <Animated.View
           style={[
@@ -293,8 +538,18 @@ export default function Mascot({
             eyeStyle,
           ]}
         >
-          <Eyes variant={variant} mood={mood} />
+          <Eyes variant={variant} mood={eyeMood} hideSpecs={!!face} />
         </Animated.View>
+        {face && (
+          <Svg
+            width={size}
+            height={height}
+            viewBox={`0 0 ${W} ${H}`}
+            style={{ position: "absolute", top: 0, left: 0 }}
+          >
+            <Eyewear id={face} />
+          </Svg>
+        )}
       </Animated.View>
     </View>
   );

@@ -14,7 +14,7 @@ Ideas and follow-ups we've agreed to come back to. Newest decisions at the top o
 - Light It Up, Odd Blob Out, Path Painter, Balance Buddy, Bubble Garden.
 
 ## Features
-- Mascot Dress-Up: spend XP/levels on hats and accessories for your buddy.
+- ~~Mascot Dress-Up~~: done (`src/app/dress-up.js`, catalogue in `src/games/wardrobe.js`). Ideas: more items, dress the in-game mascots too.
 - Background music with its own volume control.
 - Store prep: EAS build profiles, store listing, privacy policy, TestFlight / Play internal testing.
 - Online leaderboards and friend challenges (needs a backend such as Supabase).

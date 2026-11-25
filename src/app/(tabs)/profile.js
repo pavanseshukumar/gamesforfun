@@ -3,12 +3,14 @@ import { ScrollView, Text, useWindowDimensions, View } from "react-native";
 import Animated, { FadeIn, FadeInDown, FadeInUp, ZoomIn } from "react-native-reanimated";
 
 import { IconButton } from "../../components/Buttons";
+import PressableScale from "../../components/PressableScale";
 import GradientScreen from "../../components/GradientScreen";
 import HexBadge from "../../components/HexBadge";
 import Mascot from "../../components/Mascot";
 import XpBar from "../../components/XpBar";
 import { GAMES, mascotFor } from "../../games/registry";
 import useAchievements from "../../games/useAchievements";
+import useOutfit from "../../games/useOutfit";
 import { levelInfo, rankFor } from "../../lib/progress";
 import useFocusKey from "../../lib/useFocusKey";
 import { useGameStore } from "../../store/useGameStore";
@@ -46,6 +48,7 @@ export default function Profile() {
   const streak = useGameStore((s) => s.streak);
   const bestStreak = useGameStore((s) => s.bestStreak);
   const { list, earned } = useAchievements();
+  const { outfit } = useOutfit();
 
   const lv = levelInfo(xp);
   const rank = rankFor(lv.level);
@@ -89,16 +92,37 @@ export default function Profile() {
             <BigStat value={lv.level} label="level" />
           </Animated.View>
           <Animated.View entering={ZoomIn.delay(100).springify().damping(11)}>
-            <Mascot variant={avatar} size={Math.min(200, width * 0.48)} mood="cool" />
+            <PressableScale
+              onPress={() => router.push("/dress-up")}
+              accessibilityLabel="Dress up your buddy"
+            >
+              <Mascot
+                variant={avatar}
+                size={Math.min(200, width * 0.48)}
+                mood="cool"
+                outfit={outfit}
+              />
+            </PressableScale>
           </Animated.View>
           <Animated.View entering={FadeInUp.delay(300).springify()}>
             <BigStat value={totalPlays} label="games" />
           </Animated.View>
         </View>
 
+        <Animated.View entering={FadeIn.delay(200)}>
+          <View className="items-center">
+            <PressableScale onPress={() => router.push("/dress-up")} accessibilityRole="button">
+              <View className="flex-row items-center rounded-full bg-ink px-5 py-2.5">
+                <Text style={{ fontSize: 15 }}>👕</Text>
+                <Text className="ml-2 font-body-bold text-sm text-white">Dress up</Text>
+              </View>
+            </PressableScale>
+          </View>
+        </Animated.View>
+
         <Animated.View
           entering={FadeInDown.delay(250).springify()}
-          style={{ paddingHorizontal: 20, marginTop: 8 }}
+          style={{ paddingHorizontal: 20, marginTop: 14 }}
         >
           <View style={cardShadow} className="rounded-[28px] bg-white p-5">
             <View className="flex-row flex-wrap">

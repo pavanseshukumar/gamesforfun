@@ -10,6 +10,7 @@ import Mascot from "../../components/Mascot";
 import XpBar from "../../components/XpBar";
 import { ARCADE } from "../../games/registry";
 import useAchievements from "../../games/useAchievements";
+import useOutfit from "../../games/useOutfit";
 import { levelInfo, rankFor } from "../../lib/progress";
 import useFocusKey from "../../lib/useFocusKey";
 import { useGameStore } from "../../store/useGameStore";
@@ -27,6 +28,7 @@ export default function Home() {
   const focusKey = useFocusKey();
   const name = useGameStore((s) => s.name);
   const avatar = useGameStore((s) => s.avatar);
+  const { outfit } = useOutfit();
   const best = useGameStore((s) => s.best);
   const xp = useGameStore((s) => s.xp);
   const streak = useGameStore((s) => s.streak);
@@ -50,7 +52,7 @@ export default function Home() {
           <View className="flex-row items-center justify-between px-5 pt-2">
             <IconButton label="Profile" onPress={() => router.navigate("/profile")}>
               <View style={{ marginTop: 6 }}>
-                <Mascot variant={avatar} size={40} animated={false} />
+                <Mascot variant={avatar} size={40} animated={false} outfit={outfit} />
               </View>
             </IconButton>
             <View className="rounded-full bg-white/70 px-4 py-2">

@@ -14,6 +14,7 @@ quick-play button in the middle.
 
 - **Home**: "Hey {name}!" hero with the mascot crew, streak pill, numbered game carousel, level card
 - **Profile**: your name huge, your buddy, level, games played, streak, XP, rank and badge showcase
+- **Dress Up**: 16 hats, eyewear and neckwear for your buddy, unlocked by level, level stars, streaks and games played
 - **Trophies**: hexagon badges with live progress; the home bell counts newly unlocked ones
 - **Settings**: edit your name, pick your buddy, haptics, reset progress
 - **Quick play** (centre button): jumps into a random arcade game

@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+import { EMPTY_OUTFIT } from "../games/wardrobe";
 import { dayKey, levelInfo } from "../lib/progress";
 
 const yesterdayKey = () => {
@@ -33,6 +34,7 @@ export const useGameStore = create(
       ...FRESH_STATS,
       name: "Player",
       avatar: "zip",
+      outfit: EMPTY_OUTFIT, // Dress-Up: { hat, face, neck } item ids or null
       haptics: true,
       sound: true,
       controls: { colorCatch: "tilt" }, // "tilt" | "drag"
@@ -104,6 +106,9 @@ export const useGameStore = create(
       markAwardsSeen: (ids) => set({ seenAwards: ids }),
       setName: (name) => set({ name }),
       setAvatar: (avatar) => set({ avatar }),
+      /** Puts an item on (or takes the slot off with null). */
+      setOutfitItem: (slot, id) =>
+        set((s) => ({ outfit: { ...EMPTY_OUTFIT, ...s.outfit, [slot]: id } })),
       setHaptics: (haptics) => set({ haptics }),
       setSound: (sound) => set({ sound }),
       resetStats: () => set({ ...FRESH_STATS }),
