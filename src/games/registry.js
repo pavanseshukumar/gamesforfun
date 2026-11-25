@@ -7,6 +7,7 @@ import { mascotOfDay } from "./daily/logic";
 export const GAMES = [
   {
     id: "tap-rush",
+    category: "action",
     route: "/games/tap-rush",
     title: "Tap Rush",
     tagline: "Pop orbs fast, chain combos",
@@ -19,6 +20,7 @@ export const GAMES = [
   },
   {
     id: "memory",
+    category: "brain",
     route: "/games/memory",
     title: "Memory Flip",
     tagline: "Match pairs in fewest moves",
@@ -31,6 +33,7 @@ export const GAMES = [
   },
   {
     id: "fusion",
+    category: "puzzle",
     route: "/games/fusion",
     title: "Fusion",
     tagline: "Swipe, fuse, grow big tiles",
@@ -43,6 +46,7 @@ export const GAMES = [
   },
   {
     id: "bounce",
+    category: "action",
     route: "/games/bounce",
     title: "Bounce Buddy",
     tagline: "Time your hops, climb the sky",
@@ -55,6 +59,7 @@ export const GAMES = [
   },
   {
     id: "color-catch",
+    category: "action",
     route: "/games/color-catch",
     title: "Color Catch",
     tagline: "Tilt to catch the right colour",
@@ -67,6 +72,7 @@ export const GAMES = [
   },
   {
     id: "word-pop",
+    category: "brain",
     route: "/games/word-pop",
     title: "Word Pop",
     tagline: "Spell words from rising letters",
@@ -79,6 +85,7 @@ export const GAMES = [
   },
   {
     id: "stack",
+    category: "action",
     route: "/games/stack",
     title: "Stack Tower",
     tagline: "Drop, slice, stack to the sky",
@@ -91,6 +98,7 @@ export const GAMES = [
   },
   {
     id: "blob-launch",
+    category: "action",
     route: "/games/blob-launch",
     title: "Blob Launch",
     tagline: "Fling Zip, topple the Grumps",
@@ -103,6 +111,7 @@ export const GAMES = [
   },
   {
     id: "slider",
+    category: "puzzle",
     route: "/games/slider",
     title: "Picture Slider",
     tagline: "Slide tiles, rebuild the picture",
@@ -115,6 +124,7 @@ export const GAMES = [
   },
   {
     id: "maze",
+    category: "puzzle",
     route: "/games/maze",
     title: "Maze Dash",
     tagline: "Swipe through mazes, grab the key",
@@ -127,6 +137,7 @@ export const GAMES = [
   },
   {
     id: "slice",
+    category: "action",
     route: "/games/slice",
     title: "Slice Splash",
     tagline: "Swipe to slice, dodge the Grumps",
@@ -139,6 +150,7 @@ export const GAMES = [
   },
   {
     id: "quick-math",
+    category: "brain",
     route: "/games/quick-math",
     title: "Quick Math",
     tagline: "True or false? Swipe fast!",
@@ -151,6 +163,7 @@ export const GAMES = [
   },
   {
     id: "pipes",
+    category: "puzzle",
     route: "/games/pipes",
     title: "Pipe Flow",
     tagline: "Turn pipes, water the flower",
@@ -165,6 +178,7 @@ export const GAMES = [
     // The daily puzzle has its own banner on Home, so it stays out of the
     // carousel and quick play. Its mascot changes every day.
     id: "daily",
+    category: "puzzle",
     route: "/games/daily",
     title: "Daily Puzzle",
     tagline: "One new picture puzzle a day",
@@ -176,6 +190,13 @@ export const GAMES = [
     unit: "moves",
     lowerIsBetter: true,
   },
+];
+
+/** Library filters: every arcade game belongs to exactly one. */
+export const CATEGORIES = [
+  { id: "action", label: "Action", emoji: "⚡" },
+  { id: "puzzle", label: "Puzzle", emoji: "🧩" },
+  { id: "brain", label: "Brain", emoji: "🧠" },
 ];
 
 /** Games that appear in the carousel and quick play. */

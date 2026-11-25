@@ -9,24 +9,15 @@ import HexBadge from "../components/HexBadge";
 import Mascot, { MASCOTS } from "../components/Mascot";
 import PressableScale from "../components/PressableScale";
 import XpBar from "../components/XpBar";
-import { LEVELS as BLOB_LEVELS } from "../games/blob/levels";
-import { CHALLENGES } from "../games/challenges";
-import { LEVEL_NAMES as MAZE_LEVELS } from "../games/maze/levels";
-import { LEVEL_NAMES as PIPE_LEVELS } from "../games/pipes/levels";
+import { totalLevelCount } from "../games/library";
 import { ARCADE } from "../games/registry";
-import { LEVELS as SLIDER_LEVELS } from "../games/slider/levels";
 import { haptic } from "../lib/haptics";
 import { sfx } from "../lib/sound";
 import { useGameStore } from "../store/useGameStore";
 import { cardShadow, display, INK } from "../theme";
 
 const PAGES = 4;
-const LEVEL_COUNT =
-  Object.values(CHALLENGES).reduce((sum, list) => sum + list.length, 0) +
-  BLOB_LEVELS.length +
-  SLIDER_LEVELS.length +
-  MAZE_LEVELS.length +
-  PIPE_LEVELS.length;
+const LEVEL_COUNT = totalLevelCount(ARCADE);
 
 function Page({ width, height, children }) {
   return (

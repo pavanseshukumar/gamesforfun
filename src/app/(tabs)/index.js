@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ScrollView, Text, useWindowDimensions, View } from "react-native";
 import Animated, { FadeIn, FadeInDown, FadeInUp, ZoomIn } from "react-native-reanimated";
@@ -7,6 +8,7 @@ import DailyBanner from "../../components/DailyBanner";
 import GameCard from "../../components/GameCard";
 import GradientScreen from "../../components/GradientScreen";
 import Mascot from "../../components/Mascot";
+import PressableScale from "../../components/PressableScale";
 import XpBar from "../../components/XpBar";
 import { ARCADE } from "../../games/registry";
 import useAchievements from "../../games/useAchievements";
@@ -15,7 +17,7 @@ import { greetingLines } from "../../lib/fitText";
 import { levelInfo, rankFor } from "../../lib/progress";
 import useFocusKey from "../../lib/useFocusKey";
 import { useGameStore } from "../../store/useGameStore";
-import { cardShadow, display } from "../../theme";
+import { cardShadow, display, INK } from "../../theme";
 
 function greeting() {
   const h = new Date().getHours();
@@ -133,9 +135,16 @@ export default function Home() {
         {/* Game carousel */}
         <View className="mt-8 flex-row items-end justify-between px-5">
           <Text style={display(30)}>Games</Text>
-          <Text className="mb-1.5 font-body-bold text-sm text-ink-mute">
-            {ARCADE.length} to play
-          </Text>
+          <PressableScale
+            onPress={() => router.push("/games")}
+            accessibilityRole="button"
+            accessibilityLabel="See all games"
+          >
+            <View className="mb-1 flex-row items-center rounded-full bg-white px-3.5 py-1.5">
+              <Text className="font-body-bold text-sm text-ink">See all {ARCADE.length}</Text>
+              <Ionicons name="chevron-forward" size={14} color={INK} style={{ marginLeft: 2 }} />
+            </View>
+          </PressableScale>
         </View>
         <ScrollView
           horizontal

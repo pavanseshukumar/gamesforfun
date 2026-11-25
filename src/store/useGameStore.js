@@ -22,6 +22,7 @@ const FRESH_STATS = {
   seenAwards: [],
   daily: {}, // { [YYYY-MM-DD]: moves } — first solve of each daily puzzle
   levels: {}, // { [gameId]: { [levelNumber]: { stars, score } } } — best per level
+  lastPlayed: {}, // { [gameId]: timestamp } — for "recently played" sorting
 };
 
 /**
@@ -73,6 +74,7 @@ export const useGameStore = create(
 
         set({
           plays: { ...s.plays, [gameId]: (s.plays[gameId] ?? 0) + 1 },
+          lastPlayed: { ...(s.lastPlayed ?? {}), [gameId]: Date.now() },
           best: isNewBest ? { ...s.best, [gameId]: score } : s.best,
           records: nextRecords,
           xp: s.xp + xp,

@@ -99,5 +99,6 @@ Docs: https://docs.expo.dev/eas/index.md
   the level, merges `{ ...DEFAULTS, ...level.config }`, and ends a level with
   `challenge.complete(stats)` + `ChallengeResult`. Use `Infinity` for a lower-is-better stat when
   the goal wasn't reached.
-- **Adding a game:** create `src/app/games/<id>.js`, add an entry to `src/games/registry.js`, use
+- **Adding a game:** create `src/app/games/<id>.js`, add an entry to `src/games/registry.js` (with a
+  `category`: action, puzzle or brain; if it has its own level list, add it to `src/games/library.js`), use
   `GradientScreen`, `GameHeader` and `GameOverModal`, and pass the result of `recordGame(id, score, { xp, records })` to the modal.
