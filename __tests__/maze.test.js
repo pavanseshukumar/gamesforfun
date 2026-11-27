@@ -1,4 +1,4 @@
-import { extrasFor, getLevels } from "../src/games/maze/levels";
+import { extrasFor, getLevels, PADS_ON } from "../src/games/maze/levels";
 import {
   canMove,
   DIRS,
@@ -7,6 +7,7 @@ import {
   N,
   openings,
   padPartner,
+  placeExtras,
   run,
   S,
   shortestPath,
@@ -161,25 +162,34 @@ describe("Maze Dash levels", () => {
     });
   });
 
-  test("teleport pads come in linked pairs from level 5", () => {
-    levels.forEach((l, i) => {
-      expect(l.pads).toHaveLength(extrasFor(i + 1, l.dark).pads);
+  test("teleport pads are off for now", () => {
+    expect(PADS_ON).toBe(false);
+    levels.forEach((l) => expect(l.pads).toHaveLength(0));
+  });
+
+  // The pad rules stay tested so they're ready to switch back on.
+  const padded = levels.map((l, i) => ({
+    ...l,
+    ...placeExtras(l, i + 1, 3, i < 4 ? 0 : !l.dark && i >= 10 ? 2 : 1),
+  }));
+
+  test("pads come in linked pairs on free cells", () => {
+    padded.forEach((l) => {
       const cells = l.pads.flat();
       expect(new Set(cells).size).toBe(cells.length);
-      cells.forEach((c) => expect([l.start, l.exit, l.key]).not.toContain(c));
+      cells.forEach((c) => expect([l.start, l.exit, l.key, ...l.gems]).not.toContain(c));
       l.pads.forEach(([a, b]) => {
         expect(padPartner(l.pads, a)).toBe(b);
         expect(padPartner(l.pads, b)).toBe(a);
       });
     });
-    expect(levels[3].pads).toHaveLength(0);
-    expect(levels[4].pads).toHaveLength(1);
-    expect(levels[12].pads).toHaveLength(2);
-    expect(padPartner(levels[4].pads, levels[4].start)).toBeNull();
+    expect(padded[4].pads).toHaveLength(1);
+    expect(padded[12].pads).toHaveLength(2);
+    expect(padPartner(padded[4].pads, padded[4].start)).toBeNull();
   });
 
   test("the first pad pair is a shortcut: it links an early spot to a late one", () => {
-    levels
+    padded
       .filter((l) => l.pads.length)
       .forEach((l) => {
         const route = shortestPath(l.maze, l.start, l.exit).length;
@@ -192,7 +202,7 @@ describe("Maze Dash levels", () => {
   });
 
   test("runs stop on a pad", () => {
-    const l = levels.find((x) => x.pads.length);
+    const l = padded.find((x) => x.pads.length);
     const [a] = l.pads[0];
     const path = shortestPath(l.maze, l.start, a);
     const before = path[path.length - 2];

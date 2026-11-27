@@ -34,10 +34,16 @@ export function goalFor(cells, par, dark) {
   return ceil5((cells * 0.12 + par * 1.2 + 5) * (dark ? 1.4 : 1));
 }
 
-/** Gems on every maze (more as they grow); teleport pads from level 5, two pairs from 11. */
+/**
+ * Teleport pads are switched off for now (players found them confusing). The
+ * game still supports them: set this to true for pads from level 5, two pairs from 11.
+ */
+export const PADS_ON = false;
+
+/** Gems on every maze (more as they grow), and teleport pads when they're on. */
 export const extrasFor = (n, dark) => ({
   gems: 2 + Math.floor(n / 5),
-  pads: n < 5 ? 0 : !dark && n >= 11 ? 2 : 1,
+  pads: !PADS_ON || n < 5 ? 0 : !dark && n >= 11 ? 2 : 1,
 });
 
 function withExtras(level, n, dark) {

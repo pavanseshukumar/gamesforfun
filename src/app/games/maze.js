@@ -449,7 +449,7 @@ export default function MazeDash() {
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
           <LevelsHeader
             game={GAME}
-            blurb="Swipe to run. Grab gems (−3 s each), ride the teleport pads and reach the portal fast!"
+            blurb="Swipe to run. Grab gems for −3 s each and reach the portal before the clock runs down!"
             stars={totalStars(progress)}
             max={levels.length * 3}
           />
