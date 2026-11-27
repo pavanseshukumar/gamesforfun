@@ -7,7 +7,9 @@ export const INK = "#141414";
 export const BACKDROPS = {
   // Cotton candy: a punchy pink under the big greeting, fading to lilac and baby blue.
   home: ["#FFA3D4", "#E5C9FF", "#D6EDFF"],
-  // Launch splash and intro: a calm sky blue fading to soft lilac.
+  // Launch splash: the same cotton candy as Home, so the splash melts into it.
+  splash: ["#FFA3D4", "#E5C9FF", "#D6EDFF"],
+  // Intro: a calm sky blue fading to soft lilac.
   welcome: ["#5EB6FF", "#A3D8FF", "#EEE9FF"],
   profile: ["#6FB1FF", "#AFD3FF", "#EAF4FF"],
   awards: ["#A8EE5B", "#D6F9A3", "#F4FFE6"],

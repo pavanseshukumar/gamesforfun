@@ -32,13 +32,13 @@
         "expo-splash-screen",
         {
           "image": "./assets/splash-icon.png",
-          "backgroundColor": "#5EB6FF",
+          "backgroundColor": "#FFA3D4",
           "imageWidth": 240
         }
       ],
       "expo-audio"
     ],
     "scheme": "playzo",
-    "backgroundColor": "#5EB6FF"
+    "backgroundColor": "#FFA3D4"
   }
 }

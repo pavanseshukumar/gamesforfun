@@ -59,7 +59,7 @@ export default function RootLayout() {
   if (!loaded && !error) return null;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#5EB6FF" }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#FFA3D4" }}>
       <SafeAreaProvider>
         <StatusBar style="dark" />
         {/* Routes wait for saved progress, so first-run checks see the real state. */}
