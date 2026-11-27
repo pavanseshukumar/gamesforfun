@@ -1,3 +1,4 @@
+import { ceil5 } from "../timeStars";
 import { buildLevel } from "./logic";
 
 // [name, cols, rows, key?, dark?] — mazes grow and keys arrive from level 4;
@@ -25,12 +26,22 @@ const SPEC = [
   ["Darkest Vault", 12, 18, true, true],
 ];
 
+/**
+ * Seconds for 3 stars: time to run and look along the best route, a little over a second per
+ * swipe to decide, and extra for dark mazes where you can't see ahead.
+ */
+export function goalFor(cells, par, dark) {
+  return ceil5((cells * 0.12 + par * 1.2 + 5) * (dark ? 1.4 : 1));
+}
+
+const withGoal = (level, dark) => ({ ...level, goal: goalFor(level.cells, level.par, dark) });
+
 let cache = null;
 /** Built lazily on first use (generation + pathfinding for every maze). */
 export function getLevels() {
   if (!cache)
     cache = SPEC.map(([name, c, r, key, dark = false], i) => ({
-      ...buildLevel(i + 1, name, c, r, key),
+      ...withGoal(buildLevel(i + 1, name, c, r, key), dark),
       dark,
     }));
   return cache;

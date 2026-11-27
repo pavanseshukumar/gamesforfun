@@ -7,7 +7,14 @@ import { IconButton } from "./Buttons";
 import PopNumber from "./PopNumber";
 
 /** Top bar shared by every game: back button, big title, live score and best. */
-export default function GameHeader({ title, score, scoreLabel = "Score", best, right }) {
+export default function GameHeader({
+  title,
+  score,
+  scoreLabel = "Score",
+  best,
+  right,
+  popScore = true, // false for values that tick every second, like a clock
+}) {
   return (
     <Animated.View entering={FadeInDown.duration(400)}>
       <View className="flex-row items-center justify-between px-5 pb-3 pt-2">
@@ -25,7 +32,11 @@ export default function GameHeader({ title, score, scoreLabel = "Score", best, r
           <Text className="font-body-bold text-[11px] uppercase tracking-[2px] text-ink-mute">
             {scoreLabel}
           </Text>
-          <PopNumber value={score} style={display(34)} />
+          {popScore ? (
+            <PopNumber value={score} style={display(34)} />
+          ) : (
+            <Text style={display(34)}>{score}</Text>
+          )}
         </View>
         <View className="flex-1 rounded-3xl bg-white/50 px-4 py-3">
           <Text className="font-body-bold text-[11px] uppercase tracking-[2px] text-ink-mute">

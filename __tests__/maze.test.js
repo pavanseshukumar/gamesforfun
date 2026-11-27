@@ -9,7 +9,6 @@ import {
   run,
   S,
   shortestPath,
-  starsFor,
   swipesBetween,
   W,
 } from "../src/games/maze/logic";
@@ -140,9 +139,15 @@ describe("Maze Dash levels", () => {
     });
   });
 
-  test("stars reward planning", () => {
-    expect(starsFor(10, 10)).toBe(3);
-    expect(starsFor(15, 10)).toBe(2);
-    expect(starsFor(16, 10)).toBe(1);
+  test("time goals leave room to run the best route, and grow with the maze", () => {
+    levels.forEach((l) => {
+      // Running the best route takes cells × 55 ms; the goal must allow far more.
+      expect(l.goal).toBeGreaterThan(l.cells * 0.055 * 2);
+      expect(l.goal % 5).toBe(0);
+    });
+    const lit = levels.filter((l) => !l.dark);
+    expect(lit.at(-1).goal).toBeGreaterThan(lit[0].goal);
+    // A dark maze gets more time than the same-size lit one.
+    expect(levels[16].goal).toBeGreaterThan(levels[6].goal);
   });
 });

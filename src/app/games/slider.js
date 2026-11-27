@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ScrollView, Text, useWindowDimensions, View } from "react-native";
 
 import { IconButton } from "../../components/Buttons";
@@ -11,9 +11,11 @@ import LevelsHeader from "../../components/LevelsHeader";
 import LevelGrid, { Stars, totalStars } from "../../components/LevelGrid";
 import PuzzleArt from "../../components/PuzzleArt";
 import SlidingBoard from "../../components/SlidingBoard";
+import StarTimer from "../../components/StarTimer";
 import { getGame } from "../../games/registry";
 import { isSolved, slide } from "../../games/sliding";
-import { LEVELS, scoreFor, starsFor } from "../../games/slider/levels";
+import { LEVELS } from "../../games/slider/levels";
+import { fmtTime, scoreForTime, starsForTime } from "../../games/timeStars";
 import { haptic } from "../../lib/haptics";
 import { sfx } from "../../lib/sound";
 import { useGameStore } from "../../store/useGameStore";
@@ -42,10 +44,14 @@ export default function PictureSlider() {
   const n = levelIdx == null ? 0 : levelIdx + 1;
   const hasNext = levelIdx != null && levelIdx < LEVELS.length - 1;
   const running = level != null && !solved && moves > 0;
+  const startedAt = useRef(0); // the clock starts on the first move
 
   useEffect(() => {
     if (!running) return undefined;
-    const id = setInterval(() => setSeconds((s) => s + 1), 1000);
+    const id = setInterval(
+      () => setSeconds(Math.floor((Date.now() - startedAt.current) / 1000)),
+      250,
+    );
     return () => clearInterval(id);
   }, [running]);
 
@@ -68,6 +74,7 @@ export default function PictureSlider() {
     }
     haptic.tap();
     sfx("slide");
+    if (moves === 0) startedAt.current = Date.now();
     const nextMoves = moves + 1;
     setBoard(next);
     setMoves(nextMoves);
@@ -76,8 +83,10 @@ export default function PictureSlider() {
     setSolved(true);
     haptic.success();
     sfx("solved");
-    const stars = starsFor(nextMoves, level.par);
-    const score = scoreFor(nextMoves, level.par, seconds);
+    const time = moves === 0 ? 0 : Math.floor((Date.now() - startedAt.current) / 1000);
+    setSeconds(time);
+    const stars = starsForTime(time, level.goal);
+    const score = scoreForTime(time, level.goal);
     const { prevStars } = recordLevel(GAME.id, n, stars, score);
     const total = totalStars(useGameStore.getState().levels[GAME.id]);
     const gained = Math.max(0, stars - prevStars);
@@ -106,7 +115,7 @@ export default function PictureSlider() {
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
           <LevelsHeader
             game={GAME}
-            blurb="Slide the tiles to rebuild each picture. Match par for 3 stars!"
+            blurb="Slide the tiles to rebuild each picture. Beat the clock for 3 stars!"
             stars={totalStars(progress)}
             max={LEVELS.length * 3}
           />
@@ -116,15 +125,13 @@ export default function PictureSlider() {
     );
   }
 
-  const mm = Math.floor(seconds / 60);
-  const ss = String(seconds % 60).padStart(2, "0");
-
   return (
     <GradientScreen theme={GAME.id} edges={["top", "bottom"]}>
       <GameHeader
         title={`Level ${n}`}
-        score={moves}
-        scoreLabel="Moves"
+        score={fmtTime(seconds)}
+        scoreLabel="Time"
+        popScore={false}
         best={progress[n]?.stars ? "⭐".repeat(progress[n].stars) : undefined}
         right={
           level.pictureOnly ? undefined : (
@@ -137,13 +144,15 @@ export default function PictureSlider() {
         }
       />
 
-      <View className="mt-4 flex-row items-center justify-between px-5">
+      <View className="mt-3 px-5">
+        <StarTimer seconds={seconds} goal={level.goal} running={running} />
+      </View>
+
+      <View className="mt-3 flex-row items-center justify-between px-5">
         <View>
-          <Text className="font-body-black text-sm text-ink">
-            ⏱ {mm}:{ss}
-          </Text>
+          <Text className="font-body-black text-sm text-ink">{level.name}</Text>
           <Text className="font-body-bold text-xs text-ink-soft">
-            {level.name} · par {level.par}
+            {moves === 0 ? "Clock starts on your first move" : `${moves} moves`}
             {level.pictureOnly ? " · 🖼 no numbers" : ""}
           </Text>
         </View>
@@ -192,7 +201,7 @@ export default function PictureSlider() {
             <View className="mt-2 items-center">
               <Stars count={result.stars} size={26} />
               <Text className="mt-1 font-body-semi text-sm text-ink-mute">
-                {moves} moves (par {level.par}) · {mm}:{ss}
+                {fmtTime(seconds)} (3★ within {fmtTime(level.goal)}) · {moves} moves
               </Text>
             </View>
           }

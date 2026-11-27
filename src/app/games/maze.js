@@ -22,9 +22,11 @@ import GradientScreen from "../../components/GradientScreen";
 import LevelsHeader from "../../components/LevelsHeader";
 import LevelGrid, { Stars, totalStars } from "../../components/LevelGrid";
 import Mascot from "../../components/Mascot";
+import StarTimer from "../../components/StarTimer";
 import { getLevels, LEVEL_NAMES } from "../../games/maze/levels";
-import { DIRS, E, N, openings, run, S, scoreFor, starsFor, W, xyOf } from "../../games/maze/logic";
+import { DIRS, E, N, openings, run, S, W, xyOf } from "../../games/maze/logic";
 import { getGame } from "../../games/registry";
+import { fmtTime, scoreForTime, starsForTime } from "../../games/timeStars";
 import { haptic } from "../../lib/haptics";
 import { sfx } from "../../lib/sound";
 import { useGameStore } from "../../store/useGameStore";
@@ -160,10 +162,14 @@ export default function MazeDash() {
   // Lets a queued swipe replay through the latest `move` without self-reference.
   const moveRef = useRef(null);
   const started = swipes > 0 && !done;
+  const startedAt = useRef(0); // the clock starts on the first swipe
 
   useEffect(() => {
     if (!started) return undefined;
-    const id = setInterval(() => setSeconds((s) => s + 1), 1000);
+    const id = setInterval(
+      () => setSeconds(Math.floor((Date.now() - startedAt.current) / 1000)),
+      250,
+    );
     return () => clearInterval(id);
   }, [started]);
 
@@ -187,30 +193,29 @@ export default function MazeDash() {
     [levels, px, py],
   );
 
-  const finish = useCallback(
-    (totalSwipes) => {
-      const stars = starsFor(totalSwipes, level.par);
-      const score = scoreFor(totalSwipes, level.par, seconds);
-      const { prevStars } = recordLevel(GAME.id, n, stars, score);
-      const total = totalStars(useGameStore.getState().levels[GAME.id]);
-      const outcome = recordGame(GAME.id, total, {
-        xp: 10 + Math.max(0, stars - prevStars) * 12,
-        records: { mazeKeyThree: level.key != null && stars === 3 ? 1 : 0 },
-      });
-      setTimeout(
-        () =>
-          setResult({
-            stars,
-            score,
-            isNewBest: stars > prevStars,
-            xpGained: outcome.xpGained,
-            levelUp: outcome.levelUp,
-          }),
-        900,
-      );
-    },
-    [level, n, recordGame, recordLevel, seconds],
-  );
+  const finish = useCallback(() => {
+    const time = Math.floor((Date.now() - startedAt.current) / 1000);
+    setSeconds(time);
+    const stars = starsForTime(time, level.goal);
+    const score = scoreForTime(time, level.goal);
+    const { prevStars } = recordLevel(GAME.id, n, stars, score);
+    const total = totalStars(useGameStore.getState().levels[GAME.id]);
+    const outcome = recordGame(GAME.id, total, {
+      xp: 10 + Math.max(0, stars - prevStars) * 12,
+      records: { mazeKeyThree: level.key != null && stars === 3 ? 1 : 0 },
+    });
+    setTimeout(
+      () =>
+        setResult({
+          stars,
+          score,
+          isNewBest: stars > prevStars,
+          xpGained: outcome.xpGained,
+          levelUp: outcome.levelUp,
+        }),
+      900,
+    );
+  }, [level, n, recordGame, recordLevel]);
 
   const move = useCallback(
     (dirName) => {
@@ -228,6 +233,7 @@ export default function MazeDash() {
         return;
       }
       busy.current = true;
+      if (g.swipes === 0) startedAt.current = Date.now();
       g.swipes += 1;
       setSwipes(g.swipes);
       sfx("whoosh");
@@ -260,7 +266,7 @@ export default function MazeDash() {
               setDone(true);
               haptic.success();
               sfx("solved");
-              finish(g.swipes);
+              finish();
             }
           } else if (openings(level.maze, end).length === 1) {
             sfx("land"); // bumped into a dead end
@@ -320,7 +326,7 @@ export default function MazeDash() {
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
           <LevelsHeader
             game={GAME}
-            blurb="Swipe and Pengu waddles to the next junction. Grab the key, reach the portal in as few swipes as you can!"
+            blurb="Swipe and Pengu waddles to the next junction. Grab the key and reach the portal before the clock runs down for 3 stars!"
             stars={totalStars(progress)}
             max={levels.length * 3}
           />
@@ -340,27 +346,28 @@ export default function MazeDash() {
   const boardW = cell * level.maze.cols;
   const boardH = cell * level.maze.rows;
   const stroke = Math.max(3, cell * 0.16);
-  const mm = Math.floor(seconds / 60);
-  const ss = String(seconds % 60).padStart(2, "0");
 
   return (
     <GradientScreen theme={GAME.id} edges={["top", "bottom"]}>
       <GameHeader
         title={`Level ${n}`}
-        score={swipes}
-        scoreLabel="Swipes"
+        score={fmtTime(seconds)}
+        scoreLabel="Time"
+        popScore={false}
         best={progress[n]?.stars ? "⭐".repeat(progress[n].stars) : undefined}
         right={
           <IconButton icon="refresh" label="Restart level" onPress={() => startLevel(levelIdx)} />
         }
       />
+      <View className="mt-3 px-5">
+        <StarTimer seconds={seconds} goal={level.goal} running={started} />
+      </View>
       <View className="mt-3 flex-row items-center justify-between px-5">
         <View>
-          <Text className="font-body-black text-sm text-ink">
-            ⏱ {mm}:{ss}
-          </Text>
+          <Text className="font-body-black text-sm text-ink">{level.name}</Text>
           <Text className="font-body-bold text-xs text-ink-soft">
-            {level.name} · par {level.par} swipes{level.dark ? " · 🔦 dark" : ""}
+            {swipes === 0 ? "Clock starts on your first swipe" : `${swipes} swipes`}
+            {level.dark ? " · 🔦 dark" : ""}
           </Text>
         </View>
         {level.key != null && (
@@ -510,7 +517,7 @@ export default function MazeDash() {
             <View className="mt-2 items-center">
               <Stars count={result.stars} size={26} />
               <Text className="mt-1 font-body-semi text-sm text-ink-mute">
-                {swipes} swipes (par {level.par}) · {mm}:{ss}
+                {fmtTime(seconds)} (3★ within {fmtTime(level.goal)}) · {swipes} swipes
               </Text>
             </View>
           }

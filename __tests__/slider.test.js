@@ -1,5 +1,6 @@
 import { blankOf, isSolved, neighbors, scramble, slide, solvedBoard } from "../src/games/sliding";
-import { LEVELS, scoreFor, starsFor } from "../src/games/slider/levels";
+import { goalFor, LEVELS } from "../src/games/slider/levels";
+import { fmtTime, scoreForTime, starsForTime } from "../src/games/timeStars";
 import { hashString } from "../src/lib/random";
 
 describe("Sliding rules at any size", () => {
@@ -49,11 +50,34 @@ describe("Picture Slider levels", () => {
     });
   });
 
-  test("stars and score reward tidy, quick solves", () => {
-    expect(starsFor(40, 40)).toBe(3);
-    expect(starsFor(64, 40)).toBe(2);
-    expect(starsFor(65, 40)).toBe(1);
-    expect(scoreFor(40, 40, 30)).toBeGreaterThan(scoreFor(60, 40, 30));
-    expect(scoreFor(40, 40, 10)).toBeGreaterThan(scoreFor(40, 40, 200));
+  test("time goals grow with the board and are longer without numbers", () => {
+    LEVELS.forEach((l) => {
+      expect(l.goal % 5).toBe(0);
+      expect(l.goal).toBeGreaterThanOrEqual(l.par); // at least a second per scramble move
+    });
+    expect(goalFor(100, 5)).toBeGreaterThan(goalFor(100, 4));
+    expect(goalFor(60, 4, true)).toBeGreaterThan(goalFor(60, 4));
+  });
+});
+
+describe("Time stars", () => {
+  test("3 stars within the goal, 2 within twice it, else 1", () => {
+    expect(starsForTime(40, 40)).toBe(3);
+    expect(starsForTime(41, 40)).toBe(2);
+    expect(starsForTime(80, 40)).toBe(2);
+    expect(starsForTime(81, 40)).toBe(1);
+    expect(starsForTime(9999, 40)).toBe(1);
+  });
+
+  test("score rewards quicker finishes", () => {
+    expect(scoreForTime(10, 40)).toBeGreaterThan(scoreForTime(39, 40));
+    expect(scoreForTime(39, 40)).toBeGreaterThan(scoreForTime(41, 40));
+    expect(scoreForTime(9999, 40)).toBe(1000);
+  });
+
+  test("formats as m:ss", () => {
+    expect(fmtTime(0)).toBe("0:00");
+    expect(fmtTime(75.9)).toBe("1:15");
+    expect(fmtTime(605)).toBe("10:05");
   });
 });

@@ -163,20 +163,7 @@ export function buildLevel(n, name, cols, rows, withKey) {
     key == null
       ? swipesBetween(maze, start, exit, stops)
       : swipesBetween(maze, start, key, stops) + swipesBetween(maze, key, exit, stops);
-  return { name, maze, start, exit, key, par };
-}
-
-/** 3 stars at or under par swipes, 2 within 50% over, otherwise 1. */
-export function starsFor(swipes, par) {
-  if (swipes <= par) return 3;
-  if (swipes <= Math.ceil(par * 1.5)) return 2;
-  return 1;
-}
-
-export function scoreFor(swipes, par, seconds) {
-  return (
-    starsFor(swipes, par) * 1000 +
-    Math.max(0, 1000 - seconds * 5) +
-    Math.max(0, 500 - (swipes - par) * 25)
-  );
+  // Cells on the best route (start → key → exit), for the level's time goal.
+  const cells = key == null ? fromStart[exit] : fromStart[key] + distances(maze, key)[exit];
+  return { name, maze, start, exit, key, par, cells };
 }

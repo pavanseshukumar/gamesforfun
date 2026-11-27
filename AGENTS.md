@@ -98,6 +98,8 @@ Docs: https://docs.expo.dev/eas/index.md
   select and the store's `levels` slice (`recordLevel(gameId, n, stars, score)`), then call
   `recordGame(gameId, totalStars, …)` so "best" is total stars. Sliding-tile boards come from
   `src/games/sliding.js` (any N×N) and render with `components/SlidingBoard.js`.
+  Picture Slider and Maze Dash star by time: each level has a `goal` in seconds, scored with
+  `src/games/timeStars.js` and shown with `components/StarTimer.js` (the clock starts on the first move).
 - **Challenge levels** (all other arcade games): `src/games/<id>/levels.js` exports `DEFAULTS` and
   `LEVELS` (`{ name, goal, config, metric, thresholds, lower? }`), registered in
   `src/games/challenges.js` and in the DEFAULTS map of `__tests__/challenges.test.js`. The screen

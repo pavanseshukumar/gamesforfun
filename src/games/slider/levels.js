@@ -1,11 +1,13 @@
 /**
  * Picture Slider levels: sliding-tile pictures that grow from 3×3 to 6×6.
  * Levels 13–16 are "picture only": the number hints are switched off.
- * Each board is a fixed seeded scramble, and "par" is the scramble's length —
- * always achievable (undo the scramble), so 3 stars is always within reach.
+ * Each board is a fixed seeded scramble ("par" is the scramble's length).
+ * Stars are for time (see games/timeStars.js): bigger, more scrambled boards
+ * and boards without number hints get longer goals.
  */
 import { hashString } from "../../lib/random";
 import { scramble } from "../sliding";
+import { ceil5 } from "../timeStars";
 
 const SPEC = [
   // [name, size, mascot, scramble moves, picture only?]
@@ -29,21 +31,13 @@ const SPEC = [
   ["Mega Mosaic", 6, "kit", 220],
 ];
 
+/** Seconds for 3 stars: about 1.5–1.8 s per scramble move, plus a little to get going. */
+export function goalFor(par, size, pictureOnly = false) {
+  return ceil5((par * (1.2 + 0.1 * size) + 10) * (pictureOnly ? 1.25 : 1));
+}
+
 export const LEVELS = SPEC.map(([name, size, variant, moves, pictureOnly = false], i) => {
   const { board, path } = scramble(hashString(`slider:${i + 1}`), size, moves);
-  return { name, size, variant, board, par: path.length - 1, pictureOnly };
+  const par = path.length - 1;
+  return { name, size, variant, board, par, pictureOnly, goal: goalFor(par, size, pictureOnly) };
 });
-
-/** 3 stars at or under par, 2 within 60% over, otherwise 1. */
-export function starsFor(moves, par) {
-  if (moves <= par) return 3;
-  if (moves <= Math.ceil(par * 1.6)) return 2;
-  return 1;
-}
-
-/** 1000 per star plus a bonus for being quick and tidy. */
-export function scoreFor(moves, par, seconds) {
-  const tidy = Math.max(0, 1000 - Math.max(0, moves - par) * 10);
-  const quick = Math.max(0, 1000 - seconds * 4);
-  return starsFor(moves, par) * 1000 + tidy + quick;
-}
