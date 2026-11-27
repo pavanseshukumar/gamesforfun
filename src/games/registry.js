@@ -230,6 +230,32 @@ export const ALL_GAMES = [
     lowerIsBetter: false,
   },
   {
+    id: "hop-across",
+    category: "action",
+    route: "/games/hop-across",
+    title: "Hop Across",
+    tagline: "Hop Hop over the lily pads",
+    emoji: "🐸",
+    mascot: "hop",
+    colors: ["#5FD8C0", "#2E9BDB"],
+    accent: "#1F8FC9",
+    unit: "pts",
+    lowerIsBetter: false,
+  },
+  {
+    id: "feed",
+    category: "action",
+    route: "/games/feed",
+    title: "Feed the Buddies",
+    tagline: "Drag each buddy their snack",
+    emoji: "🍩",
+    mascot: "pom",
+    colors: ["#FFC46B", "#FF7E5F"],
+    accent: "#F0653E",
+    unit: "pts",
+    lowerIsBetter: false,
+  },
+  {
     // The daily puzzle has its own banner on Home, so it stays out of the
     // carousel and quick play. Its mascot changes every day.
     id: "daily",

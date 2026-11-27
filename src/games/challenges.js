@@ -16,7 +16,9 @@
 import { BALANCE_LEVELS } from "./balance/levels";
 import { BOUNCE_LEVELS } from "./bounce/levels";
 import { COLOR_CATCH_LEVELS } from "./colorCatch/levels";
+import { FEED_LEVELS } from "./feed/levels";
 import { FUSION_LEVELS } from "./fusion/levels";
+import { HOP_LEVELS } from "./hopAcross/levels";
 import { MATH_LEVELS } from "./math/levels";
 import { MEMORY_LEVELS } from "./memory/levels";
 import { ODD_LEVELS } from "./odd/levels";
@@ -37,6 +39,8 @@ export const CHALLENGES = {
   memory: MEMORY_LEVELS,
   balance: BALANCE_LEVELS,
   odd: ODD_LEVELS,
+  "hop-across": HOP_LEVELS,
+  feed: FEED_LEVELS,
 };
 
 export const challengesFor = (gameId) => CHALLENGES[gameId] ?? null;

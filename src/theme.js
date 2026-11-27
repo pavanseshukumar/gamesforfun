@@ -33,6 +33,8 @@ export const BACKDROPS = {
   paint: ["#FFC2B3", "#FFE0D6", "#FFF6F2"],
   balance: ["#A8EBD3", "#D4F7EA", "#F2FFFA"],
   odd: ["#FFC79E", "#FFE2CF", "#FFF7F1"],
+  "hop-across": ["#7EDFF2", "#BFF0EC", "#F0FFF9"],
+  feed: ["#FFC98F", "#FFE4C4", "#FFF8EE"],
 };
 
 /** Shared soft shadow for white cards. */

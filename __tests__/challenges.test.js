@@ -2,7 +2,9 @@ import { CHALLENGES, starsFor, targetsText } from "../src/games/challenges";
 import { ALL_GAMES } from "../src/games/registry";
 import { BOUNCE_DEFAULTS } from "../src/games/bounce/levels";
 import { COLOR_CATCH_DEFAULTS } from "../src/games/colorCatch/levels";
+import { FEED_DEFAULTS } from "../src/games/feed/levels";
 import { FUSION_DEFAULTS } from "../src/games/fusion/levels";
+import { HOP_DEFAULTS } from "../src/games/hopAcross/levels";
 import { BALANCE_DEFAULTS } from "../src/games/balance/levels";
 import { MATH_DEFAULTS } from "../src/games/math/levels";
 import { MEMORY_DEFAULTS } from "../src/games/memory/levels";
@@ -25,6 +27,8 @@ const DEFAULTS = {
   memory: MEMORY_DEFAULTS,
   balance: BALANCE_DEFAULTS,
   odd: ODD_DEFAULTS,
+  "hop-across": HOP_DEFAULTS,
+  feed: FEED_DEFAULTS,
 };
 
 describe.each(Object.entries(CHALLENGES))("%s challenge levels", (gameId, levels) => {
