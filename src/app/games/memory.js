@@ -290,13 +290,12 @@ function Memory() {
   );
   const PAIRS = cfg.pairs;
   const rows = (PAIRS * 2) / COLS;
+  // The board's own measured space (between the status row and the footer).
   const [area, setArea] = useState(null);
   const boardWidth = Math.min(width - 32, 420);
   // Cards are 1.25× taller than wide; bigger decks shrink to fit the height.
   const byWidth = (boardWidth - GAP * (COLS - 1)) / COLS;
-  const byHeight = area
-    ? (area.h - (challenge.level ? 150 : 100) - GAP * (rows - 1)) / rows / 1.25
-    : byWidth;
+  const byHeight = area ? (area.h - 12 - GAP * (rows - 1)) / rows / 1.25 : byWidth;
   const size = Math.max(40, Math.min(byWidth, byHeight));
   const gridWidth = size * COLS + GAP * (COLS - 1);
 
@@ -553,46 +552,62 @@ function Memory() {
         className="flex-1 items-center justify-center"
         onLayout={(e) => setArea({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
       >
+        {/* Dealt once the space is measured, so cards never start oversized. */}
+        {area && (
+          <View
+            key={deck[0].key}
+            style={[{ width: gridWidth, flexDirection: "row", flexWrap: "wrap", gap: GAP }]}
+          >
+            {deck.map((card, i) => (
+              <Card
+                key={card.key}
+                card={showAll && !card.matched ? { ...card, flipped: true } : card}
+                index={i}
+                size={size}
+                onPress={() => flip(i)}
+                shake={shake && shake.ids.includes(i) ? shake.n : null}
+              />
+            ))}
+          </View>
+        )}
         {memorising && (
-          <View className="mb-2 rounded-full bg-ink px-4 py-1.5">
+          <View
+            pointerEvents="none"
+            className="absolute top-1 self-center rounded-full bg-ink px-4 py-1.5"
+          >
             <Text className="font-body-black text-sm text-white">👀 Memorise!</Text>
           </View>
         )}
-        <View
-          key={deck[0].key}
-          style={[{ width: gridWidth, flexDirection: "row", flexWrap: "wrap", gap: GAP }]}
-        >
-          {deck.map((card, i) => (
-            <Card
-              key={card.key}
-              card={showAll && !card.matched ? { ...card, flipped: true } : card}
-              index={i}
-              size={size}
-              onPress={() => flip(i)}
-              shake={shake && shake.ids.includes(i) ? shake.n : null}
-            />
-          ))}
-        </View>
         <Banner banner={banner} />
+      </View>
+
+      {/* Footer: fixed height for the whole round, so the board never shifts. */}
+      <View className="items-center px-5 pb-3">
         {challenge.level ? (
-          <View className="mt-3 w-full px-5">
-            <ChallengeGoal level={challenge.level} n={challenge.n} />
-          </View>
+          <ChallengeGoal level={challenge.level} n={challenge.n} />
         ) : (
-          <View className="mt-4 flex-row items-center px-5">
-            <Mascot variant={GAME.mascot} size={54} mood={mood} />
-            <View style={cardShadow} className="ml-2 flex-shrink rounded-2xl bg-white px-4 py-2.5">
-              <Text className="font-body-bold text-sm text-ink">{say}</Text>
+          <>
+            <View className="mt-2 flex-row items-center">
+              <Mascot variant={GAME.mascot} size={54} mood={mood} />
+              <View
+                style={cardShadow}
+                className="ml-2 flex-shrink rounded-2xl bg-white px-4 py-2.5"
+              >
+                <Text className="font-body-bold text-sm text-ink">{say}</Text>
+              </View>
             </View>
-          </View>
-        )}
-        {!challenge.level && !started && (
-          <LevelsButton
-            gameId={GAME.id}
-            count={challenge.count}
-            onPress={challenge.openLevels}
-            style={{ marginTop: 10 }}
-          />
+            {/* Levels shows before the first flip; its space stays reserved after. */}
+            <View
+              pointerEvents={started ? "none" : "auto"}
+              style={{ opacity: started ? 0 : 1, marginTop: 8 }}
+            >
+              <LevelsButton
+                gameId={GAME.id}
+                count={challenge.count}
+                onPress={challenge.openLevels}
+              />
+            </View>
+          </>
         )}
       </View>
 

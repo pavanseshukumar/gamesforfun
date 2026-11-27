@@ -167,3 +167,71 @@ export function buildLevel(n, name, cols, rows, withKey) {
   const cells = key == null ? fromStart[exit] : fromStart[key] + distances(maze, key)[exit];
   return { name, maze, start, exit, key, par, cells };
 }
+
+/** Seconds knocked off the clock for each gem picked up. */
+export const GEM_SECONDS = 3;
+
+/**
+ * Seeded gems and teleport pads for a built level.
+ * Gems prefer dead ends, so grabbing one is a detour you weigh against the
+ * clock. The first pad pair links the early part of the maze to the late part
+ * (a shortcut, if you find it); a second pair links two far-apart spots.
+ * @returns {{ gems: number[], pads: [number, number][] }}
+ */
+export function placeExtras(level, n, gemCount, padPairs) {
+  const { maze, start, exit, key } = level;
+  const rand = createRng(hashString(`maze-extras:${n}`));
+  const fromStart = distances(maze, start);
+  const far = Math.max(...fromStart);
+  const fromExit = distances(maze, exit);
+  const route = fromStart[exit];
+  const used = new Set([start, exit, key].filter((c) => c != null));
+  // Keep the cells right next to the start clear.
+  openings(maze, start).forEach((d) => used.add(neighbor(maze, start, d)));
+  const free = (c) => !used.has(c);
+  const pickFrom = (cells) => {
+    const options = cells.filter(free);
+    if (!options.length) return null;
+    const c = options[Math.floor(rand() * options.length)];
+    used.add(c);
+    return c;
+  };
+  const all = maze.walls.map((_, i) => i);
+  const band = (lo, hi) => all.filter((c) => fromStart[c] >= far * lo && fromStart[c] <= far * hi);
+
+  const pads = [];
+  for (let p = 0; p < padPairs; p++) {
+    const a = p === 0 ? pickFrom(band(0.2, 0.45)) : pickFrom(band(0.1, 0.9));
+    if (a == null) break;
+    const fromA = distances(maze, a);
+    // The first pair must cut the start → exit walk by at least a quarter.
+    const b =
+      p === 0
+        ? pickFrom(
+            band(0.5, 0.95).filter(
+              (c) => fromA[c] >= far * 0.3 && fromStart[a] + fromExit[c] < route * 0.75,
+            ),
+          )
+        : pickFrom(all.filter((c) => fromA[c] >= far * 0.4));
+    if (b == null) break;
+    pads.push([a, b]);
+  }
+
+  const gems = [];
+  const deadEnds = all.filter((c) => openings(maze, c).length === 1);
+  while (gems.length < gemCount) {
+    const c = pickFrom(deadEnds) ?? pickFrom(all.filter((x) => fromStart[x] >= 3));
+    if (c == null) break;
+    gems.push(c);
+  }
+  return { gems, pads };
+}
+
+/** The other end of a pad pair, or null if `cell` isn't a pad. */
+export function padPartner(pads, cell) {
+  for (const [a, b] of pads) {
+    if (a === cell) return b;
+    if (b === cell) return a;
+  }
+  return null;
+}

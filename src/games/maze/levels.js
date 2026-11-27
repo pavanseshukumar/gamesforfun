@@ -1,5 +1,5 @@
 import { ceil5 } from "../timeStars";
-import { buildLevel } from "./logic";
+import { buildLevel, placeExtras } from "./logic";
 
 // [name, cols, rows, key?, dark?] — mazes grow and keys arrive from level 4;
 // levels 16–20 are dark: only a small circle around Dash is lit.
@@ -34,14 +34,27 @@ export function goalFor(cells, par, dark) {
   return ceil5((cells * 0.12 + par * 1.2 + 5) * (dark ? 1.4 : 1));
 }
 
-const withGoal = (level, dark) => ({ ...level, goal: goalFor(level.cells, level.par, dark) });
+/** Gems on every maze (more as they grow); teleport pads from level 5, two pairs from 11. */
+export const extrasFor = (n, dark) => ({
+  gems: 2 + Math.floor(n / 5),
+  pads: n < 5 ? 0 : !dark && n >= 11 ? 2 : 1,
+});
+
+function withExtras(level, n, dark) {
+  const { gems, pads } = extrasFor(n, dark);
+  return {
+    ...level,
+    ...placeExtras(level, n, gems, pads),
+    goal: goalFor(level.cells, level.par, dark),
+  };
+}
 
 let cache = null;
 /** Built lazily on first use (generation + pathfinding for every maze). */
 export function getLevels() {
   if (!cache)
     cache = SPEC.map(([name, c, r, key, dark = false], i) => ({
-      ...withGoal(buildLevel(i + 1, name, c, r, key), dark),
+      ...withExtras(buildLevel(i + 1, name, c, r, key), i + 1, dark),
       dark,
     }));
   return cache;

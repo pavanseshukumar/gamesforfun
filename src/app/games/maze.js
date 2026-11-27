@@ -22,13 +22,25 @@ import GradientScreen from "../../components/GradientScreen";
 import LevelsHeader from "../../components/LevelsHeader";
 import LevelGrid, { Stars, totalStars } from "../../components/LevelGrid";
 import Mascot from "../../components/Mascot";
+import PopNumber from "../../components/PopNumber";
 import StarTimer from "../../components/StarTimer";
 import { getLevels, LEVEL_NAMES } from "../../games/maze/levels";
-import { DIRS, E, N, openings, run, S, W, xyOf } from "../../games/maze/logic";
+import {
+  DIRS,
+  E,
+  GEM_SECONDS,
+  N,
+  openings,
+  padPartner,
+  run,
+  S,
+  W,
+  xyOf,
+} from "../../games/maze/logic";
 import { getGame } from "../../games/registry";
 import { fmtTime, scoreForTime, starsForTime } from "../../games/timeStars";
 import { haptic } from "../../lib/haptics";
-import { sfx } from "../../lib/sound";
+import { popFor, sfx } from "../../lib/sound";
 import { useGameStore } from "../../store/useGameStore";
 import { cardShadow, display } from "../../theme";
 
@@ -103,6 +115,57 @@ function Portal({ size, locked }) {
   );
 }
 
+const PAD_COLOURS = ["#FF8A3D", "#22C3E6"];
+
+/** A teleport pad: a spinning dashed ring; its twin has the same colour. */
+function Pad({ size, colour }) {
+  const spin = useSharedValue(0);
+  useEffect(() => {
+    spin.set(withRepeat(withTiming(1, { duration: 2400, easing: Easing.linear }), -1));
+  }, [spin]);
+  const style = useAnimatedStyle(() => ({ transform: [{ rotate: `${spin.value * 360}deg` }] }));
+  return (
+    <View style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
+      <View
+        style={{
+          position: "absolute",
+          width: size * 0.62,
+          height: size * 0.62,
+          borderRadius: size,
+          backgroundColor: colour,
+          opacity: 0.35,
+        }}
+      />
+      <Animated.View style={[{ position: "absolute" }, style]}>
+        <Svg width={size} height={size} viewBox="0 0 100 100">
+          <Circle
+            cx={50}
+            cy={50}
+            r={40}
+            stroke={colour}
+            strokeWidth={9}
+            strokeDasharray="18 12"
+            strokeLinecap="round"
+            fill="none"
+          />
+        </Svg>
+      </Animated.View>
+      <Ionicons name="swap-horizontal" size={size * 0.34} color={colour} />
+    </View>
+  );
+}
+
+function Gem({ size }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <Path d="M20 38 L36 18 H64 L80 38 L50 84 Z" fill="#FF5FA8" />
+      <Path d="M20 38 H80 L50 84 Z" fill="#E53A8A" />
+      <Path d="M36 18 L44 38 H20 Z M64 18 L56 38 H80 Z" fill="#FF9CCB" />
+      <Path d="M40 26 L46 26" stroke="#FFFFFF" strokeWidth={5} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
 /**
  * Dark levels: a ring with a huge border leaves a clear circle around Dash and
  * blacks out everything else. It rides the same transform as the mascot.
@@ -139,6 +202,7 @@ export default function MazeDash() {
 
   const [levelIdx, setLevelIdx] = useState(null);
   const [hasKey, setHasKey] = useState(false);
+  const [gems, setGems] = useState(() => new Set()); // collected gem cells
   const [visited, setVisited] = useState(() => new Set([0]));
   const [swipes, setSwipes] = useState(0);
   const [seconds, setSeconds] = useState(0);
@@ -158,30 +222,46 @@ export default function MazeDash() {
   const py = useSharedValue(0);
   const busy = useRef(false);
   const queued = useRef(null);
-  const game = useRef({ pos: 0, hasKey: false, swipes: 0, done: false });
+  const game = useRef({ pos: 0, hasKey: false, swipes: 0, done: false, gems: 0, got: new Set() });
+  const warp = useSharedValue(1); // Pengu's scale while teleporting
   // Lets a queued swipe replay through the latest `move` without self-reference.
   const moveRef = useRef(null);
   const started = swipes > 0 && !done;
   const startedAt = useRef(0); // the clock starts on the first swipe
+  // Seconds on the clock: time since the first swipe, minus the gem bonus.
+  const clock = useCallback(
+    () =>
+      Math.max(
+        0,
+        Math.floor((Date.now() - startedAt.current) / 1000) - game.current.gems * GEM_SECONDS,
+      ),
+    [],
+  );
 
   useEffect(() => {
     if (!started) return undefined;
-    const id = setInterval(
-      () => setSeconds(Math.floor((Date.now() - startedAt.current) / 1000)),
-      250,
-    );
+    const id = setInterval(() => setSeconds(clock()), 250);
     return () => clearInterval(id);
-  }, [started]);
+  }, [clock, started]);
 
   const startLevel = useCallback(
     (i) => {
       const l = levels[i];
-      game.current = { pos: l.start, hasKey: false, swipes: 0, done: false };
+      game.current = {
+        pos: l.start,
+        hasKey: false,
+        swipes: 0,
+        done: false,
+        gems: 0,
+        got: new Set(),
+      };
       busy.current = false;
       queued.current = null;
       setLevelIdx(i);
       setHasKey(false);
       setVisited(new Set([l.start]));
+      setGems(new Set());
+      warp.set(1);
       setSwipes(0);
       setSeconds(0);
       setDone(false);
@@ -190,11 +270,11 @@ export default function MazeDash() {
       py.set(0);
       sfx("go");
     },
-    [levels, px, py],
+    [levels, px, py, warp],
   );
 
   const finish = useCallback(() => {
-    const time = Math.floor((Date.now() - startedAt.current) / 1000);
+    const time = clock();
     setSeconds(time);
     const stars = starsForTime(time, level.goal);
     const score = scoreForTime(time, level.goal);
@@ -215,7 +295,7 @@ export default function MazeDash() {
         }),
       900,
     );
-  }, [level, n, recordGame, recordLevel]);
+  }, [clock, level, n, recordGame, recordLevel]);
 
   const move = useCallback(
     (dirName) => {
@@ -225,7 +305,10 @@ export default function MazeDash() {
         queued.current = dirName; // remember one swipe made mid-run
         return;
       }
-      const stops = [level.exit, g.hasKey ? null : level.key].filter((c) => c != null);
+      // Runs stop on the exit, the key and teleport pads.
+      const stops = [level.exit, g.hasKey ? null : level.key, ...level.pads.flat()].filter(
+        (c) => c != null,
+      );
       const path = run(level.maze, g.pos, DIRS[dirName], stops);
       if (!path.length) {
         haptic.select();
@@ -246,11 +329,50 @@ export default function MazeDash() {
       px.set(withSequence(...xs.map((v) => withTiming(v, t))));
       py.set(withSequence(...ys.map((v) => withTiming(v, t))));
 
+      // Gems are picked up as Pengu runs over them.
+      path.forEach((c, i) => {
+        if (!level.gems.includes(c) || g.got.has(c)) return;
+        g.got.add(c);
+        setTimeout(
+          () => {
+            g.gems += 1;
+            setGems(new Set(g.got));
+            setSeconds(clock());
+            haptic.success();
+            sfx(popFor(g.gems));
+          },
+          (i + 1) * CELL_MS,
+        );
+      });
+
       const end = path[path.length - 1];
       g.pos = end;
+      const release = () => {
+        busy.current = false;
+        const next = queued.current;
+        queued.current = null;
+        if (next) moveRef.current?.(next);
+      };
       setTimeout(
         () => {
           setVisited((v) => new Set([...v, ...path]));
+          // Teleport pad: shrink away, reappear on its twin.
+          const twin = padPartner(level.pads, end);
+          if (twin != null) {
+            sfx("switch");
+            haptic.tap();
+            g.pos = twin;
+            const [tx, ty] = xyOf(level.maze, twin);
+            warp.set(withTiming(0, { duration: 150, easing: Easing.in(Easing.quad) }));
+            setTimeout(() => {
+              px.set(tx * cell);
+              py.set(ty * cell);
+              setVisited((v) => new Set([...v, twin]));
+              warp.set(withTiming(1, { duration: 240, easing: Easing.out(Easing.back(2)) }));
+            }, 160);
+            setTimeout(release, 420);
+            return;
+          }
           if (end === level.key && !g.hasKey) {
             g.hasKey = true;
             setHasKey(true);
@@ -271,15 +393,12 @@ export default function MazeDash() {
           } else if (openings(level.maze, end).length === 1) {
             sfx("land"); // bumped into a dead end
           }
-          busy.current = false;
-          const next = queued.current;
-          queued.current = null;
-          if (next) moveRef.current?.(next);
+          release();
         },
         path.length * CELL_MS + 20,
       );
     },
-    [cell, finish, level, px, py],
+    [cell, clock, finish, level, px, py, warp],
   );
 
   useEffect(() => {
@@ -311,6 +430,10 @@ export default function MazeDash() {
     },
   });
 
+  const warpStyle = useAnimatedStyle(() => ({
+    opacity: warp.value,
+    transform: [{ scale: warp.value }, { rotate: `${(1 - warp.value) * 180}deg` }],
+  }));
   const pipStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: px.value }, { translateY: py.value }],
   }));
@@ -326,7 +449,7 @@ export default function MazeDash() {
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
           <LevelsHeader
             game={GAME}
-            blurb="Swipe and Pengu waddles to the next junction. Grab the key and reach the portal before the clock runs down for 3 stars!"
+            blurb="Swipe to run. Grab gems (−3 s each), ride the teleport pads and reach the portal fast!"
             stars={totalStars(progress)}
             max={levels.length * 3}
           />
@@ -370,14 +493,25 @@ export default function MazeDash() {
             {level.dark ? " · 🔦 dark" : ""}
           </Text>
         </View>
-        {level.key != null && (
-          <View className="flex-row items-center rounded-full bg-white px-3 py-1.5">
-            <Ionicons name="key" size={16} color={hasKey ? "#FFB800" : "#C9C9D2"} />
-            <Text className="ml-1 font-body-bold text-xs text-ink">
-              {hasKey ? "Got the key!" : "Find the key"}
-            </Text>
-          </View>
-        )}
+        <View className="flex-row items-center gap-2">
+          {level.gems.length > 0 && (
+            <View className="flex-row items-center rounded-full bg-white px-3 py-1.5">
+              <Gem size={16} />
+              <PopNumber
+                value={`${gems.size}/${level.gems.length}`}
+                className="ml-1 font-body-black text-xs text-ink"
+              />
+            </View>
+          )}
+          {level.key != null && (
+            <View className="flex-row items-center rounded-full bg-white px-3 py-1.5">
+              <Ionicons name="key" size={16} color={hasKey ? "#FFB800" : "#C9C9D2"} />
+              <Text className="ml-1 font-body-bold text-xs text-ink">
+                {hasKey ? "Got it!" : "Key"}
+              </Text>
+            </View>
+          )}
+        </View>
       </View>
 
       <GestureDetector gesture={swipe}>
@@ -423,6 +557,40 @@ export default function MazeDash() {
                     />
                   );
                 })}
+                {level.pads.map((pair, p) =>
+                  pair.map((c) => {
+                    const [x, y] = xyOf(level.maze, c);
+                    return (
+                      <View
+                        key={c}
+                        style={{
+                          position: "absolute",
+                          left: x * cell + cell * 0.05,
+                          top: y * cell + cell * 0.05,
+                        }}
+                      >
+                        <Pad size={cell * 0.9} colour={PAD_COLOURS[p % PAD_COLOURS.length]} />
+                      </View>
+                    );
+                  }),
+                )}
+                {level.gems
+                  .filter((c) => !gems.has(c))
+                  .map((c) => {
+                    const [x, y] = xyOf(level.maze, c);
+                    return (
+                      <View
+                        key={c}
+                        style={{
+                          position: "absolute",
+                          left: x * cell + cell * 0.2,
+                          top: y * cell + cell * 0.2,
+                        }}
+                      >
+                        <Gem size={cell * 0.6} />
+                      </View>
+                    );
+                  })}
                 <View
                   style={{
                     position: "absolute",
@@ -472,12 +640,14 @@ export default function MazeDash() {
                   pointerEvents="none"
                   style={[{ position: "absolute", left: cell * 0.04, top: -cell * 0.08 }, pipStyle]}
                 >
-                  <Mascot
-                    variant={GAME.mascot}
-                    size={cell * 0.92}
-                    mood={done ? "cheer" : "happy"}
-                    animated={false}
-                  />
+                  <Animated.View style={warpStyle}>
+                    <Mascot
+                      variant={GAME.mascot}
+                      size={cell * 0.92}
+                      mood={done ? "cheer" : "happy"}
+                      animated={false}
+                    />
+                  </Animated.View>
                 </Animated.View>
               </View>
             </View>

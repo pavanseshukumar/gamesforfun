@@ -1,4 +1,4 @@
-import { getLevels } from "../src/games/maze/levels";
+import { extrasFor, getLevels } from "../src/games/maze/levels";
 import {
   canMove,
   DIRS,
@@ -6,6 +6,7 @@ import {
   generateMaze,
   N,
   openings,
+  padPartner,
   run,
   S,
   shortestPath,
@@ -149,5 +150,53 @@ describe("Maze Dash levels", () => {
     expect(lit.at(-1).goal).toBeGreaterThan(lit[0].goal);
     // A dark maze gets more time than the same-size lit one.
     expect(levels[16].goal).toBeGreaterThan(levels[6].goal);
+  });
+
+  test("gems sit on free cells, more as mazes grow", () => {
+    levels.forEach((l, i) => {
+      expect(l.gems.length).toBe(extrasFor(i + 1, l.dark).gems);
+      const taken = [l.start, l.exit, l.key, ...l.pads.flat()];
+      l.gems.forEach((g) => expect(taken).not.toContain(g));
+      expect(new Set(l.gems).size).toBe(l.gems.length);
+    });
+  });
+
+  test("teleport pads come in linked pairs from level 5", () => {
+    levels.forEach((l, i) => {
+      expect(l.pads).toHaveLength(extrasFor(i + 1, l.dark).pads);
+      const cells = l.pads.flat();
+      expect(new Set(cells).size).toBe(cells.length);
+      cells.forEach((c) => expect([l.start, l.exit, l.key]).not.toContain(c));
+      l.pads.forEach(([a, b]) => {
+        expect(padPartner(l.pads, a)).toBe(b);
+        expect(padPartner(l.pads, b)).toBe(a);
+      });
+    });
+    expect(levels[3].pads).toHaveLength(0);
+    expect(levels[4].pads).toHaveLength(1);
+    expect(levels[12].pads).toHaveLength(2);
+    expect(padPartner(levels[4].pads, levels[4].start)).toBeNull();
+  });
+
+  test("the first pad pair is a shortcut: it links an early spot to a late one", () => {
+    levels
+      .filter((l) => l.pads.length)
+      .forEach((l) => {
+        const route = shortestPath(l.maze, l.start, l.exit).length;
+        const [a, b] = l.pads[0];
+        const viaPad =
+          shortestPath(l.maze, l.start, a).length + shortestPath(l.maze, b, l.exit).length;
+        expect(shortestPath(l.maze, a, b).length).toBeGreaterThan(3); // far apart
+        expect(viaPad).toBeLessThan(route * 0.8); // a real shortcut
+      });
+  });
+
+  test("runs stop on a pad", () => {
+    const l = levels.find((x) => x.pads.length);
+    const [a] = l.pads[0];
+    const path = shortestPath(l.maze, l.start, a);
+    const before = path[path.length - 2];
+    const d = [N, E, S, W].find((dir) => run(l.maze, before, dir, [a])[0] === a);
+    expect(run(l.maze, before, d, [a])).toEqual([a]);
   });
 });
