@@ -10,6 +10,7 @@ import Animated, {
   FadeIn,
   useAnimatedStyle,
   useSharedValue,
+  withSequence,
   withSpring,
   withTiming,
   ZoomIn,
@@ -26,7 +27,7 @@ const TILE_SPRING = { damping: 18, stiffness: 260, mass: 0.6 };
 /**
  * One picture tile. Tap it, or drag it toward the gap: it follows the finger
  * along that one direction (never past the gap), and slides in once dragged
- * about a third of the way or flicked; otherwise it springs back.
+ * a quarter of the way or flicked; otherwise it springs back.
  * `dx`/`dy` point toward the gap when this tile is next to it (else both 0).
  */
 function Tile({ id, index, size, tile, variant, inner, showNumber, onMove, dx, dy }) {
@@ -44,11 +45,8 @@ function Tile({ id, index, size, tile, variant, inner, showNumber, onMove, dx, d
   const movable = dx !== 0 || dy !== 0;
 
   const pan = usePanGesture({
-    minDistance: 6,
-    onBegin: () => {
-      "worklet";
-      press.set(withTiming(0.95, { duration: 80 }));
-    },
+    // Start tracking almost at once, so the tile stays glued to the finger.
+    minDistance: 1,
     onUpdate: (e) => {
       "worklet";
       if (!movable) return;
@@ -59,7 +57,8 @@ function Tile({ id, index, size, tile, variant, inner, showNumber, onMove, dx, d
       "worklet";
       if (!movable) return;
       const speed = e.velocityX * dx + e.velocityY * dy;
-      if (drag.value > cell * 0.35 || (speed > 450 && drag.value > 4)) {
+      // A quarter of the way, or a light flick toward the gap, is enough.
+      if (drag.value > cell * 0.25 || (speed > 250 && drag.value > 2)) {
         // Keep the tile where the finger left it; the board update springs it home.
         x.set(x.value + drag.value * dx);
         y.set(y.value + drag.value * dy);
@@ -69,23 +68,13 @@ function Tile({ id, index, size, tile, variant, inner, showNumber, onMove, dx, d
         drag.set(withSpring(0, TILE_SPRING));
       }
     },
-    onFinalize: () => {
-      "worklet";
-      press.set(withSpring(1, TILE_SPRING));
-    },
   });
   const tap = useTapGesture({
-    onBegin: () => {
-      "worklet";
-      press.set(withTiming(0.93, { duration: 70 }));
-    },
     onActivate: () => {
       "worklet";
+      // A quick pulse for taps only; drags never change the tile's size.
+      press.set(withSequence(withTiming(0.94, { duration: 70 }), withTiming(1, { duration: 120 })));
       scheduleOnRN(onMove);
-    },
-    onFinalize: () => {
-      "worklet";
-      press.set(withSpring(1, TILE_SPRING));
     },
   });
   // A drag wins over a tap, so sliding never also counts as a tap.
