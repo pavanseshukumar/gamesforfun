@@ -84,7 +84,7 @@ function Tab({ name, focused, onPress, width }) {
   );
 }
 
-/** Raised centre bubble: Spike bounces in it; tapping jumps into a random game. */
+/** Raised centre bubble: Kit bounces in it; tapping jumps into a random game. */
 function PlayBubble() {
   const spin = useSharedValue(0);
   const scale = useSharedValue(1);
@@ -127,7 +127,7 @@ function PlayBubble() {
           style={{ flex: 1, alignItems: "center", justifyContent: "flex-end" }}
         >
           <View style={{ marginBottom: -4 }}>
-            <Mascot variant="spike" size={52} mood="cheer" />
+            <Mascot variant="kit" size={52} mood="cheer" />
           </View>
         </LinearGradient>
       </Animated.View>

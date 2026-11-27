@@ -28,9 +28,9 @@ const BUDDIES = {
   mochi: { base: "#B08CFF", light: "#DCCBFF", dark: "#7E58E0" },
   bun: { base: "#FFB3CF", light: "#FFE3EE", dark: "#E57FA6" },
   rex: { base: "#4FCF7A", light: "#A9F2C2", dark: "#239A50" },
-  blink: { base: "#9C5CFF", light: "#CBA8FF", dark: "#6A2FD6" },
+  peep: { base: "#FFD23F", light: "#FFF3A8", dark: "#E8A400" },
   pengu: { base: "#2F3E6E", light: "#5D6FA8", dark: "#1B2650" },
-  spike: { base: "#FF7A45", light: "#FFC09E", dark: "#E04E1A" },
+  kit: { base: "#FF8A3D", light: "#FFC9A0", dark: "#E0601A" },
 };
 const BODY =
   "M100 50 C150 50 176 88 176 128 C176 170 144 196 100 196 C56 196 24 170 24 128 C24 88 50 50 100 50 Z";
@@ -47,7 +47,7 @@ function mouth(mood) {
   return `<path d="M84 146 Q100 162 116 146" stroke="#5A1A1A" stroke-width="5" fill="none" stroke-linecap="round"/>`;
 }
 
-/** Per-buddy parts: behind the body (ears, horns) and on top (face details, special eyes). */
+/** Per-buddy parts: behind the body (ears, crests, tails) and on top (face details, special eyes). */
 function parts(variant, c) {
   switch (variant) {
     case "mochi":
@@ -68,11 +68,12 @@ function parts(variant, c) {
         front: `<circle cx="64" cy="168" r="6" fill="${c.dark}" opacity=".5"/><circle cx="136" cy="172" r="5" fill="${c.dark}" opacity=".5"/>`,
         eyes: twoEyes,
       };
-    case "blink":
+    case "peep":
       return {
-        back: `<path d="M62 70 Q52 40 70 30 Q66 52 78 62 Z" fill="#FFE14D"/><path d="M138 70 Q148 40 130 30 Q134 52 122 62 Z" fill="#FFE14D"/>`,
-        front: `<circle cx="60" cy="170" r="5" fill="#FFE14D" opacity=".8"/><circle cx="146" cy="160" r="6" fill="#FFE14D" opacity=".8"/>`,
-        eyes: `<ellipse cx="100" cy="108" rx="30" ry="32" fill="#fff"/><circle cx="104" cy="113" r="16" fill="#2BD67B"/><circle cx="104" cy="113" r="9" fill="#141414"/><circle cx="110" cy="106" r="5" fill="#fff"/>`,
+        back: `<path d="M98 54 Q84 26 70 30 Q86 38 90 56 Z" fill="${c.dark}"/><path d="M100 54 Q100 18 110 14 Q106 34 108 54 Z" fill="${c.dark}"/><path d="M104 56 Q118 30 132 34 Q116 42 112 58 Z" fill="${c.dark}"/>`,
+        front: `<ellipse cx="100" cy="170" rx="38" ry="20" fill="${c.light}" opacity=".8"/>`,
+        eyes: twoEyes,
+        beak: `<path d="M88 134 L112 134 L100 150 Z" fill="#FFB020"/>`,
       };
     case "pengu":
       return {
@@ -81,10 +82,10 @@ function parts(variant, c) {
         eyes: twoEyes,
         beak: `<path d="M88 134 L112 134 L100 150 Z" fill="#FFB020"/>`,
       };
-    case "spike":
+    case "kit":
       return {
-        back: `<path d="M38 96 L22 84 L44 80 L36 58 L58 66 L60 42 L78 58 L90 34 L100 54 L112 32 L122 58 L140 42 L142 66 L164 58 L156 80 L178 84 L162 96 Z" fill="${c.dark}"/>`,
-        front: "",
+        back: `<path d="M46 90 L50 24 L98 58 Z" fill="${c.dark}"/><path d="M154 90 L150 24 L102 58 Z" fill="${c.dark}"/><path d="M56 76 L58 42 L82 60 Z" fill="#FFF1E0"/><path d="M144 76 L142 42 L118 60 Z" fill="#FFF1E0"/><path d="M50 24 L46 40 L60 34 Z" fill="#3A2318"/><path d="M150 24 L154 40 L140 34 Z" fill="#3A2318"/><path d="M150 178 Q206 176 198 110 Q194 92 180 96 Q186 150 150 156 Z" fill="${c.base}"/><path d="M198 110 Q194 92 180 96 Q182 112 197 120 Z" fill="#FFF4E6"/>`,
+        front: `<path d="M30 128 Q66 118 100 138 Q134 118 170 128 Q164 190 100 194 Q36 190 30 128 Z" fill="#FFF4E6"/><ellipse cx="100" cy="137" rx="9" ry="6.5" fill="#2A1A14"/>`,
         eyes: twoEyes,
       };
     default:
@@ -97,7 +98,7 @@ function mascot(variant, mood = "happy", { shadow = true } = {}) {
   const c = BUDDIES[variant];
   const p = parts(variant, c);
   const id = `g-${variant}-${mood}`;
-  const feet = variant === "pengu" ? "#FF9F1C" : c.dark;
+  const feet = variant === "pengu" || variant === "peep" ? "#FF9F1C" : c.dark;
   return `
     <defs><radialGradient id="${id}" cx="38%" cy="30%" r="75%">
       <stop offset="0" stop-color="${c.light}"/><stop offset=".55" stop-color="${c.base}"/><stop offset="1" stop-color="${c.dark}"/>
@@ -148,7 +149,7 @@ const JOBS = [
     file: "icon.png",
     w: 1024,
     h: 1024,
-    body: candyBg(1024, 1024) + sparkles(1024) + place(mascot("spike", "cheer"), 162, 150, 700),
+    body: candyBg(1024, 1024) + sparkles(1024) + place(mascot("kit", "cheer"), 162, 150, 700),
   },
   {
     // Android adaptive icon, background layer
@@ -163,7 +164,7 @@ const JOBS = [
     w: 512,
     h: 512,
     transparent: true,
-    body: place(mascot("spike", "cheer", { shadow: false }), 116, 104, 280),
+    body: place(mascot("kit", "cheer", { shadow: false }), 116, 104, 280),
   },
   {
     // Android 13+ themed icon: a single-colour silhouette; the system tints it
@@ -190,7 +191,7 @@ const JOBS = [
     h: 1024,
     transparent: true,
     body:
-      place(mascot("blink", "happy"), 150, 250, 300) +
+      place(mascot("peep", "happy"), 150, 250, 300) +
       place(mascot("rex", "wow"), 574, 250, 300) +
       place(mascot("mochi", "cheer"), 312, 170, 400) +
       `<text x="512" y="800" text-anchor="middle" font-family="Anton" font-size="190" fill="#141414">PLAYZO</text>`,
@@ -202,7 +203,8 @@ const JOBS = [
     transparent: true,
     body:
       `<defs><linearGradient id="fb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${CANDY[0]}"/><stop offset=".55" stop-color="${CANDY[1]}"/><stop offset="1" stop-color="${CANDY[2]}"/></linearGradient></defs>
-       <rect width="48" height="48" rx="12" fill="url(#fb)"/>` + place(mascot("spike", "happy", { shadow: false }), 4, 2, 40),
+       <rect width="48" height="48" rx="12" fill="url(#fb)"/>` +
+      place(mascot("kit", "happy", { shadow: false }), 4, 2, 40),
   },
 ];
 

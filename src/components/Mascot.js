@@ -14,8 +14,8 @@ import Svg, { Circle, Defs, Ellipse, G, Path, RadialGradient, Rect, Stop } from 
 import { LEGACY_BUDDIES, MASCOTS } from "../games/buddies";
 
 /**
- * The game's buddy cast: ten round, squishy characters drawn in SVG with soft
- * 3D shading. Each has its own colour and features (ears, horns, a beak…).
+ * The game's buddy cast: ten round, squishy animals drawn in SVG with soft
+ * 3D shading. Each has its own colour and features (ears, a tail, a beak…).
  */
 
 export { LEGACY_BUDDIES, MASCOTS };
@@ -26,11 +26,11 @@ const EYE_Y = 112;
 
 const BODY =
   "M100 50 C150 50 176 88 176 128 C176 170 144 196 100 196 C56 196 24 170 24 128 C24 88 50 50 100 50 Z";
-// Wobble is a jellyfish: a bell instead of a round body, tentacles instead of feet.
-const BELL =
-  "M100 50 C150 50 176 88 176 124 C176 150 160 164 100 164 C40 164 24 150 24 124 C24 88 50 50 100 50 Z";
 
-/** Ears, horns and antennae: drawn behind the body and hidden under a hat. */
+/** Birds have a beak instead of a mouth, and orange feet. */
+const BIRDS = new Set(["pengu", "peep", "hoot"]);
+
+/** Ears, crests and tufts: drawn behind the body and hidden under a hat. */
 function HeadParts({ variant, c }) {
   switch (variant) {
     case "mochi":
@@ -80,40 +80,47 @@ function HeadParts({ variant, c }) {
           <Circle cx={144} cy={64} r={11} fill="#F7C9A0" />
         </G>
       );
-    case "blink":
+    case "kit":
       return (
         <G>
-          <Path d="M62 70 Q52 40 70 30 Q66 52 78 62 Z" fill="#FFE14D" />
-          <Path d="M138 70 Q148 40 130 30 Q134 52 122 62 Z" fill="#FFE14D" />
+          <Path d="M46 90 L50 24 L98 58 Z" fill={c.dark} />
+          <Path d="M154 90 L150 24 L102 58 Z" fill={c.dark} />
+          <Path d="M56 76 L58 42 L82 60 Z" fill="#FFF1E0" />
+          <Path d="M144 76 L142 42 L118 60 Z" fill="#FFF1E0" />
+          <Path d="M50 24 L46 40 L60 34 Z" fill="#3A2318" />
+          <Path d="M150 24 L154 40 L140 34 Z" fill="#3A2318" />
         </G>
       );
-    case "bolt":
+    case "peep":
       return (
         <G>
-          <Path d="M100 54 L100 26" stroke={c.dark} strokeWidth={6} strokeLinecap="round" />
-          <Circle cx={100} cy={22} r={10} fill="#FF4D4D" />
-          <Circle cx={96} cy={18} r={3} fill="#FFFFFF" />
+          <Path d="M98 54 Q84 26 70 30 Q86 38 90 56 Z" fill={c.dark} />
+          <Path d="M100 54 Q100 18 110 14 Q106 34 108 54 Z" fill={c.dark} />
+          <Path d="M104 56 Q118 30 132 34 Q116 42 112 58 Z" fill={c.dark} />
         </G>
       );
-    case "zuzu":
+    case "koko":
       return (
         <G>
-          <Path
-            d="M74 58 Q62 34 56 24"
-            stroke={c.dark}
-            strokeWidth={5}
-            fill="none"
-            strokeLinecap="round"
-          />
-          <Path
-            d="M126 58 Q138 34 144 24"
-            stroke={c.dark}
-            strokeWidth={5}
-            fill="none"
-            strokeLinecap="round"
-          />
-          <Circle cx={56} cy={22} r={9} fill="#FF6FB1" />
-          <Circle cx={144} cy={22} r={9} fill="#4DD9FF" />
+          <Circle cx={42} cy={76} r={32} fill={c.base} />
+          <Circle cx={158} cy={76} r={32} fill={c.base} />
+          <Circle cx={44} cy={78} r={18} fill="#F7E3EC" />
+          <Circle cx={156} cy={78} r={18} fill="#F7E3EC" />
+        </G>
+      );
+    case "hop":
+      return (
+        <G>
+          <Circle cx={70} cy={70} r={28} fill={c.base} />
+          <Circle cx={130} cy={70} r={28} fill={c.base} />
+          <Circle cx={62} cy={60} r={8} fill="#FFFFFF" opacity={0.45} />
+        </G>
+      );
+    case "hoot":
+      return (
+        <G>
+          <Path d="M48 84 L36 30 L86 60 Z" fill={c.dark} />
+          <Path d="M152 84 L164 30 L114 60 Z" fill={c.dark} />
         </G>
       );
     default:
@@ -121,33 +128,16 @@ function HeadParts({ variant, c }) {
   }
 }
 
-/** Parts behind the body that stay on with a hat: tails, spikes, tentacles. */
+/** Parts behind the body that stay on with a hat: tails. */
 function BackParts({ variant, c }) {
   if (variant === "rex") {
     return <Path d="M168 170 Q196 176 192 150 Q184 166 166 160 Z" fill={c.dark} />;
   }
-  if (variant === "spike") {
-    return (
-      <Path
-        d="M38 96 L22 84 L44 80 L36 58 L58 66 L60 42 L78 58 L90 34 L100 54 L112 32 L122 58 L140 42 L142 66 L164 58 L156 80 L178 84 L162 96 Z"
-        fill={c.dark}
-      />
-    );
-  }
-  if (variant === "wobble") {
+  if (variant === "kit") {
     return (
       <G>
-        {[44, 70, 100, 130, 156].map((x, i) => (
-          <Path
-            key={x}
-            d={`M${x} 158 Q${x + (i % 2 ? 10 : -10)} 182 ${x} 206`}
-            stroke={c.dark}
-            strokeWidth={9}
-            fill="none"
-            strokeLinecap="round"
-            opacity={0.85}
-          />
-        ))}
+        <Path d="M150 178 Q206 176 198 110 Q194 92 180 96 Q186 150 150 156 Z" fill={c.base} />
+        <Path d="M198 110 Q194 92 180 96 Q182 112 197 120 Z" fill="#FFF4E6" />
       </G>
     );
   }
@@ -192,31 +182,54 @@ function FrontParts({ variant, c }) {
           fill="#FFFFFF"
         />
       );
-    case "blink":
+    case "kit":
       return (
         <G>
-          <Circle cx={60} cy={170} r={5} fill="#FFE14D" opacity={0.8} />
-          <Circle cx={146} cy={160} r={6} fill="#FFE14D" opacity={0.8} />
-          <Circle cx={132} cy={182} r={4} fill="#FFE14D" opacity={0.8} />
+          <Path
+            d="M30 128 Q66 118 100 138 Q134 118 170 128 Q164 190 100 194 Q36 190 30 128 Z"
+            fill="#FFF4E6"
+          />
+          <Ellipse cx={100} cy={137} rx={9} ry={6.5} fill="#2A1A14" />
         </G>
       );
-    case "bolt":
+    case "peep":
       return (
         <G>
-          <Rect x={48} y={88} width={104} height={52} rx={22} fill="#1F2A44" />
-          <Circle cx={36} cy={120} r={7} fill="#FFC300" />
-          <Circle cx={164} cy={120} r={7} fill="#FFC300" />
-          <Rect x={86} y={172} width={28} height={8} rx={4} fill={c.dark} />
-          <Circle cx={92} cy={176} r={2} fill="#7CFF8A" />
-          <Circle cx={100} cy={176} r={2} fill="#FFE14D" />
-          <Circle cx={108} cy={176} r={2} fill="#FF6FB1" />
+          <Ellipse cx={100} cy={170} rx={38} ry={20} fill={c.light} opacity={0.8} />
         </G>
       );
-    case "wobble":
+    case "koko":
       return (
         <G>
-          <Circle cx={140} cy={80} r={5} fill="#FFFFFF" opacity={0.7} />
-          <Circle cx={152} cy={96} r={3} fill="#FFFFFF" opacity={0.7} />
+          <Ellipse cx={100} cy={172} rx={34} ry={18} fill="#FFFFFF" opacity={0.6} />
+          <Ellipse cx={100} cy={132} rx={12} ry={14} fill="#3A3F52" />
+          <Ellipse cx={96} cy={126} rx={4} ry={3} fill="#FFFFFF" opacity={0.5} />
+        </G>
+      );
+    case "hop":
+      return (
+        <G>
+          <Ellipse cx={100} cy={174} rx={42} ry={18} fill={c.light} opacity={0.85} />
+          <Circle cx={44} cy={150} r={6} fill={c.dark} opacity={0.45} />
+          <Circle cx={158} cy={156} r={5} fill={c.dark} opacity={0.45} />
+          <Circle cx={94} cy={136} r={2.5} fill={c.dark} />
+          <Circle cx={106} cy={136} r={2.5} fill={c.dark} />
+        </G>
+      );
+    case "hoot":
+      return (
+        <G>
+          <Circle cx={78} cy={112} r={29} fill={c.light} />
+          <Circle cx={122} cy={112} r={29} fill={c.light} />
+          <Ellipse cx={100} cy={172} rx={40} ry={20} fill="#E8FBFC" />
+          <Path
+            d="M80 164 L86 169 L92 164 M108 164 L114 169 L120 164 M94 176 L100 181 L106 176"
+            stroke={c.dark}
+            strokeWidth={3}
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </G>
       );
     default:
@@ -523,15 +536,7 @@ function TwoEyes({ y = EYE_Y }) {
   );
 }
 
-function Shades({ single }) {
-  if (single) {
-    return (
-      <G>
-        <Rect x={62} y={94} width={76} height={30} rx={14} fill="#141414" />
-        <Rect x={74} y={100} width={18} height={5} rx={2.5} fill="#FFFFFF" opacity={0.6} />
-      </G>
-    );
-  }
+function Shades() {
   return (
     <G>
       <Rect x={52} y={98} width={44} height={28} rx={12} fill="#141414" />
@@ -543,51 +548,16 @@ function Shades({ single }) {
   );
 }
 
-/** Each buddy's eyes (they blink as one layer). */
-function Eyes({ variant, mood }) {
-  const cool = mood === "cool";
-  let eyes;
-  if (variant === "blink") {
-    eyes = cool ? (
-      <Shades single />
-    ) : (
-      <G>
-        <Ellipse cx={100} cy={108} rx={30} ry={32} fill="#FFFFFF" />
-        <Circle cx={104} cy={113} r={16} fill="#2BD67B" />
-        <Circle cx={104} cy={113} r={9} fill="#141414" />
-        <Circle cx={110} cy={106} r={5} fill="#FFFFFF" />
-      </G>
-    );
-  } else if (variant === "bolt") {
-    eyes = cool ? (
-      <Shades />
-    ) : (
-      <G>
-        <Ellipse cx={78} cy={113} rx={11} ry={13} fill="#4DD9FF" />
-        <Ellipse cx={122} cy={113} rx={11} ry={13} fill="#4DD9FF" />
-        <Circle cx={81} cy={109} r={3.5} fill="#FFFFFF" />
-        <Circle cx={125} cy={109} r={3.5} fill="#FFFFFF" />
-      </G>
-    );
-  } else {
-    eyes = cool ? <Shades /> : <TwoEyes />;
-  }
+/** The buddies' eyes (they blink as one layer). */
+function Eyes({ mood }) {
   return (
     <Svg width="100%" height="100%" viewBox={`0 0 ${W} ${H}`}>
-      {eyes}
-      {variant === "zuzu" && (
-        // Zuzu's third eye, above the other two.
-        <G>
-          <Ellipse cx={100} cy={80} rx={11} ry={13} fill="#FFFFFF" />
-          <Circle cx={102} cy={82} r={6.5} fill="#141414" />
-          <Circle cx={104} cy={78} r={2.4} fill="#FFFFFF" />
-        </G>
-      )}
+      {mood === "cool" ? <Shades /> : <TwoEyes />}
     </Svg>
   );
 }
 
-/** Pengu has a beak instead of a mouth; it opens when cheering or amazed. */
+/** Birds have a beak instead of a mouth; it opens when cheering or amazed. */
 function Beak({ mood }) {
   if (mood === "cheer" || mood === "wow") {
     return (
@@ -632,7 +602,7 @@ function Mouth({ mood }) {
  * @param {boolean} [props.animated]  idle bob + blink
  * @param {number} [props.delay]      offsets the idle loop so groups don't move in sync
  * @param {{hat?: string|null, face?: string|null, neck?: string|null}} [props.outfit]
- *        Dress-Up items (see games/wardrobe.js). A hat replaces ears, horns and antennae.
+ *        Dress-Up items (see games/wardrobe.js). A hat replaces ears, crests and tufts.
  */
 export default function Mascot({
   variant = "mochi",
@@ -644,7 +614,7 @@ export default function Mascot({
 }) {
   const kind = MASCOTS[variant] ? variant : (LEGACY_BUDDIES[variant] ?? "mochi");
   const c = MASCOTS[kind];
-  const jelly = kind === "wobble";
+  const bird = BIRDS.has(kind);
   const bob = useSharedValue(0);
   const blink = useSharedValue(1);
   const armsUp = mood === "cheer";
@@ -722,27 +692,15 @@ export default function Mascot({
           {/* ears, horns and antennae hide under a hat */}
           {!hat && <HeadParts variant={kind} c={c} />}
           <BackParts variant={kind} c={c} />
-          {/* feet (Pengu's are orange; Wobble has tentacles instead) */}
-          {!jelly && (
+          {/* feet (birds' are orange) */}
+          {
             <G>
-              <Ellipse
-                cx={74}
-                cy={196}
-                rx={22}
-                ry={12}
-                fill={kind === "pengu" ? "#FF9F1C" : c.dark}
-              />
-              <Ellipse
-                cx={126}
-                cy={196}
-                rx={22}
-                ry={12}
-                fill={kind === "pengu" ? "#FF9F1C" : c.dark}
-              />
+              <Ellipse cx={74} cy={196} rx={22} ry={12} fill={bird ? "#FF9F1C" : c.dark} />
+              <Ellipse cx={126} cy={196} rx={22} ry={12} fill={bird ? "#FF9F1C" : c.dark} />
             </G>
-          )}
+          }
           {/* arms */}
-          {jelly ? null : armsUp ? (
+          {armsUp ? (
             // arms flung up and out to the sides, with little round hands
             <G>
               <Ellipse
@@ -789,7 +747,7 @@ export default function Mascot({
             </G>
           )}
           {/* body */}
-          <Path d={jelly ? BELL : BODY} fill={`url(#${gid})`} opacity={jelly ? 0.95 : 1} />
+          <Path d={BODY} fill={`url(#${gid})`} />
           {/* gloss */}
           <Ellipse
             cx={70}
@@ -803,9 +761,9 @@ export default function Mascot({
           />
           <FrontParts variant={kind} c={c} />
           {/* cheeks */}
-          <Ellipse cx={56} cy={jelly ? 132 : 140} rx={12} ry={7} fill="#FF5C8A" opacity={0.35} />
-          <Ellipse cx={144} cy={jelly ? 132 : 140} rx={12} ry={7} fill="#FF5C8A" opacity={0.35} />
-          {kind === "pengu" ? <Beak mood={mood} /> : <Mouth mood={mood} />}
+          <Ellipse cx={56} cy={140} rx={12} ry={7} fill="#FF5C8A" opacity={0.35} />
+          <Ellipse cx={144} cy={140} rx={12} ry={7} fill="#FF5C8A" opacity={0.35} />
+          {bird ? <Beak mood={mood} /> : <Mouth mood={mood} />}
           {neck && <Neckwear id={neck} />}
           {hat && <Hat id={hat} />}
         </Svg>
@@ -816,7 +774,7 @@ export default function Mascot({
             eyeStyle,
           ]}
         >
-          <Eyes variant={kind} mood={eyeMood} />
+          <Eyes mood={eyeMood} />
         </Animated.View>
         {face && (
           <Svg

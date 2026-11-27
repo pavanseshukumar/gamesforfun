@@ -97,7 +97,7 @@ export default function Home() {
               entering={FadeInUp.delay(150).springify()}
               style={{ marginRight: -18, zIndex: 1 }}
             >
-              <Mascot variant="blink" size={heroSize * 0.27} mood="happy" delay={300} />
+              <Mascot variant="peep" size={heroSize * 0.27} mood="happy" delay={300} />
             </Animated.View>
             <Animated.View entering={FadeInUp.delay(50).springify()} style={{ zIndex: 2 }}>
               <Mascot variant="mochi" size={heroSize * 0.36} mood="cheer" />

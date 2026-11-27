@@ -10,14 +10,14 @@ export { BALANCE_DEFAULTS };
 export const BALANCE_LEVELS = [
   {
     name: "First Wobble",
-    goal: "Keep Bolt on the seesaw for 30 s",
+    goal: "Keep Koko on the seesaw for 30 s",
     config: { duration: 30 },
     metric: "seconds",
     thresholds: [10, 20, 30],
   },
   {
     name: "Star Catcher",
-    goal: "Roll Bolt into the falling stars",
+    goal: "Roll Koko into the falling stars",
     config: { duration: 45, starRate: 1.8 },
     metric: "stars",
     thresholds: [2, 4, 6],
@@ -38,7 +38,7 @@ export const BALANCE_LEVELS = [
   },
   {
     name: "Breezy",
-    goal: "A gusty wind pushes Bolt around",
+    goal: "A gusty wind pushes Koko around",
     config: { duration: 45, wind: 0.7 },
     metric: "seconds",
     thresholds: [15, 30, 45],

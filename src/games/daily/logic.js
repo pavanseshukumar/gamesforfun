@@ -13,7 +13,7 @@ import * as sliding from "../sliding";
 export const SIZE = 4;
 export const BLANK = sliding.blankOf(SIZE);
 const SHUFFLE_MOVES = 140;
-const CAST = ["mochi", "bun", "rex", "pom", "pengu", "blink", "bolt", "zuzu", "spike", "wobble"];
+const CAST = ["mochi", "bun", "rex", "pom", "pengu", "peep", "koko", "hop", "kit", "hoot"];
 
 export const solvedBoard = () => sliding.solvedBoard(SIZE);
 export const isSolved = sliding.isSolved;

@@ -1,8 +1,8 @@
 /**
  * Balance Buddy physics, independent of React so the app and the tests run the
  * same simulation. A plank balances on a post in a 400×640 world (y down); the
- * player tilts it to keep Bolt rolling on top while crates drop onto it and
- * stars float down to be collected. Bolt falling off ends the round.
+ * player tilts it to keep Koko rolling on top while crates drop onto it and
+ * stars float down to be collected. Koko falling off ends the round.
  */
 import Matter from "matter-js";
 
@@ -21,18 +21,18 @@ export const MAX_STARS = 3;
 export const STEP_MS = 1000 / 60;
 const TURN_RATE = 0.035; // radians per step the plank can turn
 // A seesaw tips toward weight: each unit of mass·distance from the post adds
-// this much tilt, so Bolt rolling off-centre (or a crate landing) pulls that
+// this much tilt, so Koko rolling off-centre (or a crate landing) pulls that
 // side down and the player has to keep correcting.
 const LOAD_TILT = 1 / 1400;
 const MAX_LOAD = 0.36;
-const FALL_Y = 600; // Bolt below this has fallen off
+const FALL_Y = 600; // Koko below this has fallen off
 
 export const BALANCE_DEFAULTS = {
-  duration: 0, // seconds; 0 = endless (play until Bolt falls)
+  duration: 0, // seconds; 0 = endless (play until Koko falls)
   dropScale: 1, // how often crates fall
   boxScale: 1, // crate size
   starRate: 1, // how often stars appear
-  wind: 0, // gusty sideways push on Bolt
+  wind: 0, // gusty sideways push on Koko
   plankScale: 1, // plank length
 };
 
@@ -213,7 +213,7 @@ export function createBalanceWorld(cfg = BALANCE_DEFAULTS, seed = 1) {
 }
 
 /**
- * A simple steady-hand controller (used by the tests): tilt against Bolt's
+ * A simple steady-hand controller (used by the tests): tilt against Koko's
  * offset from the middle and its speed, like balancing a ball on a beam.
  */
 export function autoBalance(world) {

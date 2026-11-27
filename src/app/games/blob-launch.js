@@ -176,7 +176,7 @@ function LevelSelect({ progress, onPick }) {
     <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
       <LevelsHeader
         game={GAME}
-        blurb="Drag back to aim, let go to fling Spike. Pop every Grump in 3 shots!"
+        blurb="Drag back to aim, let go to fling Kit. Pop every Grump in 3 shots!"
         stars={total}
         max={LEVELS.length * 3}
       />
@@ -413,7 +413,7 @@ export default function BlobLaunch() {
           <Text className="mr-1 font-body-bold text-xs text-ink-soft">Shots</Text>
           {Array.from({ length: SHOTS }, (_, i) => (
             <View key={i} style={{ opacity: i < shotsLeft ? 1 : 0.25 }}>
-              <Mascot variant="spike" size={22} animated={false} />
+              <Mascot variant="kit" size={22} animated={false} />
             </View>
           ))}
         </View>
@@ -518,7 +518,7 @@ export default function BlobLaunch() {
                 }}
               >
                 <Mascot
-                  variant="spike"
+                  variant="kit"
                   size={ballSize * 1.25}
                   mood={phase === "flying" ? "cheer" : "happy"}
                   animated={false}

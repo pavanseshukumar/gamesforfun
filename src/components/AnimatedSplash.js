@@ -22,7 +22,7 @@ const EXIT_MS = 420;
 
 const CREW = [
   { variant: "bun", size: 64, mood: "happy" },
-  { variant: "blink", size: 70, mood: "happy" },
+  { variant: "peep", size: 70, mood: "happy" },
   { variant: "mochi", size: 98, mood: "cheer" },
   { variant: "rex", size: 70, mood: "wow" },
   { variant: "pengu", size: 64, mood: "happy" },

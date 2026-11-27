@@ -163,9 +163,10 @@ export const useGameStore = create(
       // The storage key keeps the app's original name: changing it would wipe saved progress.
       name: "gamesforfun-v1",
       // v1: the first cast (Zip, Bloop, Gloop, Pip, Sunny) became ten new buddies.
-      version: 1,
+      // v2: the non-animal ones (Blink, Bolt, Zuzu, Spike, Wobble) became animals.
+      version: 2,
       migrate: (saved, version) => {
-        if (version < 1 && saved?.avatar in LEGACY_BUDDIES) {
+        if (version < 2 && saved?.avatar in LEGACY_BUDDIES) {
           return { ...saved, avatar: LEGACY_BUDDIES[saved.avatar] };
         }
         return saved;

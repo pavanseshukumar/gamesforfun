@@ -176,7 +176,7 @@ function StartPanel({ onPress, challenge, mode, setMode, tiltOk }) {
         <ChallengeGoal level={challenge.level} n={challenge.n} />
       ) : (
         <Text className="mt-1 text-center font-body-semi text-sm leading-5 text-ink-soft">
-          Tip the seesaw to keep Bolt on top.{"\n"}Crates tip it too! Roll into ⭐ for +5.
+          Tip the seesaw to keep Koko on top.{"\n"}Crates tip it too! Roll into ⭐ for +5.
         </Text>
       )}
       <View className="mt-3 flex-row rounded-full bg-[#EEF7F3] p-1">
@@ -428,7 +428,7 @@ function BalanceBuddy() {
       )}
       {phase === "over" && result && !result.challenge && (
         <GameOverModal
-          title="Bolt fell off!"
+          title="Koko fell off!"
           game={GAME}
           score={hud.score}
           best={best}

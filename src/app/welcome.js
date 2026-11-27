@@ -57,13 +57,13 @@ function Hello({ width, height }) {
   return (
     <Page width={width} height={height}>
       <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
-        <Mascot variant="blink" size={86} mood="happy" delay={200} />
+        <Mascot variant="peep" size={86} mood="happy" delay={200} />
         <Mascot variant="mochi" size={128} mood="cheer" />
         <Mascot variant="rex" size={86} mood="wow" delay={500} />
       </View>
       <Title>Hey there!</Title>
       <Body>
-        Welcome to Playzo: bite-size games starring Mochi, Bun, Rex, Blink, Bolt and their friends.
+        Welcome to Playzo: bite-size games starring Mochi, Bun, Rex, Peep, Koko and their friends.
       </Body>
     </Page>
   );
