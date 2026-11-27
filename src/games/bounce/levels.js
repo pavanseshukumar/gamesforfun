@@ -44,7 +44,7 @@ export const BOUNCE_LEVELS = [
     thresholds: [8, 12, 18],
   },
   {
-    name: "Perfect Pip",
+    name: "Perfect Bun",
     goal: "Land dead-centre as often as you can",
     config: {},
     metric: "perfects",

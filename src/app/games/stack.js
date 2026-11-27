@@ -160,7 +160,7 @@ function StackTower() {
   const level = tower.length; // level the moving block is on
   const top = tower[tower.length - 1];
 
-  // Gloop rides the top block; camera keeps the top of the tower in view.
+  // Rex rides the top block; camera keeps the top of the tower in view.
   useEffect(() => {
     if (!top) return;
     gx.set(withSpring(top.x + top.w / 2 - GLOOP / 2, { damping: 15, stiffness: 160 }));
@@ -292,7 +292,7 @@ function StackTower() {
         ...p,
         { id: ++pieceId, level, ...res.cut, dir: res.cut.x < placed.x ? -1 : 1 },
       ]);
-      // A big slice makes Gloop nervous.
+      // A big slice makes Rex nervous.
       setMood(res.cut.w > placed.w * 0.5 ? "wow" : "happy");
       haptic.tap();
       sfx("land");

@@ -509,9 +509,7 @@ function ColorCatch() {
   const flashStyle = useAnimatedStyle(() => ({ opacity: flash.value * 0.35 }));
   const fieldStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shake.value }] }));
   const controlHint =
-    mode === "drag" || tiltAvailable === false
-      ? "Drag to move Sunny"
-      : "Tilt your phone to move Sunny";
+    mode === "drag" || tiltAvailable === false ? "Drag to move Pom" : "Tilt your phone to move Pom";
 
   return (
     <GradientScreen theme={GAME.id} edges={["top", "bottom"]}>

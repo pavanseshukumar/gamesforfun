@@ -19,7 +19,7 @@ const SPARKLES = [
  * A square postcard scene starring one mascot: sky, sun, cloud, hills.
  * Used whole as the puzzle preview and sliced into tiles on the board.
  */
-export default function PuzzleArt({ variant = "zip", size, animated = false, mood = "happy" }) {
+export default function PuzzleArt({ variant = "mochi", size, animated = false, mood = "happy" }) {
   const c = MASCOTS[variant] ?? MASCOTS.zip;
   const s = size;
   return (

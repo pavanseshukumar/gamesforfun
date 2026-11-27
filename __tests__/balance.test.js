@@ -12,15 +12,15 @@ const run = (cfg, seed, control, seconds = 60) => {
 };
 
 describe("Balance Buddy physics", () => {
-  test("Bloop rests on a flat plank with nothing falling", () => {
-    // With nothing falling, a steady hand keeps Bloop near the middle.
+  test("Bolt rests on a flat plank with nothing falling", () => {
+    // With nothing falling, a steady hand keeps Bolt near the middle.
     const world = createBalanceWorld({ dropScale: 0.0001, starRate: 0 }, 1);
     for (let i = 0; i < 600; i++) world.step(autoBalance(world));
     expect(world.over).toBe(false);
     expect(Math.abs(world.buddy.position.x - 200)).toBeLessThan(30);
   });
 
-  test("tilting rolls Bloop downhill and off the end", () => {
+  test("tilting rolls Bolt downhill and off the end", () => {
     const { world, events } = run({ dropScale: 0.0001, starRate: 0 }, 1, () => 1, 20);
     expect(world.over).toBe(true);
     expect(events.some((e) => e.type === "fall")).toBe(true);
@@ -36,7 +36,7 @@ describe("Balance Buddy physics", () => {
     }
   });
 
-  test("doing nothing eventually loses (crates knock Bloop off)", () => {
+  test("doing nothing eventually loses (crates knock Bolt off)", () => {
     const { world } = run({}, 4, () => 0, 180);
     expect(world.over).toBe(true);
   });

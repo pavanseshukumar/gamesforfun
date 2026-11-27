@@ -78,12 +78,13 @@ export default function Settings() {
         </Section>
 
         <Section title="Pick your buddy" delay={160}>
-          <View className="flex-row justify-between">
+          <View className="flex-row flex-wrap justify-between" style={{ rowGap: 10 }}>
             {Object.entries(MASCOTS).map(([key, m]) => {
               const selected = key === avatar;
               return (
                 <PressableScale
                   key={key}
+                  style={{ width: "19%" }}
                   onPress={() => setAvatar(key)}
                   accessibilityLabel={`Choose ${m.name}`}
                   accessibilityState={{ selected }}

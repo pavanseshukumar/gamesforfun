@@ -22,50 +22,23 @@ const ANTON = readFileSync(
   join(ROOT, "node_modules/@expo-google-fonts/anton/400Regular/Anton_400Regular.ttf"),
 ).toString("base64");
 
-const MASCOTS = {
-  zip: { base: "#FF9F1C", light: "#FFD27A", dark: "#E06C00" },
-  bloop: { base: "#4D8CFF", light: "#9CC6FF", dark: "#2557D6" },
-  gloop: { base: "#2BD67B", light: "#9AF5C0", dark: "#11A058" },
-  pip: { base: "#FF6FB1", light: "#FFB8D9", dark: "#D63F86" },
-  sunny: { base: "#FFD43B", light: "#FFF08A", dark: "#E0A100" },
+// The buddies, drawn with the same geometry as src/components/Mascot.js
+// (happy pose, arms down). Only the ones the icons use need to be here.
+const BUDDIES = {
+  mochi: { base: "#B08CFF", light: "#DCCBFF", dark: "#7E58E0" },
+  bun: { base: "#FFB3CF", light: "#FFE3EE", dark: "#E57FA6" },
+  rex: { base: "#4FCF7A", light: "#A9F2C2", dark: "#239A50" },
+  blink: { base: "#9C5CFF", light: "#CBA8FF", dark: "#6A2FD6" },
+  pengu: { base: "#2F3E6E", light: "#5D6FA8", dark: "#1B2650" },
+  spike: { base: "#FF7A45", light: "#FFC09E", dark: "#E04E1A" },
 };
 const BODY =
   "M100 50 C150 50 176 88 176 128 C176 170 144 196 100 196 C56 196 24 170 24 128 C24 88 50 50 100 50 Z";
 
-function accessory(variant, c) {
-  switch (variant) {
-    case "zip":
-      return `<path d="M38 86 Q100 52 162 86 L158 100 Q100 68 42 100 Z" fill="#FF4D4D"/>
-        <path d="M104 66 L92 86 L102 86 L96 100 L112 78 L102 78 L108 66 Z" fill="#FFF3B0"/>`;
-    case "gloop":
-      return `<path d="M100 54 Q96 34 108 20" stroke="${c.dark}" stroke-width="6" fill="none" stroke-linecap="round"/>
-        <circle cx="110" cy="18" r="13" fill="#FFF56B"/><circle cx="106" cy="14" r="4" fill="#fff" opacity=".9"/>`;
-    case "pip":
-      return `<path d="M100 58 L72 42 Q64 58 72 74 Z" fill="#FFE14D"/><path d="M100 58 L128 42 Q136 58 128 74 Z" fill="#FFE14D"/>
-        <circle cx="100" cy="58" r="9" fill="#FFC300"/>`;
-    case "sunny":
-      return `<path d="M100 56 L100 34" stroke="#1FA35B" stroke-width="5" stroke-linecap="round"/>
-        <path d="M100 38 Q80 18 70 36 Q86 46 100 38 Z" fill="#3DDC84"/><path d="M100 34 Q118 12 132 28 Q116 42 100 34 Z" fill="#2BC46E"/>`;
-    default:
-      return "";
-  }
-}
-
-function eyes(variant, mood) {
-  if (mood === "cool") {
-    return `<rect x="52" y="98" width="44" height="28" rx="12" fill="#141414"/><rect x="104" y="98" width="44" height="28" rx="12" fill="#141414"/>
-      <rect x="94" y="106" width="12" height="5" fill="#141414"/>
-      <rect x="60" y="103" width="14" height="5" rx="2.5" fill="#fff" opacity=".6"/><rect x="112" y="103" width="14" height="5" rx="2.5" fill="#fff" opacity=".6"/>`;
-  }
-  const specs =
-    variant === "bloop"
-      ? `<circle cx="78" cy="112" r="25" stroke="#141414" stroke-width="5" fill="none"/><circle cx="122" cy="112" r="25" stroke="#141414" stroke-width="5" fill="none"/>
-         <path d="M96 108 Q100 102 104 108" stroke="#141414" stroke-width="5" fill="none"/>`
-      : "";
-  return `<ellipse cx="78" cy="112" rx="17" ry="20" fill="#fff"/><ellipse cx="122" cy="112" rx="17" ry="20" fill="#fff"/>
-    <circle cx="82" cy="115" r="10" fill="#141414"/><circle cx="118" cy="115" r="10" fill="#141414"/>
-    <circle cx="86" cy="110" r="3.5" fill="#fff"/><circle cx="122" cy="110" r="3.5" fill="#fff"/>${specs}`;
-}
+const twoEyes = `<ellipse cx="78" cy="112" rx="17" ry="20" fill="#fff"/><ellipse cx="122" cy="112" rx="17" ry="20" fill="#fff"/>
+  <circle cx="82" cy="115" r="10" fill="#141414"/><circle cx="118" cy="115" r="10" fill="#141414"/>
+  <circle cx="86" cy="110" r="3.5" fill="#fff"/><circle cx="122" cy="110" r="3.5" fill="#fff"/>`;
+const cheeks = `<ellipse cx="56" cy="140" rx="12" ry="7" fill="#FF5C8A" opacity=".35"/><ellipse cx="144" cy="140" rx="12" ry="7" fill="#FF5C8A" opacity=".35"/>`;
 
 function mouth(mood) {
   if (mood === "wow") return `<ellipse cx="100" cy="152" rx="11" ry="13" fill="#5A1A1A"/>`;
@@ -74,28 +47,69 @@ function mouth(mood) {
   return `<path d="M84 146 Q100 162 116 146" stroke="#5A1A1A" stroke-width="5" fill="none" stroke-linecap="round"/>`;
 }
 
-/** One mascot as an SVG fragment in a 200×220 box. */
+/** Per-buddy parts: behind the body (ears, horns) and on top (face details, special eyes). */
+function parts(variant, c) {
+  switch (variant) {
+    case "mochi":
+      return {
+        back: `<path d="M52 82 L58 32 L92 58 Z" fill="${c.dark}"/><path d="M148 82 L142 32 L108 58 Z" fill="${c.dark}"/><path d="M60 70 L63 44 L82 58 Z" fill="#FFB8D9"/><path d="M140 70 L137 44 L118 58 Z" fill="#FFB8D9"/>`,
+        front: `<path d="M40 132 L64 136 M40 144 L64 142 M160 132 L136 136 M160 144 L136 142" stroke="#5A3A8A" stroke-width="3" stroke-linecap="round"/><path d="M95 136 L105 136 L100 142 Z" fill="#FF6FB1"/>`,
+        eyes: twoEyes,
+      };
+    case "bun":
+      return {
+        back: `<ellipse cx="74" cy="36" rx="16" ry="38" fill="${c.base}" transform="rotate(-10 74 36)"/><ellipse cx="126" cy="36" rx="16" ry="38" fill="${c.base}" transform="rotate(10 126 36)"/><ellipse cx="74" cy="40" rx="7" ry="26" fill="#fff" opacity=".7" transform="rotate(-10 74 40)"/><ellipse cx="126" cy="40" rx="7" ry="26" fill="#fff" opacity=".7" transform="rotate(10 126 40)"/>`,
+        front: `<ellipse cx="100" cy="137" rx="7" ry="5" fill="#E5487F"/>`,
+        eyes: twoEyes,
+      };
+    case "rex":
+      return {
+        back: `<path d="M64 62 L72 36 L84 56 L96 30 L108 54 L122 34 L134 62 Z" fill="#FFB020"/><path d="M168 170 Q196 176 192 150 Q184 166 166 160 Z" fill="${c.dark}"/>`,
+        front: `<circle cx="64" cy="168" r="6" fill="${c.dark}" opacity=".5"/><circle cx="136" cy="172" r="5" fill="${c.dark}" opacity=".5"/>`,
+        eyes: twoEyes,
+      };
+    case "blink":
+      return {
+        back: `<path d="M62 70 Q52 40 70 30 Q66 52 78 62 Z" fill="#FFE14D"/><path d="M138 70 Q148 40 130 30 Q134 52 122 62 Z" fill="#FFE14D"/>`,
+        front: `<circle cx="60" cy="170" r="5" fill="#FFE14D" opacity=".8"/><circle cx="146" cy="160" r="6" fill="#FFE14D" opacity=".8"/>`,
+        eyes: `<ellipse cx="100" cy="108" rx="30" ry="32" fill="#fff"/><circle cx="104" cy="113" r="16" fill="#2BD67B"/><circle cx="104" cy="113" r="9" fill="#141414"/><circle cx="110" cy="106" r="5" fill="#fff"/>`,
+      };
+    case "pengu":
+      return {
+        back: "",
+        front: `<path d="M100 74 C140 74 156 104 156 136 C156 172 132 190 100 190 C68 190 44 172 44 136 C44 104 60 74 100 74 Z" fill="#fff"/>`,
+        eyes: twoEyes,
+        beak: `<path d="M88 134 L112 134 L100 150 Z" fill="#FFB020"/>`,
+      };
+    case "spike":
+      return {
+        back: `<path d="M38 96 L22 84 L44 80 L36 58 L58 66 L60 42 L78 58 L90 34 L100 54 L112 32 L122 58 L140 42 L142 66 L164 58 L156 80 L178 84 L162 96 Z" fill="${c.dark}"/>`,
+        front: "",
+        eyes: twoEyes,
+      };
+    default:
+      return { back: "", front: "", eyes: twoEyes };
+  }
+}
+
+/** One buddy as an SVG fragment in a 200×220 box. */
 function mascot(variant, mood = "happy", { shadow = true } = {}) {
-  const c = MASCOTS[variant];
+  const c = BUDDIES[variant];
+  const p = parts(variant, c);
   const id = `g-${variant}-${mood}`;
-  const arms =
-    mood === "cheer"
-      ? `<ellipse cx="20" cy="104" rx="12" ry="24" fill="${c.base}" transform="rotate(-38 20 104)"/>
-         <ellipse cx="180" cy="104" rx="12" ry="24" fill="${c.base}" transform="rotate(38 180 104)"/>
-         <circle cx="8" cy="86" r="11" fill="${c.light}"/><circle cx="192" cy="86" r="11" fill="${c.light}"/>`
-      : `<ellipse cx="30" cy="140" rx="13" ry="22" fill="${c.dark}" transform="rotate(20 30 140)"/>
-         <ellipse cx="170" cy="140" rx="13" ry="22" fill="${c.dark}" transform="rotate(-20 170 140)"/>`;
+  const feet = variant === "pengu" ? "#FF9F1C" : c.dark;
   return `
     <defs><radialGradient id="${id}" cx="38%" cy="30%" r="75%">
       <stop offset="0" stop-color="${c.light}"/><stop offset=".55" stop-color="${c.base}"/><stop offset="1" stop-color="${c.dark}"/>
     </radialGradient></defs>
     ${shadow ? `<ellipse cx="100" cy="212" rx="56" ry="7" fill="#1A1A40" opacity=".18"/>` : ""}
-    <ellipse cx="74" cy="196" rx="22" ry="12" fill="${c.dark}"/><ellipse cx="126" cy="196" rx="22" ry="12" fill="${c.dark}"/>
-    ${arms}
+    ${p.back}
+    <ellipse cx="74" cy="196" rx="22" ry="12" fill="${feet}"/><ellipse cx="126" cy="196" rx="22" ry="12" fill="${feet}"/>
+    <ellipse cx="30" cy="140" rx="13" ry="22" fill="${c.dark}" transform="rotate(20 30 140)"/>
+    <ellipse cx="170" cy="140" rx="13" ry="22" fill="${c.dark}" transform="rotate(-20 170 140)"/>
     <path d="${BODY}" fill="url(#${id})"/>
     <ellipse cx="70" cy="80" rx="20" ry="11" fill="#fff" opacity=".5" transform="rotate(-25 70 80)"/>
-    <ellipse cx="56" cy="140" rx="12" ry="7" fill="#FF5C8A" opacity=".35"/><ellipse cx="144" cy="140" rx="12" ry="7" fill="#FF5C8A" opacity=".35"/>
-    ${mouth(mood)}${accessory(variant, c)}${eyes(variant, mood)}`;
+    ${p.front}${cheeks}${p.beak ?? mouth(mood)}${p.eyes}`;
 }
 
 // Cotton candy: pink top-left, through lilac, to baby blue bottom-right.
@@ -134,7 +148,7 @@ const JOBS = [
     file: "icon.png",
     w: 1024,
     h: 1024,
-    body: candyBg(1024, 1024) + sparkles(1024) + place(mascot("zip", "cheer"), 162, 150, 700),
+    body: candyBg(1024, 1024) + sparkles(1024) + place(mascot("spike", "cheer"), 162, 150, 700),
   },
   {
     // Android adaptive icon, background layer
@@ -149,7 +163,7 @@ const JOBS = [
     w: 512,
     h: 512,
     transparent: true,
-    body: place(mascot("zip", "cheer", { shadow: false }), 116, 104, 280),
+    body: place(mascot("spike", "cheer", { shadow: false }), 116, 104, 280),
   },
   {
     // Android 13+ themed icon: a single-colour silhouette; the system tints it
@@ -176,9 +190,9 @@ const JOBS = [
     h: 1024,
     transparent: true,
     body:
-      place(mascot("bloop", "cool"), 150, 250, 300) +
-      place(mascot("gloop", "wow"), 574, 250, 300) +
-      place(mascot("zip", "cheer"), 312, 170, 400) +
+      place(mascot("blink", "happy"), 150, 250, 300) +
+      place(mascot("rex", "wow"), 574, 250, 300) +
+      place(mascot("mochi", "cheer"), 312, 170, 400) +
       `<text x="512" y="800" text-anchor="middle" font-family="Anton" font-size="190" fill="#141414">PLAYZO</text>`,
   },
   {
@@ -188,7 +202,7 @@ const JOBS = [
     transparent: true,
     body:
       `<defs><linearGradient id="fb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${CANDY[0]}"/><stop offset=".55" stop-color="${CANDY[1]}"/><stop offset="1" stop-color="${CANDY[2]}"/></linearGradient></defs>
-       <rect width="48" height="48" rx="12" fill="url(#fb)"/>` + place(mascot("zip", "happy", { shadow: false }), 4, 2, 40),
+       <rect width="48" height="48" rx="12" fill="url(#fb)"/>` + place(mascot("spike", "happy", { shadow: false }), 4, 2, 40),
   },
 ];
 

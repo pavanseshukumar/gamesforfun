@@ -233,7 +233,7 @@ export default function MazeDash() {
       sfx("whoosh");
       haptic.tap();
 
-      // Animate Pip cell by cell along the corridor.
+      // Animate Pengu cell by cell along the corridor.
       const xs = path.map((c) => xyOf(level.maze, c)[0] * cell);
       const ys = path.map((c) => xyOf(level.maze, c)[1] * cell);
       const t = { duration: CELL_MS, easing: Easing.linear };
@@ -320,7 +320,7 @@ export default function MazeDash() {
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
           <LevelsHeader
             game={GAME}
-            blurb="Swipe and Pip runs to the next junction. Grab the key, reach the portal in as few swipes as you can!"
+            blurb="Swipe and Pengu waddles to the next junction. Grab the key, reach the portal in as few swipes as you can!"
             stars={totalStars(progress)}
             max={levels.length * 3}
           />

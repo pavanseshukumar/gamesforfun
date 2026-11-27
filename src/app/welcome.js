@@ -57,12 +57,14 @@ function Hello({ width, height }) {
   return (
     <Page width={width} height={height}>
       <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
-        <Mascot variant="bloop" size={86} mood="cool" delay={200} />
-        <Mascot variant="zip" size={128} mood="cheer" />
-        <Mascot variant="gloop" size={86} mood="wow" delay={500} />
+        <Mascot variant="blink" size={86} mood="happy" delay={200} />
+        <Mascot variant="mochi" size={128} mood="cheer" />
+        <Mascot variant="rex" size={86} mood="wow" delay={500} />
       </View>
       <Title>Hey there!</Title>
-      <Body>Welcome to Playzo: bite-size games starring Zip, Bloop, Gloop, Pip and Sunny.</Body>
+      <Body>
+        Welcome to Playzo: bite-size games starring Mochi, Bun, Rex, Blink, Bolt and their friends.
+      </Body>
     </Page>
   );
 }
@@ -110,7 +112,7 @@ function Rewards({ width, height }) {
       >
         <View className="flex-row items-center">
           <Mascot
-            variant="pip"
+            variant="bun"
             size={96}
             mood="cheer"
             outfit={{ hat: "crown", face: "shades", neck: "bowtie" }}
@@ -141,7 +143,10 @@ function Setup({ width, height, avatar, setAvatar, name, setName, onDone }) {
     <Page width={width} height={height}>
       <Mascot variant={avatar} size={130} mood="cheer" />
       <Title>Pick your buddy</Title>
-      <View className="mt-4 flex-row" style={{ gap: 8 }}>
+      <View
+        className="mt-4 flex-row flex-wrap justify-center"
+        style={{ gap: 8, maxWidth: 5 * 54 + 4 * 8 }}
+      >
         {Object.entries(MASCOTS).map(([key, m]) => {
           const selected = key === avatar;
           return (

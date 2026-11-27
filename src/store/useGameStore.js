@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 import { BONUS_XP, GOAL_XP, goalsFor, isDone, trackGoals } from "../games/goals";
+import { LEGACY_BUDDIES } from "../games/buddies";
 import { EMPTY_OUTFIT } from "../games/wardrobe";
 import { dayKey, levelInfo } from "../lib/progress";
 
@@ -38,7 +39,7 @@ export const useGameStore = create(
     (set, get) => ({
       ...FRESH_STATS,
       name: "Player",
-      avatar: "zip",
+      avatar: "mochi",
       onboarded: false, // false until the intro screens are finished
       outfit: EMPTY_OUTFIT, // Dress-Up: { hat, face, neck } item ids or null
       haptics: true,
@@ -161,6 +162,14 @@ export const useGameStore = create(
     {
       // The storage key keeps the app's original name: changing it would wipe saved progress.
       name: "gamesforfun-v1",
+      // v1: the first cast (Zip, Bloop, Gloop, Pip, Sunny) became ten new buddies.
+      version: 1,
+      migrate: (saved, version) => {
+        if (version < 1 && saved?.avatar in LEGACY_BUDDIES) {
+          return { ...saved, avatar: LEGACY_BUDDIES[saved.avatar] };
+        }
+        return saved;
+      },
       storage: createJSONStorage(() => AsyncStorage),
     },
   ),

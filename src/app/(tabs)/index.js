@@ -97,16 +97,16 @@ export default function Home() {
               entering={FadeInUp.delay(150).springify()}
               style={{ marginRight: -18, zIndex: 1 }}
             >
-              <Mascot variant="bloop" size={heroSize * 0.27} mood="cool" delay={300} />
+              <Mascot variant="blink" size={heroSize * 0.27} mood="happy" delay={300} />
             </Animated.View>
             <Animated.View entering={FadeInUp.delay(50).springify()} style={{ zIndex: 2 }}>
-              <Mascot variant="zip" size={heroSize * 0.36} mood="cheer" />
+              <Mascot variant="mochi" size={heroSize * 0.36} mood="cheer" />
             </Animated.View>
             <Animated.View
               entering={FadeInUp.delay(250).springify()}
               style={{ marginLeft: -18, zIndex: 1 }}
             >
-              <Mascot variant="gloop" size={heroSize * 0.27} mood="wow" delay={600} />
+              <Mascot variant="rex" size={heroSize * 0.27} mood="wow" delay={600} />
             </Animated.View>
           </View>
         </View>

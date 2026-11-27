@@ -1,3 +1,4 @@
+import { MASCOTS } from "../src/games/buddies";
 import {
   BLANK,
   dailyXp,
@@ -66,7 +67,7 @@ describe("Sliding", () => {
 describe("Daily helpers", () => {
   test("mascot of the day is one of the cast and stable", () => {
     const m = mascotOfDay("2026-11-24");
-    expect(["zip", "bloop", "gloop", "pip", "sunny"]).toContain(m);
+    expect(Object.keys(MASCOTS)).toContain(m);
     expect(mascotOfDay("2026-11-24")).toBe(m);
   });
 

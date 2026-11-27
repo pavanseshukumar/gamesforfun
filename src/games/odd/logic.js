@@ -54,7 +54,18 @@ function pickMany(rand, list, n) {
   return out;
 }
 
-const VARIANTS = ["zip", "bloop", "gloop", "pip", "sunny"];
+const VARIANTS = [
+  "mochi",
+  "bun",
+  "rex",
+  "pom",
+  "pengu",
+  "blink",
+  "bolt",
+  "zuzu",
+  "spike",
+  "wobble",
+];
 const HATS = ["party", "cap", "beanie", "crown", "tophat"];
 
 function shadeRound(rand, tier, scale) {

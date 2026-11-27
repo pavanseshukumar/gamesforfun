@@ -65,7 +65,7 @@ const freshSim = (w, h, cfg = BOUNCE_DEFAULTS) => ({
   running: false,
   w,
   h,
-  n: 0, // level Pip stands on
+  n: 0, // level Bun stands on
   mx: w / 2, // moving platform centre
   mw: widthFor(1, cfg),
   mdir: 1,
@@ -73,7 +73,7 @@ const freshSim = (w, h, cfg = BOUNCE_DEFAULTS) => ({
   waiting: false, // paused while JS sets up the next platform
   jt: -1, // jump progress 0..1, -1 when standing
   px: w / 2,
-  pf: 0, // Pip's height in levels (float)
+  pf: 0, // Bun's height in levels (float)
   falling: false,
   fallV: 0,
   done: false,
@@ -131,7 +131,7 @@ function MovingPlatform({ sim, baseY, type }) {
   );
 }
 
-function Pip({ sim, baseY, squash }) {
+function Hopper({ sim, baseY, squash }) {
   const style = useAnimatedStyle(() => {
     const s = sim.value;
     // Stretch tall mid-air, squash on landing.
@@ -537,7 +537,7 @@ function BounceBuddy() {
             </Animated.View>
           ))}
           {phase === "playing" && <MovingPlatform sim={sim} baseY={baseY} type={nextType} />}
-          {phase !== "ready" && <Pip sim={sim} baseY={baseY} squash={squash} />}
+          {phase !== "ready" && <Hopper sim={sim} baseY={baseY} squash={squash} />}
         </Animated.View>
 
         {popups.map((p) => (

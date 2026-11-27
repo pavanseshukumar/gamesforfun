@@ -137,7 +137,14 @@ export default function DressUp() {
 
         <Animated.View
           entering={FadeIn.delay(150)}
-          style={{ marginTop: 4, flexDirection: "row", gap: 8 }}
+          style={{
+            marginTop: 4,
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: 8,
+            maxWidth: 5 * 50 + 4 * 8,
+          }}
         >
           {Object.entries(MASCOTS).map(([key, m]) => {
             const selected = key === avatar;

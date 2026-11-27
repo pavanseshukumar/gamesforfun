@@ -43,7 +43,7 @@ export default function Awards() {
                 {earned.length} of {list.length} unlocked
               </Text>
             </View>
-            <Mascot variant="sunny" size={96} mood="cheer" />
+            <Mascot variant="pom" size={96} mood="cheer" />
           </View>
         </Animated.View>
 

@@ -94,3 +94,13 @@ describe("Settings", () => {
     expect(store().controls.colorCatch).toBe("drag");
   });
 });
+
+describe("saved buddy from the first cast", () => {
+  test("moves to its replacement when old saves load", () => {
+    const { persist } = useGameStore;
+    const migrate = persist.getOptions().migrate;
+    expect(migrate({ avatar: "zip", xp: 5 }, 0)).toEqual({ avatar: "spike", xp: 5 });
+    expect(migrate({ avatar: "sunny" }, 0).avatar).toBe("pom");
+    expect(migrate({ avatar: "mochi" }, 0).avatar).toBe("mochi");
+  });
+});

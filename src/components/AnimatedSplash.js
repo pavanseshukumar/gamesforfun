@@ -21,11 +21,11 @@ export const SPLASH_MS = 2200;
 const EXIT_MS = 420;
 
 const CREW = [
-  { variant: "bloop", size: 64, mood: "happy" },
-  { variant: "pip", size: 70, mood: "happy" },
-  { variant: "zip", size: 98, mood: "cheer" },
-  { variant: "gloop", size: 70, mood: "wow" },
-  { variant: "sunny", size: 64, mood: "happy" },
+  { variant: "bun", size: 64, mood: "happy" },
+  { variant: "blink", size: 70, mood: "happy" },
+  { variant: "mochi", size: 98, mood: "cheer" },
+  { variant: "rex", size: 70, mood: "wow" },
+  { variant: "pengu", size: 64, mood: "happy" },
 ];
 const LETTERS = [
   { ch: "P", colour: "#FF4FA0" },
@@ -273,7 +273,7 @@ export default function AnimatedSplash({ done, onSkip }) {
             <DropIn
               key={m.variant}
               {...m}
-              // Outside-in: the edges land first and Zip drops last, in the middle.
+              // Outside-in: the edges land first and Mochi drops last, in the middle.
               delay={100 + [0, 2, 4, 3, 1][i] * 90}
               hopDelay={1000 + i * 70}
             />
