@@ -205,8 +205,8 @@ export default function DailyPuzzle() {
                 <>
                   <Text className="font-body-black text-lg text-ink">Rebuild the picture</Text>
                   <Text className="mt-1 font-body text-sm leading-5 text-ink-mute">
-                    Tap a tile next to the gap to slide it. Your first solve today counts for XP and
-                    your streak. Fewer moves, more XP!
+                    Tap or drag a tile next to the gap to slide it in. Your first solve today counts
+                    for XP and your streak. Fewer moves, more XP!
                   </Text>
                 </>
               )}
