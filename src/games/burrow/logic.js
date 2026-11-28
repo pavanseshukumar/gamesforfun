@@ -133,13 +133,15 @@ export const BURROW_DEFAULTS = {
   dirs: "easy", // easy (→ ↓), diag (adds diagonals), all (also backwards)
   duration: 90, // seconds (0 = no clock)
   theme: null, // a THEMES key, or null for a random theme
+  hints: 2, // sniffs per burrow
+  mystery: false, // the word list shows only first letters and lengths
 };
 
 const LETTERS = "AAABCDEEEEFGHIIIKLMNOOOPRRSSTTUUWY";
 
 /**
  * Builds a seeded puzzle.
- * @returns {{ size, theme, grid: string[], words: { word, cells: number[] }[] }}
+ * @returns {{ size, theme, grid: string[], words: { word, cells: number[] }[], treasure: string }}
  */
 export function makePuzzle(cfg = BURROW_DEFAULTS, seed = 1) {
   const c = { ...BURROW_DEFAULTS, ...cfg };
@@ -170,7 +172,9 @@ export function makePuzzle(cfg = BURROW_DEFAULTS, seed = 1) {
     }
     // Reject grids where a word can be read in more than one place.
     if (words.some(({ word }) => countMatches(grid, c.size, word) !== 1)) continue;
-    return { size: c.size, theme, grid, words };
+    // One word is the treasure, worth double.
+    const treasure = words[Math.floor(rand() * words.length)].word;
+    return { size: c.size, theme, grid, words, treasure };
   }
   throw new Error("could not build a burrow puzzle");
 }
@@ -275,8 +279,51 @@ export function wordAt(puzzle, cells, found = []) {
   return hit ? hit.word : null;
 }
 
-/** Points for a word: 10 per letter. */
-export const wordPoints = (word) => word.length * 10;
+/** Seconds between finds that keep a combo going. */
+export const COMBO_WINDOW = 8;
+export const MAX_COMBO = 3;
+
+/** The combo after a find `gap` seconds after the last one (first find: gap = Infinity). */
+export const nextCombo = (combo, gap) => (gap <= COMBO_WINDOW ? Math.min(MAX_COMBO, combo + 1) : 1);
+
+/** Points for a word: 10 per letter, doubled for the treasure, times the combo. */
+export const wordPoints = (word, { treasure = false, combo = 1 } = {}) =>
+  word.length * 10 * (treasure ? 2 : 1) * combo;
+
+/** Points a sniff costs. */
+export const HINT_COST = 15;
+
+/**
+ * Where Kit sniffs: the first letter of the shortest word not found yet
+ * (skipping words already hinted, while others remain). Returns a cell or -1.
+ */
+export function hintCell(puzzle, found = [], hinted = []) {
+  const left = puzzle.words.filter((w) => !found.includes(w.word));
+  if (!left.length) return -1;
+  const fresh = left.filter((w) => !hinted.includes(w.cells[0]));
+  const pool = fresh.length ? fresh : left;
+  const pick = [...pool].sort((a, b) => a.word.length - b.word.length)[0];
+  return pick.cells[0];
+}
+
+/** How a word appears in the list: in full, or "F • •" in mystery mode. */
+export const clueFor = (word, mystery) =>
+  mystery ? [word[0], ...Array.from({ length: word.length - 1 }, () => "•")].join(" ") : word;
+
+/** Dig Deeper: the burrow at each depth grows and twists. */
+export function depthConfig(depth) {
+  return {
+    size: Math.min(8, 5 + Math.floor(depth / 2)),
+    words: Math.min(8, 4 + depth),
+    dirs: depth < 2 ? "easy" : depth < 4 ? "diag" : "all",
+    theme: null,
+    hints: 2,
+    mystery: false,
+  };
+}
+
+/** Seconds added to the clock for digging one level deeper. */
+export const DEPTH_TIME = 25;
 
 /** Bonus for clearing the grid with time to spare. */
 export const timeBonus = (secondsLeft) => Math.max(0, Math.round(secondsLeft)) * 2;

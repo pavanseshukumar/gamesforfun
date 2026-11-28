@@ -1,8 +1,9 @@
 /**
  * Kit's Burrow challenge levels. Config keys understood by the game:
  *   size (grid) · words (hidden) · dirs ("easy" → ↓, "diag", "all" incl. backwards)
- *   duration (s) · theme (a THEMES key)
- * Metrics: found (words), score (10 per letter + 2 per second left), seconds (to clear, lower).
+ *   duration (s) · theme (a THEMES key) · hints (sniffs) · mystery (list shows only clues)
+ * Metrics: found (words), score (10 per letter, ×2 treasure, ×combo, + 2 per second
+ * left), seconds (to clear, lower).
  */
 import { BURROW_DEFAULTS } from "./logic";
 
@@ -67,6 +68,20 @@ export const BURROW_LEVELS = [
     thresholds: [4, 6, 7],
   },
   {
+    name: "Mystery Words",
+    goal: "Only first letters to go on",
+    config: { size: 6, words: 5, dirs: "diag", mystery: true, duration: 120 },
+    metric: "found",
+    thresholds: [2, 4, 5],
+  },
+  {
+    name: "Treasure Hunt",
+    goal: "Chain quick finds and grab the ✨ treasure",
+    config: { size: 7, words: 6, dirs: "diag", duration: 120 },
+    metric: "score",
+    thresholds: [180, 320, 460],
+  },
+  {
     name: "Deep Tunnels",
     goal: "An 8×8 burrow with eight words",
     config: { size: 8, words: 8, dirs: "all", duration: 180 },
@@ -75,10 +90,10 @@ export const BURROW_LEVELS = [
   },
   {
     name: "Master Digger",
-    goal: "Clear a big burrow against the clock",
-    config: { size: 8, words: 8, dirs: "all", duration: 240 },
+    goal: "A big mystery burrow, no sniffs",
+    config: { size: 8, words: 8, dirs: "all", duration: 240, mystery: true, hints: 0 },
     metric: "seconds",
     lower: true,
-    thresholds: [220, 150, 100],
+    thresholds: [230, 170, 120],
   },
 ];
