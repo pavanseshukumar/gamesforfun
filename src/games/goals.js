@@ -5,7 +5,7 @@
  * Pure functions, shared by the store, the Home card and the tests.
  */
 import { createRng, hashString } from "../lib/random";
-import { ARCADE } from "./registry";
+import { ARCADE, getGame } from "./registry";
 
 export const GOAL_XP = 30;
 export const BONUS_XP = 60;
@@ -140,3 +140,35 @@ export function goalProgress(goal, stats, day) {
 }
 
 export const isDone = (goal, stats, day) => goalProgress(goal, stats, day) >= goal.target;
+
+/** Level games that are quick to clear a level in (for level and 3-star goals). */
+const LEVEL_PICKS = ["pipes", "lights", "paint", "slider", "maze"];
+
+/**
+ * Where a goal's Play button goes: the game it names, the Daily Puzzle, a
+ * level game, or (for "play anything" goals) a game not played yet today.
+ * Seeded by the day so the button doesn't change while you look at it.
+ * @returns {{ gameId: string, route: string }}
+ */
+export function goalPlay(goal, stats, day) {
+  const s = stats?.day === day ? stats : freshGoalStats(day);
+  const rand = createRng(hashString(`goal-play:${goal.id}`));
+  const shuffled = (list) => {
+    const a = [...list];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+  let id;
+  if (goal.game) id = goal.game;
+  else if (goal.type === "daily") id = "daily";
+  else if (goal.type === "levels" || goal.type === "perfect")
+    id = shuffled(LEVEL_PICKS.filter(visible))[0];
+  else {
+    const games = shuffled(ARCADE.map((g) => g.id));
+    id = games.find((g) => !s.games.includes(g)) ?? games[0];
+  }
+  return { gameId: id, route: getGame(id).route };
+}

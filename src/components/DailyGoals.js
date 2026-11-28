@@ -10,7 +10,10 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { BONUS_XP, GOAL_XP, goalProgress, goalsFor } from "../games/goals";
+import { router } from "expo-router";
+
+import { BONUS_XP, GOAL_XP, goalPlay, goalProgress, goalsFor } from "../games/goals";
+import { getGame } from "../games/registry";
 import { haptic } from "../lib/haptics";
 import { dayKey } from "../lib/progress";
 import { sfx } from "../lib/sound";
@@ -37,7 +40,33 @@ function ClaimButton({ label, onPress }) {
   );
 }
 
-function GoalRow({ goal, progress, claimed, onClaim }) {
+/** Jumps straight into a game that moves this goal on. */
+function PlayButton({ play }) {
+  const game = getGame(play.gameId);
+  return (
+    <PressableScale
+      onPress={() => {
+        haptic.tap();
+        sfx("select");
+        router.push(play.route);
+      }}
+      accessibilityRole="button"
+      accessibilityLabel={`Play ${game.title}`}
+    >
+      <View
+        style={{ borderColor: PINK }}
+        className="mt-1 flex-row items-center rounded-full border-2 bg-white px-2.5 py-1"
+      >
+        <Ionicons name="play" size={11} color={PINK} />
+        <Text className="ml-1 font-body-black text-xs" style={{ color: PINK }}>
+          Play
+        </Text>
+      </View>
+    </PressableScale>
+  );
+}
+
+function GoalRow({ goal, progress, claimed, onClaim, play }) {
   const done = progress >= goal.target;
   const ratio = Math.min(1, progress / goal.target);
   return (
@@ -78,9 +107,12 @@ function GoalRow({ goal, progress, claimed, onClaim }) {
         ) : done ? (
           <ClaimButton label={`Claim +${GOAL_XP}`} onPress={onClaim} />
         ) : (
-          <Text className="font-body-black text-xs text-ink">
-            {Math.min(progress, goal.target)}/{goal.target}
-          </Text>
+          <>
+            <Text className="font-body-black text-xs text-ink">
+              {Math.min(progress, goal.target)}/{goal.target}
+            </Text>
+            <PlayButton play={play} />
+          </>
         )}
       </View>
     </View>
@@ -150,6 +182,7 @@ export default function DailyGoals() {
             progress={goalProgress(g, stats, day)}
             claimed={claimedIds.includes(g.id)}
             onClaim={() => claim(g.id)}
+            play={goalPlay(g, stats, day)}
           />
         ))}
       </View>

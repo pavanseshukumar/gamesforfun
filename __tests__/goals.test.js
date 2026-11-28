@@ -1,4 +1,5 @@
 import {
+  goalPlay,
   BONUS_XP,
   freshGoalStats,
   GOAL_XP,
@@ -7,7 +8,7 @@ import {
   isDone,
   trackGoals,
 } from "../src/games/goals";
-import { ARCADE } from "../src/games/registry";
+import { ARCADE, getGame } from "../src/games/registry";
 import { dayKey } from "../src/lib/progress";
 import { useGameStore } from "../src/store/useGameStore";
 
@@ -107,5 +108,48 @@ describe("claiming goals in the store", () => {
     expect(store().claimGoal("bonus").xpGained).toBe(BONUS_XP);
     expect(store().claimGoal("bonus")).toBeNull();
     expect(store().goalsDone).toBe(3);
+  });
+});
+
+describe("goal Play buttons", () => {
+  const day = "2026-11-28";
+  const goal = (type, extra = {}) => ({ id: `${day}:0`, type, target: 3, ...extra });
+
+  test("goals that name a game open that game", () => {
+    const g = goal("playGame", { game: "memory" });
+    expect(goalPlay(g, null, day)).toEqual({ gameId: "memory", route: getGame("memory").route });
+    expect(goalPlay(goal("score", { game: "fusion" }), null, day).gameId).toBe("fusion");
+  });
+
+  test("the Daily Puzzle goal opens the Daily Puzzle", () => {
+    expect(goalPlay(goal("daily"), null, day).route).toBe(getGame("daily").route);
+  });
+
+  test("level goals open a level game", () => {
+    for (const type of ["levels", "perfect"]) {
+      const { gameId } = goalPlay(goal(type), null, day);
+      expect(["pipes", "lights", "paint", "slider", "maze"]).toContain(gameId);
+    }
+  });
+
+  test("'play anything' goals pick a game not played yet today, and stay put", () => {
+    const stats = trackGoals(null, { type: "round", gameId: "memory" }, day);
+    for (const type of ["rounds", "variety"]) {
+      const a = goalPlay(goal(type), stats, day);
+      expect(ARCADE.map((g) => g.id)).toContain(a.gameId);
+      expect(a.gameId).not.toBe("memory");
+      expect(goalPlay(goal(type), stats, day)).toEqual(a);
+    }
+  });
+
+  test("every goal of every day has somewhere to play", () => {
+    for (let d = 1; d <= 40; d++) {
+      const key = `2026-12-${String((d % 28) + 1).padStart(2, "0")}-${d}`;
+      for (const g of goalsFor(key)) {
+        const p = goalPlay(g, null, key);
+        expect(getGame(p.gameId)).toBeTruthy();
+        expect(p.route).toMatch(/^\/games\//);
+      }
+    }
   });
 });
