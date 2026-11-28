@@ -18,7 +18,6 @@ import { BOUNCE_LEVELS } from "./bounce/levels";
 import { BURROW_LEVELS } from "./burrow/levels";
 import { COLOR_CATCH_LEVELS } from "./colorCatch/levels";
 import { FEED_LEVELS } from "./feed/levels";
-import { FISHING_LEVELS } from "./fishing/levels";
 import { FUSION_LEVELS } from "./fusion/levels";
 import { HOP_LEVELS } from "./hopAcross/levels";
 import { MATH_LEVELS } from "./math/levels";
@@ -48,7 +47,6 @@ export const CHALLENGES = {
   feed: FEED_LEVELS,
   parade: PARADE_LEVELS,
   burrow: BURROW_LEVELS,
-  fishing: FISHING_LEVELS,
   shadow: SHADOW_LEVELS,
   spot: SPOT_LEVELS,
 };

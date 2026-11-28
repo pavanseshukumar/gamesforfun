@@ -4,7 +4,6 @@ import { BOUNCE_DEFAULTS } from "../src/games/bounce/levels";
 import { BURROW_DEFAULTS } from "../src/games/burrow/levels";
 import { COLOR_CATCH_DEFAULTS } from "../src/games/colorCatch/levels";
 import { FEED_DEFAULTS } from "../src/games/feed/levels";
-import { FISHING_DEFAULTS } from "../src/games/fishing/levels";
 import { FUSION_DEFAULTS } from "../src/games/fusion/levels";
 import { HOP_DEFAULTS } from "../src/games/hopAcross/levels";
 import { BALANCE_DEFAULTS } from "../src/games/balance/levels";
@@ -36,7 +35,6 @@ const DEFAULTS = {
   feed: FEED_DEFAULTS,
   parade: PARADE_DEFAULTS,
   burrow: BURROW_DEFAULTS,
-  fishing: FISHING_DEFAULTS,
   shadow: SHADOW_DEFAULTS,
   spot: SPOT_DEFAULTS,
 };

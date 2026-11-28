@@ -67,8 +67,8 @@ Docs: https://docs.expo.dev/eas/index.md
   frame. Send discrete events (catch, land, game over) to JS with `scheduleOnRN` from
   `react-native-worklets`, through a stable `emit` callback that forwards to a handler ref.
 - **Stepped games** (Hop Across `src/games/hopAcross/world.js`, Feed the Buddies `src/games/feed/logic.js`,
-  Pattern Parade `src/games/parade/logic.js`, Kit's Burrow `src/games/burrow/logic.js`, Fishing Fun,
-  Shadow Match and Where's Pom? under `src/games/{fishing,shadow,spot}/logic.js`):
+  Pattern Parade `src/games/parade/logic.js`, Kit's Burrow `src/games/burrow/logic.js`,
+  Shadow Match and Where's Pom? under `src/games/{shadow,spot}/logic.js`):
   React-free rules with a test player (`autoHop`, `makeWaiter`) that checks every challenge level earns a
   star. The screen keeps the live game in a ref and draws from poses / a snapshot, never from the ref in render.
 - **Physics games** (Blob Launch, Balance Buddy — `src/games/balance/world.js`, whose tests drive it with

@@ -37,7 +37,6 @@ export const BACKDROPS = {
   feed: ["#FFC98F", "#FFE4C4", "#FFF8EE"],
   parade: ["#E9B3FF", "#F6DAFF", "#FFF4FE"],
   burrow: ["#F7C58E", "#FBE2C4", "#FFF8EF"],
-  fishing: ["#8FDDF5", "#C9EFFB", "#F0FBFF"],
   shadow: ["#B9B6E8", "#DCDAF5", "#F6F5FF"],
   spot: ["#B6EC9A", "#DDF7CC", "#F5FFF0"],
 };

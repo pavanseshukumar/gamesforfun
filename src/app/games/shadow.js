@@ -167,6 +167,7 @@ function ShadowMatch() {
   const [hud, setHud] = useState({ score: 0, streak: 0, correct: 0 });
   const [timeLeft, setTimeLeft] = useState(cfg.duration);
   const [result, setResult] = useState(null);
+  const [area, setArea] = useState(null);
 
   const rand = useRef(null);
   const stats = useRef({ score: 0, correct: 0, streak: 0, bestStreak: 0, misses: 0 });
@@ -253,11 +254,22 @@ function ShadowMatch() {
     setTimeout(deal, 950);
   };
 
+  // Everything is sized from the space left under the timer, so it fits short phones too.
   const cols = cfg.options === 4 ? 2 : 3;
-  const size = Math.min((width - 40 - GAP * (cols - 1)) / cols, cols === 2 ? 150 : 112);
+  const rows = Math.ceil(cfg.options / cols);
+  const availH = area?.h ?? 520;
+  const shadowSize = Math.max(86, Math.min(150, availH * 0.27, width * 0.36));
+  const cardH = shadowSize * 1.1 + 20;
+  const size = Math.max(
+    64,
+    Math.min(
+      (width - 40 - GAP * (cols - 1)) / cols,
+      (availH - cardH - 36 - GAP * (rows - 1)) / rows,
+      cols === 2 ? 150 : 112,
+    ),
+  );
   const mult = multiplierFor(hud.streak);
   const ratio = Math.max(0, Math.min(1, timeLeft / cfg.duration));
-  const shadowSize = Math.min(170, width * 0.42);
 
   return (
     <GradientScreen theme={GAME.id} edges={["top", "bottom"]}>
@@ -291,38 +303,52 @@ function ShadowMatch() {
         </View>
       </View>
 
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      <View
+        style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        onLayout={(e) => setArea({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
+      >
         {phase === "ready" && <StartPanel onPress={start} challenge={challenge} />}
         {phase !== "ready" && round && (
           <>
             <Animated.View key={`s${round.id}`} entering={FadeInDown.duration(220)}>
               <View
-                style={[cardShadow, { width: shadowSize + 40 }]}
-                className="items-center rounded-3xl bg-[#FFF8E8] px-4 pb-2 pt-3"
+                style={[cardShadow, { width: width - 40, height: cardH, marginBottom: 16 }]}
+                className="flex-row items-center rounded-3xl bg-[#FFF8E8] px-3"
               >
                 <View
                   style={{
-                    position: "absolute",
-                    top: 10,
-                    width: shadowSize * 0.9,
-                    height: shadowSize * 0.9,
-                    borderRadius: shadowSize,
-                    backgroundColor: "#FFE7A8",
+                    width: shadowSize,
+                    height: shadowSize * 1.1,
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
-                />
-                <Mascot
-                  variant={round.target.variant}
-                  size={shadowSize}
-                  mood={moodOf(round.target)}
-                  outfit={outfitOf(round.target)}
-                  silhouette={INK_SHADOW}
-                  animated={false}
-                />
+                >
+                  <View
+                    style={{
+                      position: "absolute",
+                      width: shadowSize * 0.88,
+                      height: shadowSize * 0.88,
+                      borderRadius: shadowSize,
+                      backgroundColor: "#FFE7A8",
+                    }}
+                  />
+                  <Mascot
+                    variant={round.target.variant}
+                    size={shadowSize}
+                    mood={moodOf(round.target)}
+                    outfit={outfitOf(round.target)}
+                    silhouette={INK_SHADOW}
+                    animated={false}
+                  />
+                </View>
+                <View className="ml-2 flex-1">
+                  <Text style={display(26)}>Who cast this shadow?</Text>
+                  <Text className="mt-1 font-body-semi text-xs text-ink-soft">
+                    Look at ears, tails, hats and arms
+                  </Text>
+                </View>
               </View>
             </Animated.View>
-            <View className="mb-4 mt-4 rounded-full bg-white px-5 py-2" style={cardShadow}>
-              <Text className="font-body-black text-base text-ink">Who cast this shadow?</Text>
-            </View>
             <View
               style={{
                 width: size * cols + GAP * (cols - 1),
