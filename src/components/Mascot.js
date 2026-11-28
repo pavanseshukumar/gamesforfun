@@ -1,5 +1,5 @@
 import { useEffect, useId } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -9,7 +9,18 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-import Svg, { Circle, Defs, Ellipse, G, Path, RadialGradient, Rect, Stop } from "react-native-svg";
+import Svg, {
+  Circle,
+  Defs,
+  Ellipse,
+  FeColorMatrix,
+  Filter,
+  G,
+  Path,
+  RadialGradient,
+  Rect,
+  Stop,
+} from "react-native-svg";
 
 import { LEGACY_BUDDIES, MASCOTS } from "../games/buddies";
 
@@ -594,6 +605,17 @@ function Mouth({ mood }) {
   );
 }
 
+/** Colour matrix that paints everything one colour, keeping its alpha. */
+function inkMatrix(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  // Browsers run SVG filters in linear light, so convert the colour there first.
+  const toLinear = (v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+  const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) =>
+    (Platform.OS === "web" ? toLinear(v / 255) : v / 255).toFixed(3),
+  );
+  return `0 0 0 0 ${r}  0 0 0 0 ${g}  0 0 0 0 ${b}  0 0 0 1 0`;
+}
+
 /**
  * @param {object} props
  * @param {keyof MASCOTS} props.variant
@@ -603,6 +625,8 @@ function Mouth({ mood }) {
  * @param {number} [props.delay]      offsets the idle loop so groups don't move in sync
  * @param {{hat?: string|null, face?: string|null, neck?: string|null}} [props.outfit]
  *        Dress-Up items (see games/wardrobe.js). A hat replaces ears, crests and tufts.
+ * @param {string} [props.silhouette] a "#rrggbb" colour: draw the buddy (and outfit) as a
+ *        solid shadow of that colour, with no face (Shadow Match).
  */
 export default function Mascot({
   variant = "mochi",
@@ -611,6 +635,7 @@ export default function Mascot({
   animated = true,
   delay = 0,
   outfit = null,
+  silhouette = null,
 }) {
   const kind = MASCOTS[variant] ? variant : (LEGACY_BUDDIES[variant] ?? "mochi");
   const c = MASCOTS[kind];
@@ -688,95 +713,106 @@ export default function Mascot({
               <Stop offset="0.55" stopColor={c.base} />
               <Stop offset="1" stopColor={c.dark} />
             </RadialGradient>
+            {silhouette && (
+              <Filter id={`${gid}-sil`}>
+                <FeColorMatrix type="matrix" values={inkMatrix(silhouette)} />
+              </Filter>
+            )}
           </Defs>
-          {/* ears, horns and antennae hide under a hat */}
-          {!hat && <HeadParts variant={kind} c={c} />}
-          <BackParts variant={kind} c={c} />
-          {/* feet (birds' are orange) */}
-          {
-            <G>
-              <Ellipse cx={74} cy={196} rx={22} ry={12} fill={bird ? "#FF9F1C" : c.dark} />
-              <Ellipse cx={126} cy={196} rx={22} ry={12} fill={bird ? "#FF9F1C" : c.dark} />
-            </G>
-          }
-          {/* arms */}
-          {armsUp ? (
-            // arms flung up and out to the sides, with little round hands
-            <G>
-              <Ellipse
-                cx={20}
-                cy={104}
-                rx={12}
-                ry={24}
-                fill={c.base}
-                rotation={-38}
-                origin="20,104"
-              />
-              <Ellipse
-                cx={180}
-                cy={104}
-                rx={12}
-                ry={24}
-                fill={c.base}
-                rotation={38}
-                origin="180,104"
-              />
-              <Circle cx={8} cy={86} r={11} fill={c.light} />
-              <Circle cx={192} cy={86} r={11} fill={c.light} />
-            </G>
-          ) : (
-            <G>
-              <Ellipse
-                cx={30}
-                cy={140}
-                rx={13}
-                ry={22}
-                fill={c.dark}
-                rotation={20}
-                origin="30,140"
-              />
-              <Ellipse
-                cx={170}
-                cy={140}
-                rx={13}
-                ry={22}
-                fill={c.dark}
-                rotation={-20}
-                origin="170,140"
-              />
-            </G>
-          )}
-          {/* body */}
-          <Path d={BODY} fill={`url(#${gid})`} />
-          {/* gloss */}
-          <Ellipse
-            cx={70}
-            cy={80}
-            rx={20}
-            ry={11}
-            fill="#FFFFFF"
-            opacity={0.5}
-            rotation={-25}
-            origin="70,80"
-          />
-          <FrontParts variant={kind} c={c} />
-          {/* cheeks */}
-          <Ellipse cx={56} cy={140} rx={12} ry={7} fill="#FF5C8A" opacity={0.35} />
-          <Ellipse cx={144} cy={140} rx={12} ry={7} fill="#FF5C8A" opacity={0.35} />
-          {bird ? <Beak mood={mood} /> : <Mouth mood={mood} />}
-          {neck && <Neckwear id={neck} />}
-          {hat && <Hat id={hat} />}
+          <G filter={silhouette ? `url(#${gid}-sil)` : undefined}>
+            {/* ears, horns and antennae hide under a hat */}
+            {!hat && <HeadParts variant={kind} c={c} />}
+            <BackParts variant={kind} c={c} />
+            {/* feet (birds' are orange) */}
+            {
+              <G>
+                <Ellipse cx={74} cy={196} rx={22} ry={12} fill={bird ? "#FF9F1C" : c.dark} />
+                <Ellipse cx={126} cy={196} rx={22} ry={12} fill={bird ? "#FF9F1C" : c.dark} />
+              </G>
+            }
+            {/* arms */}
+            {armsUp ? (
+              // arms flung up and out to the sides, with little round hands
+              <G>
+                <Ellipse
+                  cx={20}
+                  cy={104}
+                  rx={12}
+                  ry={24}
+                  fill={c.base}
+                  rotation={-38}
+                  origin="20,104"
+                />
+                <Ellipse
+                  cx={180}
+                  cy={104}
+                  rx={12}
+                  ry={24}
+                  fill={c.base}
+                  rotation={38}
+                  origin="180,104"
+                />
+                <Circle cx={8} cy={86} r={11} fill={c.light} />
+                <Circle cx={192} cy={86} r={11} fill={c.light} />
+              </G>
+            ) : (
+              <G>
+                <Ellipse
+                  cx={30}
+                  cy={140}
+                  rx={13}
+                  ry={22}
+                  fill={c.dark}
+                  rotation={20}
+                  origin="30,140"
+                />
+                <Ellipse
+                  cx={170}
+                  cy={140}
+                  rx={13}
+                  ry={22}
+                  fill={c.dark}
+                  rotation={-20}
+                  origin="170,140"
+                />
+              </G>
+            )}
+            {/* body */}
+            <Path d={BODY} fill={`url(#${gid})`} />
+            {/* gloss */}
+            <Ellipse
+              cx={70}
+              cy={80}
+              rx={20}
+              ry={11}
+              fill="#FFFFFF"
+              opacity={0.5}
+              rotation={-25}
+              origin="70,80"
+            />
+            <FrontParts variant={kind} c={c} />
+            {/* cheeks */}
+            <Ellipse cx={56} cy={140} rx={12} ry={7} fill="#FF5C8A" opacity={0.35} />
+            <Ellipse cx={144} cy={140} rx={12} ry={7} fill="#FF5C8A" opacity={0.35} />
+            {bird ? <Beak mood={mood} /> : <Mouth mood={mood} />}
+            {neck && <Neckwear id={neck} />}
+            {hat && <Hat id={hat} />}
+            {/* a shadow has no eyes, but its glasses still change its outline */}
+            {silhouette && face && <Eyewear id={face} />}
+          </G>
         </Svg>
-        <Animated.View
-          style={[
-            { position: "absolute", top: 0, left: 0, width: size, height },
-            { transformOrigin: `50% ${(EYE_Y / H) * 100}%` },
-            eyeStyle,
-          ]}
-        >
-          <Eyes mood={eyeMood} />
-        </Animated.View>
-        {face && (
+        {!silhouette && (
+          <Animated.View
+            style={[
+              { position: "absolute", top: 0, left: 0, width: size, height },
+              { transformOrigin: `50% ${(EYE_Y / H) * 100}%` },
+              eyeStyle,
+            ]}
+          >
+            <Eyes mood={eyeMood} />
+          </Animated.View>
+        )}
+        {face && !silhouette && (
           <Svg
             width={size}
             height={height}

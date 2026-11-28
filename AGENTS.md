@@ -47,7 +47,7 @@ Docs: https://docs.expo.dev/eas/index.md
   (`components/Buttons.js`), Anton display headlines via `display(size)`, Outfit body text via
   `font-body`, `font-body-semi`, `font-body-bold` and `font-body-black`. Never rely on `fontWeight`
   with these custom fonts. The mascots in `components/Mascot.js` are original SVG characters;
-  reuse them rather than adding emoji art. Pass `outfit` (from `useOutfit()`) wherever the
+  reuse them rather than adding emoji art. `<Mascot silhouette="#rrggbb">` draws a buddy (and outfit) as a solid shadow. Pass `outfit` (from `useOutfit()`) wherever the
   player's own buddy appears; Dress-Up items are listed in `src/games/wardrobe.js` and drawn in
   `Mascot.js` (`Hat`, `Eyewear`, `Neckwear`).
 - **Styling:** NativeWind v4 (Tailwind v3). Theme colors and font families live in `tailwind.config.js`.
@@ -67,7 +67,8 @@ Docs: https://docs.expo.dev/eas/index.md
   frame. Send discrete events (catch, land, game over) to JS with `scheduleOnRN` from
   `react-native-worklets`, through a stable `emit` callback that forwards to a handler ref.
 - **Stepped games** (Hop Across `src/games/hopAcross/world.js`, Feed the Buddies `src/games/feed/logic.js`,
-  Pattern Parade `src/games/parade/logic.js`, Kit's Burrow `src/games/burrow/logic.js`):
+  Pattern Parade `src/games/parade/logic.js`, Kit's Burrow `src/games/burrow/logic.js`, Fishing Fun,
+  Shadow Match and Where's Pom? under `src/games/{fishing,shadow,spot}/logic.js`):
   React-free rules with a test player (`autoHop`, `makeWaiter`) that checks every challenge level earns a
   star. The screen keeps the live game in a ref and draws from poses / a snapshot, never from the ref in render.
 - **Physics games** (Blob Launch, Balance Buddy — `src/games/balance/world.js`, whose tests drive it with

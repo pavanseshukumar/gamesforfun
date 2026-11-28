@@ -18,13 +18,16 @@ import { BOUNCE_LEVELS } from "./bounce/levels";
 import { BURROW_LEVELS } from "./burrow/levels";
 import { COLOR_CATCH_LEVELS } from "./colorCatch/levels";
 import { FEED_LEVELS } from "./feed/levels";
+import { FISHING_LEVELS } from "./fishing/levels";
 import { FUSION_LEVELS } from "./fusion/levels";
 import { HOP_LEVELS } from "./hopAcross/levels";
 import { MATH_LEVELS } from "./math/levels";
 import { MEMORY_LEVELS } from "./memory/levels";
 import { ODD_LEVELS } from "./odd/levels";
 import { PARADE_LEVELS } from "./parade/levels";
+import { SHADOW_LEVELS } from "./shadow/levels";
 import { SLICE_LEVELS } from "./slice/levels";
+import { SPOT_LEVELS } from "./spot/levels";
 import { STACK_LEVELS } from "./stack/levels";
 import { TAP_RUSH_LEVELS } from "./tapRush/levels";
 import { WORD_POP_LEVELS } from "./wordpop/levels";
@@ -45,6 +48,9 @@ export const CHALLENGES = {
   feed: FEED_LEVELS,
   parade: PARADE_LEVELS,
   burrow: BURROW_LEVELS,
+  fishing: FISHING_LEVELS,
+  shadow: SHADOW_LEVELS,
+  spot: SPOT_LEVELS,
 };
 
 export const challengesFor = (gameId) => CHALLENGES[gameId] ?? null;
