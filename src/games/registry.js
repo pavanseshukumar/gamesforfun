@@ -256,6 +256,32 @@ export const ALL_GAMES = [
     lowerIsBetter: false,
   },
   {
+    id: "parade",
+    category: "brain",
+    route: "/games/parade",
+    title: "Pattern Parade",
+    tagline: "Watch the dance, then repeat it",
+    emoji: "🎶",
+    mascot: "bun",
+    colors: ["#FF8FD0", "#9C6BFF"],
+    accent: "#9C4BFF",
+    unit: "pts",
+    lowerIsBetter: false,
+  },
+  {
+    id: "burrow",
+    category: "puzzle",
+    route: "/games/burrow",
+    title: "Kit's Burrow",
+    tagline: "Swipe to dig up hidden words",
+    emoji: "🔤",
+    mascot: "kit",
+    colors: ["#FFB36B", "#E8743B"],
+    accent: "#D9621F",
+    unit: "pts",
+    lowerIsBetter: false,
+  },
+  {
     // The daily puzzle has its own banner on Home, so it stays out of the
     // carousel and quick play. Its mascot changes every day.
     id: "daily",

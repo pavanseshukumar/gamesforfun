@@ -1,6 +1,7 @@
 import { CHALLENGES, starsFor, targetsText } from "../src/games/challenges";
 import { ALL_GAMES } from "../src/games/registry";
 import { BOUNCE_DEFAULTS } from "../src/games/bounce/levels";
+import { BURROW_DEFAULTS } from "../src/games/burrow/levels";
 import { COLOR_CATCH_DEFAULTS } from "../src/games/colorCatch/levels";
 import { FEED_DEFAULTS } from "../src/games/feed/levels";
 import { FUSION_DEFAULTS } from "../src/games/fusion/levels";
@@ -9,6 +10,7 @@ import { BALANCE_DEFAULTS } from "../src/games/balance/levels";
 import { MATH_DEFAULTS } from "../src/games/math/levels";
 import { MEMORY_DEFAULTS } from "../src/games/memory/levels";
 import { ODD_DEFAULTS } from "../src/games/odd/levels";
+import { PARADE_DEFAULTS } from "../src/games/parade/levels";
 import { SLICE_DEFAULTS } from "../src/games/slice/levels";
 import { STACK_DEFAULTS } from "../src/games/stack/levels";
 import { TAP_RUSH_DEFAULTS } from "../src/games/tapRush/levels";
@@ -29,6 +31,8 @@ const DEFAULTS = {
   odd: ODD_DEFAULTS,
   "hop-across": HOP_DEFAULTS,
   feed: FEED_DEFAULTS,
+  parade: PARADE_DEFAULTS,
+  burrow: BURROW_DEFAULTS,
 };
 
 describe.each(Object.entries(CHALLENGES))("%s challenge levels", (gameId, levels) => {

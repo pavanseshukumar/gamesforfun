@@ -35,6 +35,8 @@ export const BACKDROPS = {
   odd: ["#FFC79E", "#FFE2CF", "#FFF7F1"],
   "hop-across": ["#7EDFF2", "#BFF0EC", "#F0FFF9"],
   feed: ["#FFC98F", "#FFE4C4", "#FFF8EE"],
+  parade: ["#E9B3FF", "#F6DAFF", "#FFF4FE"],
+  burrow: ["#F7C58E", "#FBE2C4", "#FFF8EF"],
 };
 
 /** Shared soft shadow for white cards. */
