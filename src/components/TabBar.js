@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useEffect } from "react";
 import { Pressable, View } from "react-native";
@@ -14,18 +15,19 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ARCADE } from "../games/registry";
 import { haptic } from "../lib/haptics";
 import { sfx } from "../lib/sound";
-import { INK } from "../theme";
 
 const TABS = {
-  index: { icon: "home", label: "Home" },
-  profile: { icon: "person", label: "Profile" },
-  awards: { icon: "trophy", label: "Trophies" },
-  settings: { icon: "settings-sharp", label: "Settings" },
+  // Each tab wears its screen's colour when open.
+  index: { icon: "home", label: "Home", color: "#FF4FA0" },
+  profile: { icon: "person", label: "Profile", color: "#3F86FF" },
+  awards: { icon: "trophy", label: "Trophies", color: "#1FB865" },
+  settings: { icon: "settings-sharp", label: "Settings", color: "#8A5CFF" },
 };
 
 const BAR_H = 64;
 const GAP = 12;
-const MUTED = "#A4A3AE";
+const MUTED = "#B9B0D0"; // soft lilac grey
+const CANDY = ["#FF8CC6", "#C9A8FF", "#8FCBFF"]; // the cotton candy backdrop
 const SURFACE = "#FFFFFF";
 // Every tab-bar motion uses one smooth ease-in-out: no springs, no overshoot.
 const EASE = Easing.inOut(Easing.cubic);
@@ -36,9 +38,9 @@ const surface = {
   backgroundColor: SURFACE,
   // A faint outline and a deep shadow lift the bar off any gradient behind it.
   borderWidth: 1,
-  borderColor: "rgba(26,26,64,0.08)",
-  shadowColor: "#1A1A40",
-  shadowOpacity: 0.24,
+  borderColor: "rgba(138,92,255,0.16)",
+  shadowColor: "#6A3FD6",
+  shadowOpacity: 0.26,
   shadowRadius: 24,
   shadowOffset: { width: 0, height: 12 },
   elevation: 14,
@@ -87,13 +89,13 @@ function Tab({ name, focused, onPress }) {
           <Ionicons name={t.icon} size={26} color={MUTED} />
         </Animated.View>
         <Animated.View style={[{ position: "absolute" }, darkStyle]}>
-          <Ionicons name={t.icon} size={26} color={INK} />
+          <Ionicons name={t.icon} size={26} color={t.color} />
         </Animated.View>
       </Animated.View>
       {/* the open tab's dot */}
       <Animated.View
         style={[
-          { width: 5, height: 5, borderRadius: 3, backgroundColor: INK, marginTop: 5 },
+          { width: 5, height: 5, borderRadius: 3, backgroundColor: t.color, marginTop: 5 },
           dotStyle,
         ]}
       />
@@ -129,24 +131,31 @@ function PlayButton() {
             width: BAR_H,
             height: BAR_H,
             borderRadius: BAR_H / 2,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: INK,
-            borderColor: INK,
+            overflow: "hidden",
+            borderWidth: 3,
+            borderColor: "#FFFFFF",
           },
         ]}
       >
-        <Animated.View style={style}>
-          <Ionicons name="shuffle" size={28} color="#FFFFFF" />
-        </Animated.View>
+        <LinearGradient
+          colors={CANDY}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
+          <Animated.View style={style}>
+            <Ionicons name="shuffle" size={28} color="#FFFFFF" />
+          </Animated.View>
+        </LinearGradient>
       </View>
     </Pressable>
   );
 }
 
 /**
- * Floating tab bar: a white pill of four icon tabs, with a round ink Play
- * button beside it. The open tab's icon turns dark with a dot; the others stay grey.
+ * Floating tab bar: a white pill of four icon tabs, with a round cotton-candy
+ * Play button beside it. The open tab's icon and dot take its screen's colour;
+ * the others stay lilac grey.
  */
 export default function TabBar({ state, emitter, navigateToTab }) {
   const insets = useSafeAreaInsets();
