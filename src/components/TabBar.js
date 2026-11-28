@@ -26,7 +26,7 @@ const TABS = {
 const BAR_H = 64;
 const GAP = 12;
 const MUTED = "#A4A3AE";
-const SURFACE = "#F6F6F8";
+const SURFACE = "#FFFFFF";
 // Every tab-bar motion uses one smooth ease-in-out: no springs, no overshoot.
 const EASE = Easing.inOut(Easing.cubic);
 const FADE = { duration: 260, easing: EASE };
@@ -34,13 +34,14 @@ const FADE = { duration: 260, easing: EASE };
 /** Soft, raised surface shared by the pill and the round button. */
 const surface = {
   backgroundColor: SURFACE,
+  // A faint outline and a deep shadow lift the bar off any gradient behind it.
   borderWidth: 1,
-  borderColor: "rgba(255,255,255,0.95)",
+  borderColor: "rgba(26,26,64,0.08)",
   shadowColor: "#1A1A40",
-  shadowOpacity: 0.14,
-  shadowRadius: 20,
-  shadowOffset: { width: 0, height: 10 },
-  elevation: 8,
+  shadowOpacity: 0.24,
+  shadowRadius: 24,
+  shadowOffset: { width: 0, height: 12 },
+  elevation: 14,
 };
 
 /** One icon tab: the grey icon fades into a dark one when its screen is open. */
@@ -61,6 +62,10 @@ function Tab({ name, focused, onPress }) {
   const wrapStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }] }));
   const darkStyle = useAnimatedStyle(() => ({ opacity: on.value }));
   const greyStyle = useAnimatedStyle(() => ({ opacity: 1 - on.value }));
+  const dotStyle = useAnimatedStyle(() => ({
+    opacity: on.value,
+    transform: [{ scale: on.value }],
+  }));
   const t = TABS[name];
   return (
     <Pressable
@@ -69,7 +74,13 @@ function Tab({ name, focused, onPress }) {
       accessibilityLabel={t.label}
       accessibilityState={{ selected: focused }}
       hitSlop={6}
-      style={{ flex: 1, height: BAR_H, alignItems: "center", justifyContent: "center" }}
+      style={{
+        flex: 1,
+        height: BAR_H,
+        alignItems: "center",
+        justifyContent: "center",
+        paddingTop: 8,
+      }}
     >
       <Animated.View style={[{ width: 28, height: 28 }, wrapStyle]}>
         <Animated.View style={[{ position: "absolute" }, greyStyle]}>
@@ -79,6 +90,13 @@ function Tab({ name, focused, onPress }) {
           <Ionicons name={t.icon} size={26} color={INK} />
         </Animated.View>
       </Animated.View>
+      {/* the open tab's dot */}
+      <Animated.View
+        style={[
+          { width: 5, height: 5, borderRadius: 3, backgroundColor: INK, marginTop: 5 },
+          dotStyle,
+        ]}
+      />
     </Pressable>
   );
 }
@@ -113,11 +131,13 @@ function PlayButton() {
             borderRadius: BAR_H / 2,
             alignItems: "center",
             justifyContent: "center",
+            backgroundColor: INK,
+            borderColor: INK,
           },
         ]}
       >
         <Animated.View style={style}>
-          <Ionicons name="shuffle" size={28} color={INK} />
+          <Ionicons name="shuffle" size={28} color="#FFFFFF" />
         </Animated.View>
       </View>
     </Pressable>
@@ -125,8 +145,8 @@ function PlayButton() {
 }
 
 /**
- * Floating tab bar: a soft pill of four icon tabs, with a round Play button
- * beside it. The open tab's icon turns dark; the others stay grey.
+ * Floating tab bar: a white pill of four icon tabs, with a round ink Play
+ * button beside it. The open tab's icon turns dark with a dot; the others stay grey.
  */
 export default function TabBar({ state, emitter, navigateToTab }) {
   const insets = useSafeAreaInsets();
